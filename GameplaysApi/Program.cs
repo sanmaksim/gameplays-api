@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using GameplaysApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
