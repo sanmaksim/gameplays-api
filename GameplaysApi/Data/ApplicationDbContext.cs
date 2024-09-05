@@ -13,5 +13,7 @@ namespace GameplaysApi.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Game> Games { get; set; }
+
+        public DbSet<Play> Plays { get; set; }
     }
 }
