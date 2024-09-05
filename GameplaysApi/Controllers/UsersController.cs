@@ -84,5 +84,21 @@ namespace GameplaysApi.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var existingUser = await _context.Users.FindAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(existingUser);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
