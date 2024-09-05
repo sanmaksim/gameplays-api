@@ -87,5 +87,21 @@ namespace GameplaysApi.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            var existingGame = await _context.Games.FindAsync(id);
+            if (existingGame == null)
+            {
+                return NotFound();
+            }
+
+            _context.Games.Remove(existingGame);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
