@@ -15,5 +15,14 @@ namespace GameplaysApi.Data
         public DbSet<Game> Games { get; set; }
 
         public DbSet<Play> Plays { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+        }
     }
 }
