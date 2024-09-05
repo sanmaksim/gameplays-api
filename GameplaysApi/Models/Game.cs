@@ -14,7 +14,7 @@ namespace GameplaysApi.Models
         [MaxLength(255)]
         public string? Genre { get; set; }
 
-        public DateTime? ReleaseDate { get; set; }
+        public DateOnly? ReleaseDate { get; set; }
 
         [MaxLength(255)]
         public string? Developer { get; set; }
