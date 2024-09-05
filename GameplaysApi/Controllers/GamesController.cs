@@ -44,5 +44,48 @@ namespace GameplaysApi.Controllers
 
             return Ok(game);
         }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateGame(int id, Game game)
+        {
+            var existingGame = await _context.Games.FindAsync(id);
+            if (existingGame == null)
+            {
+                return NotFound();
+            }
+
+            // Update only provided properties
+            if (!string.IsNullOrEmpty(game.Title))
+                existingGame.Title = game.Title;
+            
+            if (!string.IsNullOrEmpty(game.Genre))
+                existingGame.Genre = game.Genre;
+            
+            if (game.ReleaseDate != default(DateOnly))
+                existingGame.ReleaseDate = game.ReleaseDate;
+
+            if (!string.IsNullOrEmpty(game.Developer))
+                existingGame.Developer = game.Developer;
+
+            existingGame.UpdateTimestamp();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Games.Any(e => e.GameId == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
     }
 }
