@@ -31,5 +31,18 @@ namespace GameplaysApi.Controllers
             var games = await _context.Games.ToListAsync();
             return Ok(games);
         }
+        
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetGame(int id)
+        {
+            var game = await _context.Games.FindAsync(id);
+
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(game);
+        }
     }
 }
