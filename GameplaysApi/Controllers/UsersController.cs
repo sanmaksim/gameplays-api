@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using GameplaysApi.Models;
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
+using MySqlConnector;
 
 namespace GameplaysApi.Controllers
 {
@@ -20,9 +21,27 @@ namespace GameplaysApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(CreateUser), new { id = user.UserId }, user);
+            try
+            {
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(CreateUser), new { id = user.UserId }, user);
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException is MySqlException mySqlEx && mySqlEx.Number == 1062)
+                {
+                    return Conflict(new { message = "A user with this email already exists." });
+                }
+                
+                // For other database-related errors, return a generic error message
+                return StatusCode(500, new { message = "An error occurred while creating the user." });
+            }
+            catch (Exception)
+            {
+                // For any other unexpected errors, return a generic error message
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
 
         [HttpGet]
