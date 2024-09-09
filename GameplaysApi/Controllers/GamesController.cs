@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GameplaysApi.Models;
 using GameplaysApi.Data;
-using GameplaysApi.DTOs;
 
 namespace GameplaysApi.Controllers
 {
@@ -22,7 +21,7 @@ namespace GameplaysApi.Controllers
         {
             _context.Games.Add(game);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(CreateGame), new { id = game.GameId }, game);
+            return CreatedAtAction(nameof(GetGame), new { id = game.GameId }, game);
         }
 
         [HttpGet]
