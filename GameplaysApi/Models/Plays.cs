@@ -34,7 +34,7 @@ namespace GameplaysApi.Models
         [Column(TypeName = "decimal(5,2)")]
         public decimal HoursPlayed { get; set; } = 0.00m;
 
-        public DateTime? LastPlayedAt { get; set; }
+        public DateOnly? LastPlayedAt { get; set; }
 
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 

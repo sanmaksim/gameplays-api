@@ -74,5 +74,80 @@ namespace GameplaysApi.Controllers
             return Ok(play);
         }
         
+        [HttpPut("{playId}")]
+        public async Task<IActionResult> UpdatePlay(int userId, int playId, Play play)
+        {
+            var existingPlay = await _context.Plays.FindAsync(playId);
+            if (existingPlay == null)
+            {
+                return NotFound(new { message = "Play not found." });
+            }
+
+            if (play.GameId != 0 && existingPlay.GameId != play.GameId)
+            {
+                // Verify the new game exists
+                var newGameExists = await _context.Games.AnyAsync(g => g.GameId == play.GameId);
+                if (!newGameExists)
+                {
+                    return NotFound(new { message = "Game not found." });
+                }
+                existingPlay.GameId = play.GameId;
+            }
+
+            if (play.Status != PlayStatus.Unplayed) // Unplayed is the default
+            {
+                existingPlay.Status = play.Status;
+            }
+
+            if (play.PercentageCompleted >= 0 && play.PercentageCompleted <= 100)
+            {
+                existingPlay.PercentageCompleted = play.PercentageCompleted;
+            }
+            else if (play.PercentageCompleted != 0)
+            {
+                return BadRequest(new { message = "PercentageCompleted must be between 0 and 100." });
+            }
+
+            if (play.HoursPlayed >= 0)
+            {
+                existingPlay.HoursPlayed = play.HoursPlayed;
+            }
+            else if (play.HoursPlayed != 0)
+            {
+                return BadRequest(new { message = "HoursPlayed must be non-negative." });
+            }
+
+            if (play.LastPlayedAt.HasValue)
+            {
+                if (play.LastPlayedAt.Value <= DateOnly.FromDateTime(DateTime.UtcNow))
+                {
+                    existingPlay.LastPlayedAt = play.LastPlayedAt;
+                }
+                else
+                {
+                    return BadRequest(new { message = "LastPlayedAt cannot be in the future." });
+                }
+            }
+
+            existingPlay.UpdateTimestamp();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateConcurrencyException)
+            {
+                if (!_context.Plays.Any(p => p.PlayId == playId))
+                {
+                    return NotFound(new { message = "Play not found." });
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
     }
 }
