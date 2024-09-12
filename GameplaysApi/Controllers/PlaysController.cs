@@ -50,6 +50,8 @@ namespace GameplaysApi.Controllers
         {
             var plays = await _context.Plays
                 .Where(p => p.UserId == userId)
+                .Include(p => p.User)
+                .Include(p => p.Game)
                 .ToListAsync();
             
             if (plays == null || !plays.Any())
@@ -64,6 +66,8 @@ namespace GameplaysApi.Controllers
         public async Task<IActionResult> GetPlay(int userId, int playId)
         {
             var play = await _context.Plays
+                .Include(p => p.User)
+                .Include(p => p.Game)
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
 
             if (play == null)
