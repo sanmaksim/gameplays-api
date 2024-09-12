@@ -153,5 +153,23 @@ namespace GameplaysApi.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{playId}")]
+        public async Task<IActionResult> DeletePlay(int userId, int playId)
+        {
+            var existingPlay = await _context.Plays
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
+            
+            if (existingPlay == null)
+            {
+                return NotFound(new { message = "Play not found for this user." });
+            }
+
+            _context.Plays.Remove(existingPlay);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
