@@ -81,7 +81,9 @@ namespace GameplaysApi.Controllers
         [HttpPut("{playId}")]
         public async Task<IActionResult> UpdatePlay(int userId, int playId, Play play)
         {
-            var existingPlay = await _context.Plays.FindAsync(playId);
+            var existingPlay = await _context.Plays
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
+            
             if (existingPlay == null)
             {
                 return NotFound(new { message = "Play not found." });
