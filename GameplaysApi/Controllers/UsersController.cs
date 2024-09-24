@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using GameplaysApi.Models;
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
-using MySqlConnector;
 
 namespace GameplaysApi.Controllers
 {
@@ -18,28 +17,44 @@ namespace GameplaysApi.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateUser(User user)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             try
             {
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
-            }
-            catch (DbUpdateException ex)
-            {
-                if (ex.InnerException is MySqlException mySqlEx && mySqlEx.Number == 1062)
+                User? existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
+                if (existingUser != null)
                 {
-                    return Conflict(new { message = "A user with this email already exists." });
+                    return BadRequest(new { message = "Username already exists." });
                 }
-                
-                // For other database-related errors, return a generic error message
+
+                User? existingEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
+                if (existingEmail != null)
+                {
+                    return BadRequest(new { message = "Email already exists." });
+                }
+
+                // pwd will not be null here after form validation
+                string password = registerDto.Password;
+                User newUser = new User
+                {
+                    Username = registerDto.Username,
+                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    Email = registerDto.Email
+                };
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
+
+            }
+            catch (DbUpdateException)
+            {
                 return StatusCode(500, new { message = "An error occurred while creating the user." });
             }
             catch (Exception)
             {
-                // For any other unexpected errors, return a generic error message
                 return StatusCode(500, new { message = "An unexpected error occurred." });
             }
         }
