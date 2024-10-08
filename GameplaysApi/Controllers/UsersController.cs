@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using GameplaysApi.Models;
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
-using FluentValidation.Results;
 
 namespace GameplaysApi.Controllers
 {
@@ -18,9 +17,6 @@ namespace GameplaysApi.Controllers
             _context = context;
         }
 
-        // @desc Register user/set token
-        // route POST /api/users/register
-        // @access Public
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -63,46 +59,6 @@ namespace GameplaysApi.Controllers
             }
         }
 
-        
-        // @desc Auth user/set token
-        // route GET /api/users/auth
-        // @access Public
-        [HttpPost("auth")]
-        public async Task<IActionResult> Login([FromBody] AuthDto authDto)
-        {
-            AuthDtoValidator validator = new AuthDtoValidator();
-            ValidationResult result = validator.Validate(authDto);
-
-            if (!result.IsValid)
-            {
-                foreach (ValidationFailure error in result.Errors)
-                {
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-                }
-                return BadRequest(ModelState);
-            }
-
-            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authDto.Username || u.Email == authDto.Email);
-
-            if (user == null)
-            {
-                return Unauthorized("Invalid login.");
-            }
-            else
-            {
-                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(authDto.Password, user.Password);
-                if (!isPasswordValid)
-                {
-                    return Unauthorized("Invalid password.");
-                }
-            }
-
-            return Ok(user);
-        }
-
-        // @desc Get all users
-        // route GET /api/users
-        // @access ???
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -110,9 +66,6 @@ namespace GameplaysApi.Controllers
             return Ok(users);
         }
 
-        // @desc Get user
-        // route GET /api/users/:id
-        // @access ???
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
@@ -126,9 +79,6 @@ namespace GameplaysApi.Controllers
             return Ok(user);
         }
 
-        // @desc Update user
-        // route GET /api/users/:id
-        // @access Protected
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserUpdateDto updateDto)
         {
@@ -169,9 +119,6 @@ namespace GameplaysApi.Controllers
             return NoContent();
         }
 
-        // @desc Delete user
-        // route DELETE /api/users/:id
-        // @access Protected
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
