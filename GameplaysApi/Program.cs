@@ -17,6 +17,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 39))));
 
+// temp to allow cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAnyOrigin", policy =>
+    {
+        policy.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Apply migrations and ensure the database is created
@@ -29,6 +40,9 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.MapControllers();
+
+// temp to allow cors
+app.UseCors("AllowAnyOrigin");
 
 // Configure Kestrel to listen on port 5000
 app.Urls.Add("http://localhost:5000");
