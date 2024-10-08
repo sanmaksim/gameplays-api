@@ -6,9 +6,9 @@
         "type": "coreclr",
         "request": "launch",
         "preLaunchTask": "build",
-        "program": "${workspaceFolder}/GameplaysApi/bin/Debug/net8.0/GameplaysApi.dll",
+        "program": "${workspaceFolder}/GameplaysBackend/bin/Debug/net8.0/GameplaysBackend.dll",
         "args": [],
-        "cwd": "${workspaceFolder}/GameplaysApi",
+        "cwd": "${workspaceFolder}/GameplaysBackend",
         "stopAtEntry": false,
         /*"serverReadyAction": {
           "action": "openExternally",

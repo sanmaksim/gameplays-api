@@ -7,10 +7,10 @@
         "command": "dotnet",
         "args": [
           "build",
-          "${workspaceFolder}/GameplaysApi/GameplaysApi.csproj"
+          "${workspaceFolder}/GameplaysBackend/GameplaysBackend.csproj"
         ],
         "options": {
-          "cwd": "${workspaceFolder}/GameplaysApi"
+          "cwd": "${workspaceFolder}/GameplaysBackend"
         },
         "problemMatcher": "$msCompile"
       }
