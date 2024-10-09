@@ -39,12 +39,10 @@ namespace GameplaysBackend.Controllers
                     return BadRequest(new { message = "Email already exists." });
                 }
 
-                // pwd will not be null here after form validation
-                string password = registerDto.Password;
                 User newUser = new User
                 {
                     Username = registerDto.Username,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    Password = registerDto.Password, // auto-hashed upon save in User class
                     Email = registerDto.Email
                 };
 
@@ -102,6 +100,24 @@ namespace GameplaysBackend.Controllers
             return Ok(user);
         }
 
+        // @desc Auth user/set token
+        // route GET /api/users/auth
+        // @access Public
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(int id)
+        {
+            // will probably need to do something related
+            // to the auth token -- e.g. destroy
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
         // @desc Get all users
         // route GET /api/users
         // @access ???
@@ -114,8 +130,10 @@ namespace GameplaysBackend.Controllers
 
         // @desc Get user
         // route GET /api/users/:id
-        // @access ???
+        // route GET /api/users/profile ???
+        // @access Private
         [HttpGet("{id}")]
+        //[HttpGet("profile")] ???
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -129,9 +147,11 @@ namespace GameplaysBackend.Controllers
         }
 
         // @desc Update user
-        // route GET /api/users/:id
-        // @access Protected
+        // route PUT /api/users/:id
+        // route PUT /api/users/profile ???
+        // @access Private
         [HttpPut("{id}")]
+        //[HttpPut("profile")] ???
         public async Task<IActionResult> UpdateUser(int id, UserUpdateDto updateDto)
         {
             var existingUser = await _context.Users.FindAsync(id);

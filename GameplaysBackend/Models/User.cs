@@ -4,6 +4,8 @@ namespace GameplaysBackend.Models
 {
     public class User
     {
+        private string _password = string.Empty;
+
         [Key]
         public int UserId { get; set; }
 
@@ -17,7 +19,21 @@ namespace GameplaysBackend.Models
 
         [Required]
         [MaxLength(255)]
-        public required string Password { get; set; }
+        public required string Password
+        { 
+            get { return _password; } 
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    _password = BCrypt.Net.BCrypt.HashPassword(value);
+                }
+                else
+                {
+                    throw new ArgumentException("Password cannot be null or whitespace.");
+                }
+            }
+        }
 
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
         
