@@ -18,6 +18,7 @@ async function registerUser(data: User) {
         }
 
         return response;
+
     } catch (error) {
         throw error;
     }
@@ -46,6 +47,7 @@ async function authUser(data: User) {
     }
 }
 
+// alter to fetch from /api/users/profile ???
 async function fetchUser({params}: LoaderFunctionArgs) {
     try {
         const response = await fetch(`${apiUrl}/users/${params.id}`);
@@ -62,4 +64,25 @@ async function fetchUser({params}: LoaderFunctionArgs) {
     }
 }
 
-export { fetchUser, authUser, registerUser };
+async function updateUser(data: User) {
+    try {
+        const response = await fetch(`${apiUrl}/users/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export { fetchUser, authUser, registerUser, updateUser };
