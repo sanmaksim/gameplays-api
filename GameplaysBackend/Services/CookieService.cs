@@ -9,7 +9,7 @@ namespace GameplaysBackend.Services
                 Expires = DateTimeOffset.UtcNow.AddDays(expirationDays),
                 HttpOnly = true,
                 Secure = false, // should be true for HTTPS in production
-                SameSite = SameSiteMode.Lax // or Strict ???
+                SameSite = SameSiteMode.Strict
             };
 
             response.Cookies.Append(cookieName, cookieValue, cookieOptions);
