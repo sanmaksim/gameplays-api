@@ -88,22 +88,21 @@ namespace GameplaysBackend.Controllers
 
             User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authDto.Username || u.Email == authDto.Email);
 
-            if (user == null)
+            if (user != null && authDto.Password != null)
             {
-                return Unauthorized("Invalid login.");
-            }
-            else
-            {
-                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(authDto.Password, user.Password);
-                if (isPasswordValid)
+                if (user.VerifyPassword(authDto.Password, user.Password))
                 {
                     _authService.CreateAuthCookie(user, Response);
                     return Ok(user);
                 }
                 else
                 {
-                    return Unauthorized("Invalid password.");
+                    return Unauthorized("Invalid username or password.");
                 }
+            }
+            else
+            {
+                return Unauthorized("Please enter your credentials.");
             }
         }
 

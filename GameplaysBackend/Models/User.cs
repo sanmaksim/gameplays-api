@@ -43,5 +43,10 @@ namespace GameplaysBackend.Models
         {
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public bool VerifyPassword(string enteredPassword, string storedPassword)
+        {
+            return BCrypt.Net.BCrypt.Verify(enteredPassword, storedPassword);
+        }
     }
 }
