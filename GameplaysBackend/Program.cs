@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GameplaysBackend.Data;
+using GameplaysBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,10 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 // Add DbContext with MySQL configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 39))));
+
+builder.Services.AddTransient<JwtTokenService>();
+builder.Services.AddTransient<CookieService>();
+builder.Services.AddTransient<AuthService>();
 
 var app = builder.Build();
 

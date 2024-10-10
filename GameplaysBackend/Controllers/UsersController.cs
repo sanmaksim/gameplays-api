@@ -5,6 +5,7 @@ using GameplaysBackend.Models;
 using GameplaysBackend.Data;
 using GameplaysBackend.DTOs;
 using FluentValidation.Results;
+using GameplaysBackend.Services;
 
 namespace GameplaysBackend.Controllers
 {
@@ -13,10 +14,12 @@ namespace GameplaysBackend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly AuthService _authService;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, AuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         // @desc Register user/set token
@@ -49,6 +52,7 @@ namespace GameplaysBackend.Controllers
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
+                _authService.CreateAuthCookie(newUser, Response);
                 return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
 
             }
@@ -91,13 +95,16 @@ namespace GameplaysBackend.Controllers
             else
             {
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(authDto.Password, user.Password);
-                if (!isPasswordValid)
+                if (isPasswordValid)
+                {
+                    _authService.CreateAuthCookie(user, Response);
+                    return Ok(user);
+                }
+                else
                 {
                     return Unauthorized("Invalid password.");
                 }
             }
-
-            return Ok(user);
         }
 
         // @desc Auth user/set token
