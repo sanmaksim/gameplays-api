@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using FluentValidation.Results;
 using GameplaysBackend.Models;
 using GameplaysBackend.Data;
 using GameplaysBackend.DTOs;
-using FluentValidation.Results;
 using GameplaysBackend.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameplaysBackend.Controllers
 {
@@ -70,7 +71,7 @@ namespace GameplaysBackend.Controllers
         // @desc Auth user/set token
         // route GET /api/users/auth
         // @access Public
-        [HttpPost("auth")]
+        [HttpPost("login")]
         [EnableCors("AllowSpecificOriginWithCredentials")]
         public async Task<IActionResult> Login([FromBody] AuthDto authDto)
         {
@@ -79,7 +80,7 @@ namespace GameplaysBackend.Controllers
 
             if (!result.IsValid)
             {
-                foreach (ValidationFailure error in result.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
                 }
@@ -110,18 +111,10 @@ namespace GameplaysBackend.Controllers
         // route GET /api/users/auth
         // @access Public
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout(int id)
+        public IActionResult Logout()
         {
-            // will probably need to do something related
-            // to the auth token -- e.g. destroy
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(user);
+            _authService.DeleteAuthCookie(Response);
+            return Ok( new { message = "Logged out successfully." });
         }
 
         // @desc Get all users
@@ -156,6 +149,7 @@ namespace GameplaysBackend.Controllers
         // route PUT /api/users/:id
         // route PUT /api/users/profile ???
         // @access Private
+        [Authorize]
         [HttpPut("{id}")]
         //[HttpPut("profile")] ???
         public async Task<IActionResult> UpdateUser(int id, UserUpdateDto updateDto)

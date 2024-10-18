@@ -26,7 +26,7 @@ async function registerUser(data: User) {
 
 async function authUser(data: User) {
     try {
-        const response = await fetch(`${apiUrl}/users/auth`, {
+        const response = await fetch(`${apiUrl}/users/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

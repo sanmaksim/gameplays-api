@@ -1,4 +1,5 @@
 using GameplaysBackend.Models;
+using System.Security.Claims;
 
 namespace GameplaysBackend.Services
 {
@@ -6,6 +7,8 @@ namespace GameplaysBackend.Services
     {
         private readonly JwtTokenService _jwtTokenService;
         private readonly CookieService _cookieService;
+
+        private readonly string _cookieName = "jwt";
 
         public AuthService(JwtTokenService jwtTokenService, CookieService cookieService)
         {
@@ -15,19 +18,23 @@ namespace GameplaysBackend.Services
 
         public void CreateAuthCookie(User user, HttpResponse response)
         {
+            var expirationDays = 1;
+            
             // create JWT
-            var payload = new Dictionary<string, object>
+            var payload = new Claim[]
             {
-                { "id", user.UserId }
+                new Claim("id", user.UserId.ToString())
             };
-            var expirationHours = 24;
-            var token = _jwtTokenService.CreateToken(payload, expirationHours);
+            var token = _jwtTokenService.CreateToken(payload, expirationDays);
 
             // create cookie
-            var cookieName = "jwt";
             var cookieValue = token;
-            var expirationDays = 1;
-            _cookieService.CreateCookie(response, cookieName, cookieValue, expirationDays);
+            _cookieService.CreateCookie(response, _cookieName, cookieValue, expirationDays);
+        }
+
+        public void DeleteAuthCookie(HttpResponse response)
+        {
+            _cookieService.DeleteCookie(response, _cookieName);
         }
     }
 }
