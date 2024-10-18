@@ -9,8 +9,8 @@ namespace GameplaysBackend.Services
                 Expires = DateTimeOffset.UtcNow.AddDays(expDays),
                 HttpOnly = true,
                 Path = "/",
-                Secure = false, // should be true for HTTPS in production
-                SameSite = SameSiteMode.Strict
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
 
             response.Cookies.Append(cookieName, cookieValue, cookieOptions);
@@ -22,8 +22,8 @@ namespace GameplaysBackend.Services
             {
                 HttpOnly = true,
                 Path = "/",
-                Secure = false, // should be true for HTTPS in production
-                SameSite = SameSiteMode.Strict
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
 
             response.Cookies.Delete(cookieName, cookieOptions);

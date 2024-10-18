@@ -1,11 +1,11 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { User } from '../types/UserType';
 
-const apiUrl = 'http://localhost:5000/api'
+const apiUrl = 'https://localhost:5001'
 
 async function registerUser(data: User) {
     try {
-        const response = await fetch(`${apiUrl}/users/register`, {
+        const response = await fetch(`${apiUrl}/api/users/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -26,13 +26,13 @@ async function registerUser(data: User) {
 
 async function authUser(data: User) {
     try {
-        const response = await fetch(`${apiUrl}/users/login`, {
+        const response = await fetch(`${apiUrl}/api/users/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data),
-            credentials: 'include'
+            //credentials: 'include'
         });
 
         if (!response.ok) {
@@ -50,7 +50,10 @@ async function authUser(data: User) {
 // alter to fetch from /api/users/profile ???
 async function fetchUser({params}: LoaderFunctionArgs) {
     try {
-        const response = await fetch(`${apiUrl}/users/${params.id}`);
+        const response = await fetch(`${apiUrl}/api/users/${params.id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -66,7 +69,7 @@ async function fetchUser({params}: LoaderFunctionArgs) {
 
 async function updateUser(data: User) {
     try {
-        const response = await fetch(`${apiUrl}/users/profile`, {
+        const response = await fetch(`${apiUrl}/api/users/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

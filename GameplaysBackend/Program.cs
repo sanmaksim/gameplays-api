@@ -7,24 +7,29 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var pfxPassword = builder.Configuration["CertSettings:PfxPassword"];
+
+// Configure Kestrel to Use HTTPS
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000);
+    options.ListenAnyIP(5001, listenOptions =>
+    {
+        listenOptions.UseHttps("Certificates/certificate.pfx", pfxPassword);
+    });
+});
+
 // Define CORS policies
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOriginWithCredentials",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+            //policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+            policy.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-        });
-
-    options.AddPolicy("AllowSpecificOrigin",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
         });
 });
 
@@ -67,8 +72,10 @@ if (hmacSecretKey != null)
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidIssuer = "http://127.0.0.1:5000,http://localhost:5000",
-            ValidAudience = "http://127.0.0.1:3000,http://localhost:3000",
+            //ValidIssuers = new List<string> { "https://localhost:5001", "http://localhost:5000" },
+            ValidIssuer = "https://localhost:5001",
+            //ValidAudiences = new List<string> { "http://localhost:3000", "http://127.0.0.1:3000" },
+            ValidAudience = "http://localhost:3000",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey))
         };
         // Read token from cookie
@@ -99,12 +106,12 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowSpecificOrigin");
+app.UseCors("AllowSpecificOriginWithCredentials");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
 // Configure Kestrel to listen on port 5000
-app.Urls.Add("http://localhost:5000");
+//app.Urls.Add("http://localhost:5000");
 
 app.Run();

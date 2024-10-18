@@ -69,14 +69,13 @@ namespace GameplaysBackend.Controllers
 
         
         // @desc Auth user/set token
-        // route GET /api/users/auth
+        // route GET /api/users/login
         // @access Public
         [HttpPost("login")]
-        [EnableCors("AllowSpecificOriginWithCredentials")]
         public async Task<IActionResult> Login([FromBody] AuthDto authDto)
         {
-            AuthDtoValidator validator = new AuthDtoValidator();
-            ValidationResult result = validator.Validate(authDto);
+            var validator = new AuthDtoValidator();
+            var result = validator.Validate(authDto);
 
             if (!result.IsValid)
             {
@@ -131,6 +130,7 @@ namespace GameplaysBackend.Controllers
         // route GET /api/users/:id
         // route GET /api/users/profile ???
         // @access Private
+        [Authorize]
         [HttpGet("{id}")]
         //[HttpGet("profile")] ???
         public async Task<IActionResult> GetUser(int id)

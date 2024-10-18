@@ -16,7 +16,7 @@ namespace GameplaysBackend.Services
             _tokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public string CreateToken(IEnumerable<Claim> claims, int expDays)
+        public string CreateToken(List<Claim> claims, int expDays)
         {
             string? hmacSecretKey = _configuration["JwtSettings:HmacSecretKey"];
 
@@ -37,7 +37,7 @@ namespace GameplaysBackend.Services
             }
             else
             {
-                throw new Exception("HmacSecretKey must not be null.");
+                throw new Exception("HmacSecretKey value must not be null.");
             }
         }
     }
