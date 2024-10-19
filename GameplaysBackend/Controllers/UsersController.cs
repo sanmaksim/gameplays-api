@@ -109,6 +109,7 @@ namespace GameplaysBackend.Controllers
         // @desc Auth user/set token
         // route GET /api/users/auth
         // @access Public
+        [Authorize]
         [HttpPost("logout")]
         public IActionResult Logout()
         {

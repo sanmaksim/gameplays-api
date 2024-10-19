@@ -28,6 +28,7 @@ async function authUser(data: User) {
     try {
         const response = await fetch(`${apiUrl}/api/users/login`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
