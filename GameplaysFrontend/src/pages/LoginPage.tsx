@@ -44,18 +44,15 @@ function LoginPage() {
 
     const submitForm = async (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
-        let result: void;
-
+        
         try {
-            const user: User = await authUser(formData);
+            const user = await authUser(formData);
             if (user.userId) {
-                result = navigate(`/user/${user.userId}`);
+                navigate(`/user/${user.userId}`);
             }
         } catch (error) {
             setShowAlert(true);
         }
-
-        return result;
     };
 
     return (

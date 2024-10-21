@@ -16,6 +16,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import RegisterPage from './pages/RegisterPage';
 import TosPage from './pages/TosPage';
 import UserProfilePage from './pages/UserProfilePage';
+import Logout from './components/Logout';
 
 function App() {
   const router = createBrowserRouter(
@@ -30,6 +31,7 @@ function App() {
         <Route path='/user/games' element={<MyGamesPage />} />
         <Route path='/user/:id' element={<UserProfilePage />} loader={fetchUser} />
         <Route path='/user/register' element={<RegisterPage />} />
+        <Route path='/user/logout' element={<Logout />} />
         <Route path='*' element={<NotFoundPage />} />
       </Route>
     )

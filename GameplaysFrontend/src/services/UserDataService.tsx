@@ -32,8 +32,7 @@ async function authUser(data: User) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
-            //credentials: 'include'
+            body: JSON.stringify(data)
         });
 
         if (!response.ok) {
@@ -89,4 +88,19 @@ async function updateUser(data: User) {
     }
 }
 
-export { fetchUser, authUser, registerUser, updateUser };
+async function logoutUser() {
+    try {
+        const response = await fetch(`${apiUrl}/api/users/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export { fetchUser, authUser, registerUser, updateUser, logoutUser };
