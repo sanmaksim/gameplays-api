@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import { registerUser } from '../services/UserDataService';
-import { User } from '../types/UserType';
+import { User } from '../types/DataType';
 import { useNavigate } from 'react-router-dom';
 
 function RegisterPage() {

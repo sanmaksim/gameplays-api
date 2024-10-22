@@ -1,13 +1,15 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
+import { authUser } from '../services/UserDataService';
+import { ChangeEvent, FormEvent, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { UserType } from '../types/DataType';
 import Alert from 'react-bootstrap/esm/Alert';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
-import { authUser } from '../services/UserDataService';
-import { User } from '../types/UserType';
 
 function LoginPage() {
+    const { setLoggedIn } = useContext(AuthContext);
     const [cred, setCred] = useState('');
     const [pwd, setPwd] = useState('');
     const [credTouched, setCredTouched] = useState(false);
@@ -33,7 +35,7 @@ function LoginPage() {
         credential = { username: cred };
     }
 
-    const formData: User = {
+    const formData: UserType = {
         // spread operator copies properties
         // from one object to another
         ...credential,
@@ -49,6 +51,7 @@ function LoginPage() {
             const user = await authUser(formData);
             if (user.userId) {
                 navigate(`/user/${user.userId}`);
+                setLoggedIn();
             }
         } catch (error) {
             setShowAlert(true);

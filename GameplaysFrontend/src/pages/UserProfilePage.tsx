@@ -1,8 +1,8 @@
 import { useLoaderData } from "react-router-dom";
-import { User } from "../types/UserType";
+import { UserType } from "../types/DataType";
 
 function UserProfilePage() {
-    const user = useLoaderData() as User;
+    const user = useLoaderData() as UserType;
 
     return (
         <div>User: {user.username}</div>

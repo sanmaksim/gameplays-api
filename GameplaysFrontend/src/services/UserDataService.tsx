@@ -1,9 +1,9 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
-import { User } from '../types/UserType';
+import { UserType } from '../types/DataType';
 
 const apiUrl = 'https://localhost:5001'
 
-async function registerUser(data: User) {
+async function registerUser(data: UserType) {
     try {
         const response = await fetch(`${apiUrl}/api/users/register`, {
             method: 'POST',
@@ -24,7 +24,7 @@ async function registerUser(data: User) {
     }
 }
 
-async function authUser(data: User) {
+async function authUser(data: UserType) {
     try {
         const response = await fetch(`${apiUrl}/api/users/login`, {
             method: 'POST',
@@ -39,7 +39,7 @@ async function authUser(data: User) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const user: User = await response.json();
+        const user: UserType = await response.json();
         return user;
 
     } catch (error) {
@@ -59,7 +59,7 @@ async function fetchUser({params}: LoaderFunctionArgs) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const user: User = await response.json();
+        const user: UserType = await response.json();
         return user;
 
     } catch (error) {
@@ -67,7 +67,7 @@ async function fetchUser({params}: LoaderFunctionArgs) {
     }
 }
 
-async function updateUser(data: User) {
+async function updateUser(data: UserType) {
     try {
         const response = await fetch(`${apiUrl}/api/users/profile`, {
             method: 'PUT',
