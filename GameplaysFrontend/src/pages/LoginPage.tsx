@@ -9,7 +9,8 @@ import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 
 function LoginPage() {
-    const { setLoggedIn } = useContext(AuthContext);
+    const { setIsLoggedInContext } = useContext(AuthContext);
+
     const [cred, setCred] = useState('');
     const [pwd, setPwd] = useState('');
     const [credTouched, setCredTouched] = useState(false);
@@ -51,7 +52,7 @@ function LoginPage() {
             const user = await authUser(formData);
             if (user.userId) {
                 navigate(`/user/${user.userId}`);
-                setLoggedIn();
+                setIsLoggedInContext();
             }
         } catch (error) {
             setShowAlert(true);
@@ -62,18 +63,22 @@ function LoginPage() {
         <div className="mx-auto mt-5">
             <Card style={{ width: '20rem' }}>
                 <Card.Body>
+
                     <Card.Title className="lg mb-3">Please sign in</Card.Title>
-                    {showAlert && (<Alert variant="danger">Incorrect username or password.</Alert>)}
-                    <Form onSubmit={submitForm}>
+
+                    { showAlert && (<Alert variant="danger">Incorrect username or password.</Alert>) }
+
+                    <Form onSubmit={ submitForm }>
+
                         <Form.Group className="mb-3" controlId="formBasicUsername">
                             <Form.Label>Username or Email</Form.Label>
                             <Form.Control
                                 type="username"
                                 placeholder="Email address or username"
-                                value={cred}
-                                onChange={handleCredInputChange}
+                                value={ cred }
+                                onChange={ handleCredInputChange }
                                 required
-                                isInvalid={!cred && credTouched} />
+                                isInvalid={ !cred && credTouched } />
                             <Form.Control.Feedback type="invalid">Please enter your login.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -82,19 +87,23 @@ function LoginPage() {
                             <Form.Control
                                 type="password"
                                 placeholder="Password"
-                                value={pwd}
-                                onChange={handlePwdInputChange}
+                                value={ pwd }
+                                onChange={ handlePwdInputChange }
                                 required
-                                isInvalid={!pwd && pwdTouched} />
+                                isInvalid={ !pwd && pwdTouched } />
                             <Form.Control.Feedback type="invalid">Please enter your password.</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+
+                        {/* <Form.Group className="mb-3" controlId="formBasicCheckbox">
                             <Form.Check type="checkbox" label="Keep me signed in" />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
+                        </Form.Group> */}
+
+                        <Button variant="secondary" type="submit">
                             Sign in
                         </Button>
+
                     </Form>
+
                 </Card.Body>
             </Card>
         </div>

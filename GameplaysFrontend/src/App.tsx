@@ -29,7 +29,7 @@ function App() {
         <Route path='/tos' element={<TosPage />} />
         <Route path='/user/login' element={<LoginPage />} />
         <Route path='/user/games' element={<MyGamesPage />} />
-        <Route path='/user/:id' element={<UserProfilePage />} loader={fetchUser} />
+        <Route path='/user/:id' element={<UserProfilePage />} loader={ fetchUser } />
         <Route path='/user/register' element={<RegisterPage />} />
         <Route path='/user/logout' element={<Logout />} />
         <Route path='*' element={<NotFoundPage />} />

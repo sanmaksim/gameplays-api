@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import { registerUser } from '../services/UserDataService';
-import { User } from '../types/DataType';
+import { UserType } from '../types/DataType';
 import { useNavigate } from 'react-router-dom';
 
 function RegisterPage() {
@@ -31,7 +31,7 @@ function RegisterPage() {
         setPwdTouched(true);
     };
 
-    const formData: User = {
+    const formData: UserType = {
         username: un,
         email: mail,
         password: pwd
@@ -59,17 +59,21 @@ function RegisterPage() {
         <div className="mx-auto mt-5">
             <Card style={{ width: '20rem' }}>
                 <Card.Body>
+
                     <Card.Title className="lg mb-3">Sign up with Gameplays</Card.Title>
-                    {showAlert && (<Alert variant="danger">Invalid username or password.</Alert>)}
-                    <Form onSubmit={submitForm}>
+
+                    { showAlert && (<Alert variant="danger">Invalid username or password.</Alert>) }
+
+                    <Form onSubmit={ submitForm }>
+
                         <Form.Group className="mb-3" controlId="formBasicUsername">
                             <Form.Label>Username</Form.Label>
                             <Form.Control
                                 type="username"
-                                value={un}
-                                onChange={handleUnInputChange}
+                                value={ un }
+                                onChange={ handleUnInputChange }
                                 required
-                                isInvalid={!un && unTouched} />
+                                isInvalid={ !un && unTouched } />
                             <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -77,10 +81,10 @@ function RegisterPage() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
-                                value={mail}
-                                onChange={handleMailInputChange}
+                                value={ mail }
+                                onChange={ handleMailInputChange }
                                 required
-                                isInvalid={!mail && mailTouched} />
+                                isInvalid={ !mail && mailTouched } />
                             <Form.Control.Feedback type="invalid">Please enter a valid email address.</Form.Control.Feedback>
                             <Form.Text className="text-muted">
                                 We'll never share your email with anyone else.
@@ -91,16 +95,19 @@ function RegisterPage() {
                             <Form.Label>Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                value={pwd}
-                                onChange={handlePwdInputChange}
+                                value={ pwd }
+                                onChange={ handlePwdInputChange }
                                 required
-                                isInvalid={!pwd && pwdTouched} />
+                                isInvalid={ !pwd && pwdTouched } />
                             <Form.Control.Feedback type="invalid">Please enter a valid password.</Form.Control.Feedback>
                         </Form.Group>
+
                         <Button variant="primary" type="submit">
                             Register
                         </Button>
+
                     </Form>
+
                 </Card.Body>
             </Card>
         </div>

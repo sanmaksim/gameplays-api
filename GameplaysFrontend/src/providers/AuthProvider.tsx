@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { AuthProviderType } from "../types/DataType";
+import { ProviderType } from "../types/DataType";
+import { AuthContextType } from "../types/ContextType";
 
-function AuthProvider({ children }: AuthProviderType) {
-    const [isLoggedIn, setIsLoggedIn ] = useState(false);
+function AuthProvider({ children }: ProviderType) {
+    const [ isLoggedIn, setIsLoggedIn ] = useState(false);
 
-    const setLoggedIn = () => setIsLoggedIn(true);
-    const setLoggedOut = () => setIsLoggedIn(false);
+    const authContext: AuthContextType = {
+        isLoggedInContext: isLoggedIn,
+        setIsLoggedInContext: () => setIsLoggedIn(true),
+        setIsLoggedOutContext: () => setIsLoggedIn(false)
+    }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, setLoggedOut }}>
+        <AuthContext.Provider value= { authContext }>
             { children }
         </AuthContext.Provider>
     );
