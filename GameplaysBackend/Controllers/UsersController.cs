@@ -5,7 +5,6 @@ using GameplaysBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace GameplaysBackend.Controllers
@@ -172,60 +171,67 @@ namespace GameplaysBackend.Controllers
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
-            if (userId == null || userId != userDto.UserId.ToString())
+            if (string.IsNullOrEmpty(userId))
             {
                 return Forbid();
             }
 
-            var existingUser = await _context.Users.FindAsync(userDto.UserId);
-
-            if (existingUser == null)
+            if (int.TryParse(userId, out int id))
             {
-                return NotFound();
-            }
+                var existingUser = await _context.Users.FindAsync(id);
 
-            bool hasChanges = false;
-
-            // Update only provided properties
-            if (userDto.Username != null && userDto.Username != existingUser.Username)
-            {
-                existingUser.Username = userDto.Username;
-                hasChanges = true;
-            }
-            if (userDto.Email != null && userDto.Email != existingUser.Email)
-            {
-                existingUser.Email = userDto.Email;
-                hasChanges = true;
-            }
-            if (!string.IsNullOrEmpty(userDto.Password))
-            {
-                // TODO: to check if the password has indeed changed?
-                existingUser.Password = userDto.Password;
-                hasChanges = true;
-            }
-
-            if (hasChanges)
-            {
-                existingUser.UpdateTimestamp();
-
-                try
+                if (existingUser == null)
                 {
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Users.Any(e => e.UserId == userDto.UserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
 
-            return NoContent();
+                bool hasChanges = false;
+
+                // Update only provided properties
+                if (userDto.Username != null && userDto.Username != existingUser.Username)
+                {
+                    existingUser.Username = userDto.Username;
+                    hasChanges = true;
+                }
+                if (userDto.Email != null && userDto.Email != existingUser.Email)
+                {
+                    existingUser.Email = userDto.Email;
+                    hasChanges = true;
+                }
+                if (!string.IsNullOrEmpty(userDto.Password))
+                {
+                    // TODO: to check if the password has indeed changed?
+                    existingUser.Password = userDto.Password;
+                    hasChanges = true;
+                }
+
+                if (hasChanges)
+                {
+                    existingUser.UpdateTimestamp();
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!_context.Users.Any(e => e.UserId == id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest("The token string is not a valid integer.");
+            }
         }
 
         // @desc Delete user
@@ -233,30 +239,37 @@ namespace GameplaysBackend.Controllers
         // @access Private
         [Authorize]
         [HttpDelete("settings")]
-        public async Task<IActionResult> DeleteUser([FromBody] UserDto userDto)
+        public async Task<IActionResult> DeleteUser()
         {
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
-            if (userId == null || userId != userDto.UserId.ToString())
+            if (string.IsNullOrEmpty(userId))
             {
                 return Forbid();
             }
 
-            var existingUser = await _context.Users.FindAsync(userDto.UserId);
-
-            if (existingUser == null)
+            if (int.TryParse(userId, out int id))
             {
-                return NotFound();
+                var existingUser = await _context.Users.FindAsync(id);
+
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+                
+                _context.Users.Remove(existingUser);
+                
+                _authService.DeleteAuthCookie(Response);
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Users.Remove(existingUser);
-            
-            _authService.DeleteAuthCookie(Response);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            else
+            {
+                return BadRequest("The token string is not a valid integer.");
+            }
         }
     }
 }

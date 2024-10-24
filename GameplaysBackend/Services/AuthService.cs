@@ -1,5 +1,4 @@
 using GameplaysBackend.Models;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -23,7 +22,7 @@ namespace GameplaysBackend.Services
         public void CreateAuthCookie(User user, HttpResponse response)
         {
             var expirationDays = 1;
-            
+
             var validIssuer = _configuration["JwtSettings:validIssuers"];
             var validAudience = _configuration["JwtSettings:ValidAudiences"];
             

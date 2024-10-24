@@ -4,8 +4,6 @@ namespace GameplaysBackend.DTOs
 {
     public class UserDto
     {
-        public int UserId { get; set; }
-
         [MaxLength(255)]
         public string? Username { get; set; }
 
