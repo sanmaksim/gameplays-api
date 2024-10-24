@@ -1,4 +1,3 @@
-import { LoaderFunctionArgs } from 'react-router-dom';
 import { UserType } from '../types/DataType';
 
 const apiUrl = 'https://localhost:5001'
@@ -7,6 +6,7 @@ async function registerUser(data: UserType) {
     try {
         const response = await fetch(`${apiUrl}/api/users/register`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -17,7 +17,8 @@ async function registerUser(data: UserType) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return response;
+        const user = await response.json();
+        return user;
 
     } catch (error) {
         throw error;
@@ -39,7 +40,7 @@ async function authUser(data: UserType) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const user: UserType = await response.json();
+        const user = await response.json();
         return user;
 
     } catch (error) {
@@ -47,10 +48,9 @@ async function authUser(data: UserType) {
     }
 }
 
-// alter to fetch from /api/users/profile ???
-async function fetchUser({params}: LoaderFunctionArgs) {
+async function fetchUser() {
     try {
-        const response = await fetch(`${apiUrl}/api/users/${params.id}`, {
+        const response = await fetch(`${apiUrl}/api/users/profile`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -69,7 +69,7 @@ async function fetchUser({params}: LoaderFunctionArgs) {
 
 async function updateUser(data: UserType) {
     try {
-        const response = await fetch(`${apiUrl}/api/users/profile`, {
+        const response = await fetch(`${apiUrl}/api/users/settings`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -80,8 +80,6 @@ async function updateUser(data: UserType) {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        return response;
 
     } catch (error) {
         throw error;
@@ -98,6 +96,7 @@ async function logoutUser() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
     } catch (error) {
         throw error;
     }

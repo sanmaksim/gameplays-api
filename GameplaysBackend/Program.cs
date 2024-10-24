@@ -7,6 +7,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Retrieve the cert pwd from app settings
 var pfxPassword = builder.Configuration["CertSettings:PfxPassword"];
 
 // Configure Kestrel to Use HTTPS
@@ -25,7 +26,6 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOriginWithCredentials",
         policy =>
         {
-            //policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
             policy.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
@@ -39,7 +39,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllersWithViews();
 
-// Retrieve the connection string from user secrets
+// Retrieve connection string from app settings
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add DbContext with MySQL configuration
@@ -54,29 +54,31 @@ else
     throw new Exception("DefaultConnection string must not be null.");
 }
 
+// Add custom JWT and cookie handling middleware
 builder.Services.AddTransient<JwtTokenService>();
 builder.Services.AddTransient<CookieService>();
 builder.Services.AddTransient<AuthService>();
 
-// Retrieve the HmacSecretKey from appsettings.json
+// Retrieve the HmacSecretKey from app settings for JWT signing key comparison below
 var hmacSecretKey = builder.Configuration["JwtSettings:HmacSecretKey"];
 
 if (hmacSecretKey != null)
 {
-    // Configure authentication
+    // Add authentication middleware
     builder.Services.AddAuthentication(options => {
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
+        // Do NOT map claim types that are extracted when validating a JWT
+        options.MapInboundClaims = false;
+        // Define JWT validation parameters
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            //ValidIssuers = new List<string> { "https://localhost:5001", "http://localhost:5000" },
             ValidIssuer = "https://localhost:5001",
-            //ValidAudiences = new List<string> { "http://localhost:3000", "http://127.0.0.1:3000" },
             ValidAudience = "http://localhost:3000",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey)),
         };
         // Read token from cookie
         options.Events = new JwtBearerEvents
@@ -94,7 +96,9 @@ else
     throw new Exception("HmacSecretKey must not be null.");
 }
 
+// Add authorization middleware
 builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Apply migrations and ensure the database is created

@@ -41,18 +41,15 @@ function RegisterPage() {
 
     const submitForm = async (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
-        let result: void;
 
         try {
             const response = await registerUser(formData);
-            if (response.ok) {
-                result = navigate('/');
+            if (response) {
+                navigate('/');
             }
         } catch (error) {
             setShowAlert(true);
         }
-
-        return result;
     };
 
     return (

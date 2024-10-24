@@ -1,12 +1,12 @@
-using FluentValidation.Results;
 using GameplaysBackend.Models;
 using GameplaysBackend.Data;
 using GameplaysBackend.DTOs;
 using GameplaysBackend.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace GameplaysBackend.Controllers
 {
@@ -46,14 +46,16 @@ namespace GameplaysBackend.Controllers
                 User newUser = new User
                 {
                     Username = registerDto.Username,
-                    Password = registerDto.Password, // auto-hashed upon save in User class
+                    Password = registerDto.Password, // auto-hashed upon save in User model
                     Email = registerDto.Email
                 };
 
                 _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
 
                 _authService.CreateAuthCookie(newUser, Response);
+
+                await _context.SaveChangesAsync();
+
                 return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
 
             }
@@ -68,7 +70,7 @@ namespace GameplaysBackend.Controllers
         }
 
         
-        // @desc Auth user/set token
+        // @desc Auth user/create auth cookie
         // route GET /api/users/login
         // @access Public
         [HttpPost("login")]
@@ -102,13 +104,13 @@ namespace GameplaysBackend.Controllers
             }
             else
             {
-                return Unauthorized("Please enter your credentials.");
+                return NotFound("User not found.");
             }
         }
 
-        // @desc Auth user/set token
-        // route GET /api/users/auth
-        // @access Public
+        // @desc Delete auth cookie
+        // route GET /api/users/logout
+        // @access Private
         [Authorize]
         [HttpPost("logout")]
         public IActionResult Logout()
@@ -119,7 +121,8 @@ namespace GameplaysBackend.Controllers
 
         // @desc Get all users
         // route GET /api/users
-        // @access ???
+        // @access Private
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -128,64 +131,97 @@ namespace GameplaysBackend.Controllers
         }
 
         // @desc Get user
-        // route GET /api/users/:id
-        // route GET /api/users/profile ???
+        // route GET /api/users/profile
         // @access Private
         [Authorize]
-        [HttpGet("{id}")]
-        //[HttpGet("profile")] ???
-        public async Task<IActionResult> GetUser(int id)
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUser()
         {
-            var user = await _context.Users.FindAsync(id);
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
-            if (user == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return NotFound();
+                return Forbid();
             }
 
-            return Ok(user);
+            if (int.TryParse(userId, out int id))
+            {
+                var user = await _context.Users.FindAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest("The token string is not a valid integer.");
+            }
         }
 
         // @desc Update user
-        // route PUT /api/users/:id
-        // route PUT /api/users/profile ???
+        // route PUT /api/users/settings
         // @access Private
         [Authorize]
-        [HttpPut("{id}")]
-        //[HttpPut("profile")] ???
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto updateDto)
+        [HttpPut("settings")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
         {
-            var existingUser = await _context.Users.FindAsync(id);
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (userId == null || userId != userDto.UserId.ToString())
+            {
+                return Forbid();
+            }
+
+            var existingUser = await _context.Users.FindAsync(userDto.UserId);
+
             if (existingUser == null)
             {
                 return NotFound();
             }
 
+            bool hasChanges = false;
+
             // Update only provided properties
-            if (!string.IsNullOrEmpty(updateDto.Username))
-                existingUser.Username = updateDto.Username;
-            
-            if (!string.IsNullOrEmpty(updateDto.Email))
-                existingUser.Email = updateDto.Email;
-            
-            if (!string.IsNullOrEmpty(updateDto.Password))
-                existingUser.Password = updateDto.Password;
-
-            existingUser.UpdateTimestamp();
-
-            try
+            if (userDto.Username != null && userDto.Username != existingUser.Username)
             {
-                await _context.SaveChangesAsync();
+                existingUser.Username = userDto.Username;
+                hasChanges = true;
             }
-            catch (DbUpdateConcurrencyException)
+            if (userDto.Email != null && userDto.Email != existingUser.Email)
             {
-                if (!_context.Users.Any(e => e.UserId == id))
+                existingUser.Email = userDto.Email;
+                hasChanges = true;
+            }
+            if (!string.IsNullOrEmpty(userDto.Password))
+            {
+                // TODO: to check if the password has indeed changed?
+                existingUser.Password = userDto.Password;
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                existingUser.UpdateTimestamp();
+
+                try
                 {
-                    return NotFound();
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!_context.Users.Any(e => e.UserId == userDto.UserId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
 
@@ -193,18 +229,30 @@ namespace GameplaysBackend.Controllers
         }
 
         // @desc Delete user
-        // route DELETE /api/users/:id
-        // @access Protected
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        // route DELETE /api/users/settings
+        // @access Private
+        [Authorize]
+        [HttpDelete("settings")]
+        public async Task<IActionResult> DeleteUser([FromBody] UserDto userDto)
         {
-            var existingUser = await _context.Users.FindAsync(id);
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (userId == null || userId != userDto.UserId.ToString())
+            {
+                return Forbid();
+            }
+
+            var existingUser = await _context.Users.FindAsync(userDto.UserId);
+
             if (existingUser == null)
             {
                 return NotFound();
             }
 
             _context.Users.Remove(existingUser);
+            
+            _authService.DeleteAuthCookie(Response);
 
             await _context.SaveChangesAsync();
 

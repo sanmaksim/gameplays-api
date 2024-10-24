@@ -2,8 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameplaysBackend.DTOs
 {
-    public class UserUpdateDto
+    public class UserDto
     {
+        public int UserId { get; set; }
+
         [MaxLength(255)]
         public string? Username { get; set; }
 

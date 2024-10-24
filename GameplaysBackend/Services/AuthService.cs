@@ -23,9 +23,8 @@ namespace GameplaysBackend.Services
         public void CreateAuthCookie(User user, HttpResponse response)
         {
             var expirationDays = 1;
-            //var validIssuers = _configuration.GetSection("JwtSettings:validIssuers").Get<string[]>();
+            
             var validIssuer = _configuration["JwtSettings:validIssuers"];
-            //var validAudiences = _configuration.GetSection("JwtSettings:ValidAudiences").Get<string[]>();
             var validAudience = _configuration["JwtSettings:ValidAudiences"];
             
             //if (validIssuers != null && validAudiences != null)
@@ -39,14 +38,7 @@ namespace GameplaysBackend.Services
                     new Claim(JwtRegisteredClaimNames.Iss, validIssuer),
                     new Claim(JwtRegisteredClaimNames.Aud, validAudience)
                 };
-                // foreach (var issuer in validIssuers)
-                // {
-                //     payload.Add(new Claim(JwtRegisteredClaimNames.Iss, issuer));
-                // }
-                // foreach (var aud in validAudiences)
-                // {
-                //     payload.Add(new Claim(JwtRegisteredClaimNames.Aud, aud));
-                // }
+
                 var token = _jwtTokenService.CreateToken(payload, expirationDays);
 
                 // create cookie
