@@ -18,7 +18,7 @@ function Logout() {
         performLogout();
     }, [navigate]);
 
-    // maybe include spinner here
+    // TODO: maybe include spinner here
     return (
         <></>
     )

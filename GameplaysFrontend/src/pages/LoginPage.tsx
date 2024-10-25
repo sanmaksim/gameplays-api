@@ -51,7 +51,7 @@ function LoginPage() {
         try {
             const user = await authUser(formData);
             if (user.userId) {
-                navigate(`/user/profile`);
+                navigate(`/`);
                 setIsLoggedInContext();
             }
         } catch (error) {

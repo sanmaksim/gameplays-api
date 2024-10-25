@@ -19,4 +19,4 @@ function AuthProvider({ children }: ProviderType) {
     );
 }
 
-export default AuthProvider ;
+export default AuthProvider;

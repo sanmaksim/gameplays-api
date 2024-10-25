@@ -1,4 +1,5 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
+import { ChangeEvent, FormEvent, useContext, useState } from 'react';
 import Alert from 'react-bootstrap/esm/Alert';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
@@ -8,6 +9,8 @@ import { UserType } from '../types/DataType';
 import { useNavigate } from 'react-router-dom';
 
 function RegisterPage() {
+    const { setIsLoggedInContext } = useContext(AuthContext);
+
     const [un, setUn] = useState('');
     const [mail, setMail] = useState('');
     const [pwd, setPwd] = useState('');
@@ -46,6 +49,7 @@ function RegisterPage() {
             const response = await registerUser(formData);
             if (response) {
                 navigate('/');
+                setIsLoggedInContext();
             }
         } catch (error) {
             setShowAlert(true);
