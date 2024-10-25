@@ -51,9 +51,11 @@ namespace GameplaysBackend.Controllers
 
                 _context.Users.Add(newUser);
 
-                _authService.CreateAuthCookie(newUser, Response);
-
+                // Save the new user first to generate the UserId
                 await _context.SaveChangesAsync();
+
+                // Now that the UserId is set, create the cookie
+                _authService.CreateAuthCookie(newUser, Response);
 
                 return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
 
