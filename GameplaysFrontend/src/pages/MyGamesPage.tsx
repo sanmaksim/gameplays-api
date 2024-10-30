@@ -1,6 +1,10 @@
+import { Container } from "react-bootstrap";
+
 function MyGamesPage() {
     return (
-        <div>MyGamesPage</div>
+        <Container>
+            MyGamesPage
+        </Container>
     );
 };
 

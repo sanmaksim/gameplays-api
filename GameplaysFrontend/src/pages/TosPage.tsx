@@ -1,6 +1,10 @@
+import { Container } from "react-bootstrap";
+
 function TosPage() {
     return (
-        <div>TosPage</div>
+        <Container>
+            TosPage
+        </Container>
     );
 };
 

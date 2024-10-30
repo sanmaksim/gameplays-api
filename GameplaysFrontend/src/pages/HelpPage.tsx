@@ -1,6 +1,10 @@
+import { Container } from "react-bootstrap";
+
 function HelpPage() {
     return (
-        <div>HelpPage</div>
+        <Container>
+            HelpPage
+        </Container>
     );
 };
 

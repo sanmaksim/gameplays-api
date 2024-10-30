@@ -1,5 +1,6 @@
 import { AuthContext } from '../contexts/AuthContext';
 import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { Container } from 'react-bootstrap';
 import Alert from 'react-bootstrap/esm/Alert';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
@@ -57,8 +58,8 @@ function RegisterPage() {
     };
 
     return (
-        <div className="mx-auto mt-5">
-            <Card style={{ width: '20rem' }}>
+        <Container className="mx-auto mt-5">
+            <Card className="mx-auto" style={{ width: '20rem' }}>
                 <Card.Body>
 
                     <Card.Title className="lg mb-3">Sign up with Gameplays</Card.Title>
@@ -111,7 +112,7 @@ function RegisterPage() {
 
                 </Card.Body>
             </Card>
-        </div>
+        </Container>
     );
 };
 

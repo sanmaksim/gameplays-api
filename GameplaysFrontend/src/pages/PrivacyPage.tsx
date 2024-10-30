@@ -1,6 +1,10 @@
+import { Container } from "react-bootstrap";
+
 function PrivacyPage() {
     return (
-        <div>PrivacyPage</div>
+        <Container>
+            PrivacyPage
+        </Container>
     );
 };
 

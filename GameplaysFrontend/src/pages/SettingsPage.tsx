@@ -1,8 +1,10 @@
-type Props = {}
+import { Container } from "react-bootstrap";
 
-function SettingsPage({ }: Props) {
+function SettingsPage() {
     return (
-        <div>SettingsPage</div>
+        <Container>
+            SettingsPage
+        </Container>
     )
 }
 

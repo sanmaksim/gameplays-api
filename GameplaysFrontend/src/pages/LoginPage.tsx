@@ -1,6 +1,7 @@
 import { AuthContext } from '../contexts/AuthContext';
 import { authUser } from '../services/UserDataService';
 import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { UserType } from '../types/DataType';
 import Alert from 'react-bootstrap/esm/Alert';
@@ -60,8 +61,8 @@ function LoginPage() {
     };
 
     return (
-        <div className="mx-auto mt-5">
-            <Card style={{ width: '20rem' }}>
+        <Container className="mx-auto mt-5">
+            <Card className="mx-auto" style={{ width: '20rem' }}>
                 <Card.Body>
 
                     <Card.Title className="lg mb-3">Please sign in</Card.Title>
@@ -106,7 +107,7 @@ function LoginPage() {
 
                 </Card.Body>
             </Card>
-        </div>
+        </Container>
     );
 }
 

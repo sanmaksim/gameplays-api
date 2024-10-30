@@ -1,6 +1,10 @@
+import { Container } from "react-bootstrap";
+
 function Start() {
     return (
-        <div>StartPage</div>
+        <Container>
+            StartPage
+        </Container>
     )
 }
 
