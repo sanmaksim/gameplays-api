@@ -10,6 +10,7 @@ import { UserType } from '../types/DataType';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
+import Loader from '../components/Loader';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -98,6 +99,8 @@ function LoginPage() {
                                 isInvalid={ !pwd && pwdTouched } />
                             <Form.Control.Feedback type="invalid">Please enter your password.</Form.Control.Feedback>
                         </Form.Group>
+
+                        { isLoading && <Loader /> }
 
                         <Button variant="secondary" type="submit">
                             Sign in

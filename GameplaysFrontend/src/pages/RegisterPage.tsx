@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { RootState } from '../store';
+import { setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,7 +10,7 @@ import { UserType } from '../types/DataType';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
-import { setCredentials } from '../slices/authSlice';
+import Loader from '../components/Loader';
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -139,6 +140,8 @@ function RegisterPage() {
                                 isInvalid={ !confirmPwd && confirmPwdTouched } />
                             <Form.Control.Feedback type="invalid">Please confirm your password.</Form.Control.Feedback>
                         </Form.Group>
+
+                        { isLoading && <Loader /> }
 
                         <Button variant="primary" type="submit">
                             Register

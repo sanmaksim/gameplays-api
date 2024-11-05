@@ -49,7 +49,7 @@ function NavBar() {
                     <Nav className="ms-auto">
                         {userInfo ? (
                             <>
-                                <NavDropdown title={userInfo.username} id="basic-nav-dropdown">
+                                <NavDropdown title={userInfo.username} id="user-dropdown">
                                     <Link className="dropdown-item" to="/user/profile">Profile</Link>
                                     <Link className="dropdown-item" to="/user/settings">Settings</Link>
                                     <Link className="dropdown-item" to="/help">Help</Link>
@@ -76,7 +76,7 @@ function NavBar() {
                             </Link>
                         )}
 
-                        {/* <NavDropdown title="Games" id="basic-nav-dropdown" menuVariant='dark'>
+                        {/* <NavDropdown title="Games" id="user-dropdown" menuVariant='dark'>
                             <Link className="dropdown-item" to="/games/all">All Games</Link>
                             <Link className="dropdown-item" to="/games/popular">Popular Games</Link>
                             <Link className="dropdown-item" to="/games/top">Top 100 Games</Link>
