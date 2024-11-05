@@ -1,14 +1,5 @@
-type AuthContextType = {
-    isLoggedInContext: boolean,
-    setIsLoggedInContext: () => void,
-    setIsLoggedOutContext: () => void
-}
-
 type PageContextType = {
-    isLoginPageContext: boolean,
-    isRegisterPageContext: boolean
-    setLoginPageContext: () => void,
-    setRegisterPageContext: () => void
+    isLoginPageContext: boolean
 }
 
-export type { AuthContextType, PageContextType };
+export type { PageContextType };

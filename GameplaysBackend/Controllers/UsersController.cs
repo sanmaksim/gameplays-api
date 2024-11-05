@@ -105,7 +105,7 @@ namespace GameplaysBackend.Controllers
             }
             else
             {
-                return NotFound("User not found.");
+                return Unauthorized("Invalid username or password.");
             }
         }
 

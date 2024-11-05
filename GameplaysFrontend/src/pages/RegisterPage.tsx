@@ -1,24 +1,38 @@
-import { AuthContext } from '../contexts/AuthContext';
-import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
-import Alert from 'react-bootstrap/esm/Alert';
+import { RootState } from '../store';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRegisterMutation } from '../slices/usersApiSlice';
+import { UserType } from '../types/DataType';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
-import { registerUser } from '../services/UserDataService';
-import { UserType } from '../types/DataType';
-import { useNavigate } from 'react-router-dom';
+import { setCredentials } from '../slices/authSlice';
 
 function RegisterPage() {
-    const { setIsLoggedInContext } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [register, { isLoading }] = useRegisterMutation();
+
+    const { userInfo } = useSelector((state: RootState) => state.auth);
+
+    useEffect(() => {
+        if (userInfo) {
+            navigate('/');
+        }
+    }, [navigate, userInfo]);
 
     const [un, setUn] = useState('');
     const [mail, setMail] = useState('');
     const [pwd, setPwd] = useState('');
+    const [confirmPwd, setConfirmPwd] = useState('');
     const [unTouched, setUnTouched] = useState(false);
     const [mailTouched, setMailTouched] = useState(false);
     const [pwdTouched, setPwdTouched] = useState(false);
-    const [showAlert, setShowAlert] = useState(false);
+    const [confirmPwdTouched, setConfirmPwdTouched] = useState(false);
 
     const handleUnInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
         setUn(evt.target.value);
@@ -34,6 +48,11 @@ function RegisterPage() {
         setPwd(evt.target.value);
         setPwdTouched(true);
     };
+    
+    const handleConfirmPwdInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
+        setConfirmPwd(evt.target.value);
+        setConfirmPwdTouched(true);
+    }
 
     const formData: UserType = {
         username: un,
@@ -41,19 +60,27 @@ function RegisterPage() {
         password: pwd
     };
 
-    const navigate = useNavigate();
+    const handlePwdMatching = (): boolean => {
+        if (pwd === confirmPwd) {
+            return true;
+        } else {
+            return false;
+        }
+    };
 
     const submitForm = async (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
 
-        try {
-            const response = await registerUser(formData);
-            if (response) {
+        if (handlePwdMatching()) {
+            try {
+                const response = await register(formData).unwrap();
+                dispatch(setCredentials({...response}));
                 navigate('/');
-                setIsLoggedInContext();
+            } catch (error: any) {
+                toast.error(error.data || "An error occurred.");
             }
-        } catch (error) {
-            setShowAlert(true);
+        } else {
+            toast.error('Passwords do not match.');
         }
     };
 
@@ -63,8 +90,6 @@ function RegisterPage() {
                 <Card.Body>
 
                     <Card.Title className="lg mb-3">Sign up with Gameplays</Card.Title>
-
-                    { showAlert && (<Alert variant="danger">Invalid username or password.</Alert>) }
 
                     <Form onSubmit={ submitForm }>
 
@@ -102,6 +127,17 @@ function RegisterPage() {
                                 required
                                 isInvalid={ !pwd && pwdTouched } />
                             <Form.Control.Feedback type="invalid">Please enter a valid password.</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+                            <Form.Label>Confirm Password</Form.Label>
+                            <Form.Control
+                                type="password"
+                                value={ confirmPwd }
+                                onChange={ handleConfirmPwdInputChange }
+                                required
+                                isInvalid={ !confirmPwd && confirmPwdTouched } />
+                            <Form.Control.Feedback type="invalid">Please confirm your password.</Form.Control.Feedback>
                         </Form.Group>
 
                         <Button variant="primary" type="submit">

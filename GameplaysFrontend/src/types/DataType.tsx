@@ -1,6 +1,6 @@
 import React from "react";
 
-type ProviderType = {
+type ChildrenNodeType = {
     children: React.ReactNode
 }
 
@@ -11,4 +11,4 @@ type UserType = {
     password?: string
 }
 
-export type { ProviderType, UserType };
+export type { ChildrenNodeType, UserType };
