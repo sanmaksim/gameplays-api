@@ -5,7 +5,7 @@ import {
   Route
 } from 'react-router-dom';
 import { fetchUser } from './services/UserDataService';
-import Logout from './components/Logout';
+// import Logout from './components/Logout';
 import MainLayout from './layouts/MainLayout';
 import AboutPage from './pages/AboutPage';
 import HelpPage from './pages/HelpPage';
@@ -32,7 +32,6 @@ function App() {
         <Route path='/user/games' element={<MyGamesPage />} />
         <Route path='/user/profile' element={<ProfilePage />} loader={ fetchUser } />
         <Route path='/user/register' element={<RegisterPage />} />
-        <Route path='/user/logout' element={<Logout />} />
         <Route path='/user/settings' element={<SettingsPage />} />
         <Route path='*' element={<NotFoundPage />} />
       </Route>

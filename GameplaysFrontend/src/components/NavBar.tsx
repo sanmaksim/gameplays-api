@@ -2,6 +2,7 @@ import { clearCredentials } from '../slices/authSlice';
 import { Container } from 'react-bootstrap';
 import { Controller } from 'react-bootstrap-icons';
 import { Link, useNavigate } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 import { PageContext } from '../contexts/PageContext';
 import { RootState } from '../store';
@@ -9,6 +10,7 @@ import { useContext } from 'react';
 import { toast } from 'react-toastify';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { useSelector, useDispatch } from 'react-redux';
+// import { useSelector } from 'react-redux';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -53,7 +55,7 @@ function NavBar() {
                                     <Link className="dropdown-item" to="/user/profile">Profile</Link>
                                     <Link className="dropdown-item" to="/user/settings">Settings</Link>
                                     <Link className="dropdown-item" to="/help">Help</Link>
-                                    <Link className="dropdown-item" to="/user/logout" onClick={logoutHandler}>Logout</Link>
+                                    <Nav.Item className="dropdown-item" onClick={logoutHandler}>Logout</Nav.Item>
                                 </NavDropdown>
 
                                 <Nav onSelect={handleSelect}>

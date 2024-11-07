@@ -61,18 +61,12 @@ function RegisterPage() {
         password: pwd
     };
 
-    const handlePwdMatching = (): boolean => {
-        if (pwd === confirmPwd) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
     const submitForm = async (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
 
-        if (handlePwdMatching()) {
+        if (pwd !== confirmPwd) {
+            toast.error('Passwords do not match.');
+        } else {
             try {
                 const response = await register(formData).unwrap();
                 dispatch(setCredentials({...response}));
@@ -80,8 +74,6 @@ function RegisterPage() {
             } catch (error: any) {
                 toast.error(error.data || "An error occurred.");
             }
-        } else {
-            toast.error('Passwords do not match.');
         }
     };
 
