@@ -4,16 +4,15 @@ import {
   RouterProvider,
   Route
 } from 'react-router-dom';
-import { fetchUser } from './services/UserDataService';
-// import Logout from './components/Logout';
-import MainLayout from './layouts/MainLayout';
 import AboutPage from './pages/AboutPage';
 import HelpPage from './pages/HelpPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import MainLayout from './layouts/MainLayout';
 import MyGamesPage from './pages/MyGamesPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PrivacyPage from './pages/PrivacyPage';
+import PrivateRoute from './components/PrivateRoute';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import SettingsPage from './pages/SettingsPage';
@@ -29,10 +28,12 @@ function App() {
         <Route path='/privacy' element={<PrivacyPage />} />
         <Route path='/tos' element={<TosPage />} />
         <Route path='/user/login' element={<LoginPage />} />
-        <Route path='/user/games' element={<MyGamesPage />} />
-        <Route path='/user/profile' element={<ProfilePage />} loader={ fetchUser } />
+        <Route path='' element={<PrivateRoute />}>
+          <Route path='/user/games' element={<MyGamesPage />} />
+          <Route path='/user/profile' element={<ProfilePage />} />
+          <Route path='/user/settings' element={<SettingsPage />} />
+        </Route>
         <Route path='/user/register' element={<RegisterPage />} />
-        <Route path='/user/settings' element={<SettingsPage />} />
         <Route path='*' element={<NotFoundPage />} />
       </Route>
     )
