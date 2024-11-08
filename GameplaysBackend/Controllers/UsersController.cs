@@ -30,19 +30,19 @@ namespace GameplaysBackend.Controllers
         {
             try
             {
-                User? existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
                 if (existingUser != null)
                 {
                     return BadRequest(new { message = "Username already exists." });
                 }
 
-                User? existingEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
+                var existingEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
                 if (existingEmail != null)
                 {
                     return BadRequest(new { message = "Email already exists." });
                 }
 
-                User newUser = new User
+                var newUser = new User
                 {
                     Username = registerDto.Username,
                     Password = registerDto.Password, // auto-hashed upon save in User model
@@ -89,7 +89,7 @@ namespace GameplaysBackend.Controllers
                 return BadRequest(ModelState);
             }
 
-            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authDto.Username || u.Email == authDto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authDto.Username || u.Email == authDto.Email);
 
             if (user != null && authDto.Password != null)
             {
@@ -159,7 +159,7 @@ namespace GameplaysBackend.Controllers
             }
             else
             {
-                return BadRequest("The token string is not a valid integer.");
+                return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
 
@@ -167,7 +167,7 @@ namespace GameplaysBackend.Controllers
         // route PUT /api/users/settings
         // @access Private
         [Authorize]
-        [HttpPut("settings")]
+        [HttpPut("profile")]
         public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
         {
             // Retrieve the user ID string from the JWT 'sub' claim
@@ -186,14 +186,27 @@ namespace GameplaysBackend.Controllers
                 {
                     return NotFound();
                 }
+                if (id != userDto.UserId)
+                {
+                    return Forbid();
+                }
 
                 bool hasChanges = false;
 
                 // Update only provided properties
                 if (userDto.Username != null && userDto.Username != existingUser.Username)
                 {
-                    existingUser.Username = userDto.Username;
-                    hasChanges = true;
+                    bool usernameExists = await _context.Users.AnyAsync(u => u.Username == userDto.Username);
+
+                    if (!usernameExists)
+                    {
+                        existingUser.Username = userDto.Username;
+                        hasChanges = true;
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "The username already exists." });
+                    }
                 }
                 if (userDto.Email != null && userDto.Email != existingUser.Email)
                 {
@@ -202,7 +215,6 @@ namespace GameplaysBackend.Controllers
                 }
                 if (!string.IsNullOrEmpty(userDto.Password))
                 {
-                    // TODO: to check if the password has indeed changed?
                     existingUser.Password = userDto.Password;
                     hasChanges = true;
                 }
@@ -228,11 +240,11 @@ namespace GameplaysBackend.Controllers
                     }
                 }
 
-                return NoContent();
+                return Ok(existingUser);
             }
             else
             {
-                return BadRequest("The token string is not a valid integer.");
+                return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
 
@@ -240,7 +252,7 @@ namespace GameplaysBackend.Controllers
         // route DELETE /api/users/settings
         // @access Private
         [Authorize]
-        [HttpDelete("settings")]
+        [HttpDelete("profile")]
         public async Task<IActionResult> DeleteUser()
         {
             // Retrieve the user ID string from the JWT 'sub' claim
@@ -270,7 +282,7 @@ namespace GameplaysBackend.Controllers
             }
             else
             {
-                return BadRequest("The token string is not a valid integer.");
+                return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
     }

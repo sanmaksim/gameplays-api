@@ -1,12 +1,129 @@
-import { Container } from "react-bootstrap";
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { RootState } from '../store';
+import { setCredentials } from '../slices/authSlice';
+import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { UserType } from '../types/DataType';
+import { useUpdateUserMutation } from '../slices/usersApiSlice';
+import Button from 'react-bootstrap/esm/Button';
+import Card from 'react-bootstrap/esm/Card';
+import Form from 'react-bootstrap/esm/Form';
+import Loader from '../components/Loader';
 
 function ProfilePage() {
+    const [un, setUn] = useState('');
+    const [mail, setMail] = useState('');
+    const [pwd, setPwd] = useState('');
+    const [confirmPwd, setConfirmPwd] = useState('');
+    const [unTouched, setUnTouched] = useState(false);
+    const [mailTouched, setMailTouched] = useState(false);
+
+    const dispatch = useDispatch();
+
+    const [updateUser, { isLoading }] = useUpdateUserMutation();
+
+    const { userInfo } = useSelector((state: RootState) => state.auth);
+
+    useEffect(() => {
+        setUn(userInfo.username);
+        setMail(userInfo.email);
+    }, [userInfo.setUn, userInfo.setMail]);
+
+    const handleUnInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
+        setUn(evt.target.value);
+        setUnTouched(true);
+    };
+
+    const handleMailInputChange = (evt: ChangeEvent<HTMLInputElement>) => {
+        setMail(evt.target.value);
+        setMailTouched(true);
+    };
+
+    const formData: UserType = {
+        userId: userInfo.userId,
+        username: un,
+        email: mail,
+        password: pwd
+    };
+
+    const submitForm = async (evt: FormEvent<HTMLFormElement>) => {
+        evt.preventDefault();
+
+        if (pwd !== confirmPwd) {
+            toast.error('Passwords do not match.');
+        } else {
+            try {
+                const response = await updateUser(formData).unwrap();
+                dispatch(setCredentials(response));
+                setPwd('');
+                setConfirmPwd('');
+                toast.success("Changes saved.");
+            } catch (error: any) {
+                toast.error(error.data || "An error occurred.");
+            }
+        }
+    };
 
     return (
-        <Container>
-            ProfilePage
+        <Container className="mx-auto mt-5">
+            <Card className="mx-auto" style={{ width: '20rem' }}>
+                <Card.Body>
+
+                    <Card.Title className="lg mb-3">Edit your profile</Card.Title>
+
+                    <Form onSubmit={ submitForm }>
+
+                        <Form.Group className="mb-3" controlId="formBasicUsername">
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control
+                                type="username"
+                                value={ un }
+                                onChange={ handleUnInputChange }
+                                required
+                                isInvalid={ !un && unTouched } />
+                            <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control
+                                type="email"
+                                value={ mail }
+                                onChange={ handleMailInputChange }
+                                required
+                                isInvalid={ !mail && mailTouched } />
+                            <Form.Control.Feedback type="invalid">Please enter a valid email address.</Form.Control.Feedback>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control
+                                type="password"
+                                value={ pwd }
+                                onChange={ (evt) => setPwd(evt.target.value) } />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+                            <Form.Label>Confirm Password</Form.Label>
+                            <Form.Control
+                                type="password"
+                                value={ confirmPwd }
+                                onChange={ (evt) => setConfirmPwd(evt.target.value) } />
+                        </Form.Group>
+
+                        { isLoading && <Loader /> }
+
+                        <Button variant="primary" type="submit">
+                            Save
+                        </Button>
+
+                    </Form>
+
+                </Card.Body>
+            </Card>
         </Container>
     );
-};
+}
 
 export default ProfilePage;

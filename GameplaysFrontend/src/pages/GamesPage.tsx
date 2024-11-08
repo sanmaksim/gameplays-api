@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap";
 
-function MyGamesPage() {
+function GamesPage() {
     return (
         <Container>
             MyGamesPage
@@ -8,4 +8,4 @@ function MyGamesPage() {
     );
 };
 
-export default MyGamesPage;
+export default GamesPage;
