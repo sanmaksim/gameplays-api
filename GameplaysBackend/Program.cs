@@ -21,16 +21,25 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Define CORS policies
+var devCorsPolicy = "DevCorsPolicy";
+var prodCorsPolicy = "ProdCorsPolicy";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOriginWithCredentials",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        });
+    options.AddPolicy(devCorsPolicy, builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+    });
+
+    options.AddPolicy(prodCorsPolicy, builder => {
+       builder.WithOrigins("http://localhost")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+    });
 });
 
 // Add services to the container.
@@ -108,14 +117,19 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate(); // Applies any pending migrations
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors(devCorsPolicy);
+}
+else
+{
+    app.UseCors(prodCorsPolicy);
+}
+
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowSpecificOriginWithCredentials");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-// Configure Kestrel to listen on port 5000
-//app.Urls.Add("http://localhost:5000");
 
 app.Run();
