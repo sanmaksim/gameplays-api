@@ -10,7 +10,7 @@ function PageProvider({ children }: ChildrenNodeType) {
     const location = useLocation();
 
     useEffect(() => {
-        if (location.pathname === '/user/login') {
+        if (location.pathname === '/login') {
             setIsLoginPage(true);
         } else {
             setIsLoginPage(false);

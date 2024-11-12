@@ -4,6 +4,8 @@ import {
   RouterProvider,
   Route
 } from 'react-router-dom';
+import { RootState } from './store';
+import { useSelector } from 'react-redux';
 import AboutPage from './pages/AboutPage';
 import GamesPage from './pages/GamesPage';
 import HelpPage from './pages/HelpPage';
@@ -18,6 +20,8 @@ import RegisterPage from './pages/RegisterPage';
 import TosPage from './pages/TosPage';
 
 function App() {
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path='/' element={<MainLayout />}>
@@ -28,10 +32,17 @@ function App() {
         <Route path='/register' element={<RegisterPage />} />
         
         {/* Private Routes */}
-        <Route path='' element={<PrivateRoute />}>
-          <Route path='/profile' element={<ProfilePage />} />
-          <Route path='/games' element={<GamesPage />} />
-        </Route>
+        { userInfo ? (
+          <Route path='' element={<PrivateRoute />}>
+            <Route path={`/user/${userInfo.username}`} element={<ProfilePage />} />
+            <Route path={`/user/${userInfo.username}/games`} element={<GamesPage />} />
+          </Route>
+        ) : (
+          <>
+            <Route path='/user/*' element={<NotFoundPage />} />
+          </>
+        )}
+        
 
         {/* Info Routes */}
         <Route path='/about' element={<AboutPage />} />
