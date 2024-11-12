@@ -72,7 +72,7 @@ function RegisterPage() {
                 dispatch(setCredentials({...response}));
                 navigate('/');
             } catch (error: any) {
-                toast.error(error.data || "An error occurred.");
+                toast.error(error.data.message || "An error occurred.");
             }
         }
     };

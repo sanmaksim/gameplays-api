@@ -60,7 +60,7 @@ function ProfilePage() {
                 setConfirmPwd('');
                 toast.success("Changes saved.");
             } catch (error: any) {
-                toast.error(error.data || "An error occurred.");
+                toast.error(error.data.message || "An error occurred.");
             }
         }
     };

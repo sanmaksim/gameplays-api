@@ -27,11 +27,12 @@ function NavBar() {
 
     const logoutHandler = async () => {
         try {
-            await logout('').unwrap();
+            const response = await logout('').unwrap();
             dispatch(clearCredentials());
             navigate('/');
+            toast.success(response.message);
         } catch (error: any) {
-            toast.error(error.data);
+            toast.error(error.data.message);
         }
     }
 

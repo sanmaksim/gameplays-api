@@ -100,12 +100,12 @@ namespace GameplaysBackend.Controllers
                 }
                 else
                 {
-                    return Unauthorized("Invalid username or password.");
+                    return Unauthorized(new { message = "Invalid username or password." });
                 }
             }
             else
             {
-                return Unauthorized("Invalid username or password.");
+                return Unauthorized(new { message = "Invalid username or password." });
             }
         }
 
@@ -210,8 +210,17 @@ namespace GameplaysBackend.Controllers
                 }
                 if (userDto.Email != null && userDto.Email != existingUser.Email)
                 {
-                    existingUser.Email = userDto.Email;
-                    hasChanges = true;
+                    bool emailExists = await _context.Users.AnyAsync(u => u.Email == userDto.Email);
+
+                    if (!emailExists)
+                    {
+                        existingUser.Email = userDto.Email;
+                        hasChanges = true;
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "The email is already in use."});
+                    }
                 }
                 if (!string.IsNullOrEmpty(userDto.Password))
                 {
