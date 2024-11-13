@@ -9,7 +9,7 @@ function Hero() {
                 <h1 className="display-5 fw-bold text-body-emphasis">What's on your play list?</h1>
                 <div className="col-lg-6 mx-auto">
                     <p className="lead mb-4">
-                        Gameplays let's you manage your video game collection so you can clear your backlog.
+                        Gameplays let's you manage your video game collection and track your backlog.
                     </p>
                     <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
                         <Link to="/register">

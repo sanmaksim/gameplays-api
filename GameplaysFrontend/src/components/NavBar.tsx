@@ -1,6 +1,7 @@
 import { clearCredentials } from '../slices/authSlice';
 import { Container, Form } from 'react-bootstrap';
-import { Controller } from 'react-bootstrap-icons';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageContext } from '../contexts/PageContext';
 import { RootState } from '../store';
@@ -39,11 +40,11 @@ function NavBar() {
     return (
         <Navbar expand="lg" bg="dark" data-bs-theme="dark">
             <Container>
-                <Nav>
+                <Nav style={{ width: '150px' }}>
                     <Navbar.Brand>
                         <Link className="text-light fw-bold text-decoration-none" to="/">
-                            <Controller size={30} />
-                            {/* <span className="ms-1">Gameplays</span> */}
+                            <FontAwesomeIcon icon={faGamepad} />
+                            <span className="ms-1">Gameplays</span>
                         </Link>
                     </Navbar.Brand>
                 </Nav>
@@ -62,7 +63,7 @@ function NavBar() {
                         />
                     </Form>
                 </Nav>
-                <Nav>
+                <Nav className="d-flex justify-content-end" style={{ width: '150px' }}>
                     {userInfo ? (
                         <NavDropdown title={userInfo.username} id="user-dropdown">
                             <Link className="dropdown-item" to={`/user/${userInfo.username}`}>Profile</Link>

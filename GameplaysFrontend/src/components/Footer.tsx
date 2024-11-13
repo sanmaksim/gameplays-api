@@ -6,7 +6,7 @@ function Footer() {
     return (
         <div className="container mt-auto">
             <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-                <p className="col-md-4 mb-0 text-body-secondary">&copy; {currentYear} Company, Inc</p>
+                <p className="col-md-4 mb-0 text-body-secondary">&copy; {currentYear} Gameplays. All rights reserved.</p>
                 
                 <ul className="nav col-md-4 justify-content-end">
                     <li className="nav-item">
