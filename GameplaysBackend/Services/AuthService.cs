@@ -7,24 +7,20 @@ namespace GameplaysBackend.Services
     public class AuthService
     {
         private readonly CookieService _cookieService;
-        private readonly IConfiguration _configuration;
         private readonly JwtTokenService _jwtTokenService;
-
         private readonly string _cookieName = "jwt";
 
-        public AuthService(CookieService cookieService, IConfiguration configuration, JwtTokenService jwtTokenService)
+        public AuthService(CookieService cookieService, JwtTokenService jwtTokenService)
         {
             _cookieService = cookieService;
-            _configuration = configuration;
             _jwtTokenService = jwtTokenService;
         }
 
         public void CreateAuthCookie(User user, HttpResponse response)
         {
             var expirationDays = 1;
-
-            var validIssuer = _configuration["JwtSettings:validIssuers"];
-            var validAudience = _configuration["JwtSettings:ValidAudiences"];
+            var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
+            var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
             
             //if (validIssuers != null && validAudiences != null)
             if (validIssuer != null && validAudience != null)

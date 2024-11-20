@@ -7,18 +7,17 @@ namespace GameplaysBackend.Services
 {
     public class JwtTokenService
     {
-        private readonly IConfiguration _configuration;
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
-        public JwtTokenService(IConfiguration configuration)
+        public JwtTokenService()
         {
-            _configuration = configuration;
+            // _configuration = configuration;
             _tokenHandler = new JwtSecurityTokenHandler();
         }
 
         public string CreateToken(List<Claim> claims, int expDays)
         {
-            string? hmacSecretKey = _configuration["JwtSettings:HmacSecretKey"];
+            string? hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
 
             if (hmacSecretKey != null)
             {

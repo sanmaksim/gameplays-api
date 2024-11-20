@@ -7,35 +7,34 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Retrieve the cert pwd from app settings
-var pfxPassword = builder.Configuration["CertSettings:PfxPassword"];
+if (builder.Environment.IsDevelopment())
+{
+    DotNetEnv.Env.Load(); // read from .env
+}
+
+// Retrieve PFX cert pwd from app settings
+var pfxPassword = Environment.GetEnvironmentVariable("GAMEPLAYS_PFXPASSWORD");
+
+// Define ports
+var httpPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTP_PORT")!);
+var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
+var originPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_ORIGIN_PORT")!);
 
 // Configure Kestrel to Use HTTPS
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5000);
-    options.ListenAnyIP(5001, listenOptions =>
+    options.ListenAnyIP(httpPort);
+    options.ListenAnyIP(httpsPort, listenOptions =>
     {
-        listenOptions.UseHttps("Certificates/certificate.pfx", pfxPassword);
+        listenOptions.UseHttps(Path.Combine("certs","cert.pfx"), pfxPassword);
     });
 });
 
-// Define CORS policies
-var devCorsPolicy = "DevCorsPolicy";
-var prodCorsPolicy = "ProdCorsPolicy";
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(devCorsPolicy, builder =>
+    options.AddPolicy("AllowSpecificOriginWithCredentials", builder =>
     {
-        builder.WithOrigins("http://localhost:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-    });
-
-    options.AddPolicy(prodCorsPolicy, builder => {
-       builder.WithOrigins("http://localhost")
+        builder.WithOrigins("http://localhost", $"http://localhost:{originPort}")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -49,7 +48,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllersWithViews();
 
 // Retrieve connection string from app settings
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = Environment.GetEnvironmentVariable("GAMEPLAYS_CONNECTION_STRING");
 
 // Add DbContext with MySQL configuration
 if (connectionString != null)
@@ -69,7 +68,11 @@ builder.Services.AddTransient<CookieService>();
 builder.Services.AddTransient<AuthService>();
 
 // Retrieve the HmacSecretKey from app settings for JWT signing key comparison below
-var hmacSecretKey = builder.Configuration["JwtSettings:HmacSecretKey"];
+var hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
+
+// Define JWT settings
+var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
+var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
 
 if (hmacSecretKey != null)
 {
@@ -85,8 +88,8 @@ if (hmacSecretKey != null)
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidIssuer = "https://localhost:5001",
-            ValidAudience = "http://localhost:3000",
+            ValidIssuer = validIssuer,
+            ValidAudience = validAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey)),
         };
         // Read token from cookie
@@ -108,6 +111,7 @@ else
 // Add authorization middleware
 builder.Services.AddAuthorization();
 
+
 var app = builder.Build();
 
 // Apply migrations and ensure the database is created
@@ -117,19 +121,13 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate(); // Applies any pending migrations
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors(devCorsPolicy);
-}
-else
-{
-    app.UseCors(prodCorsPolicy);
-}
-
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseCors("AllowSpecificOriginWithCredentials");
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
 
+app.MapControllers();
 app.Run();
