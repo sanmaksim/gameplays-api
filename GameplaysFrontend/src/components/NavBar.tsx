@@ -66,8 +66,8 @@ function NavBar() {
                 <Nav className="d-flex justify-content-end" style={{ width: '150px' }}>
                     {userInfo ? (
                         <NavDropdown title={userInfo.username} id="user-dropdown">
-                            <Link className="dropdown-item" to={`/user/${userInfo.username}`}>Profile</Link>
-                            <Link className="dropdown-item" to={`/user/${userInfo.username}/games`}>Games</Link>
+                            <Link className="dropdown-item" to="/user/profile">Profile</Link>
+                            <Link className="dropdown-item" to="/user/games">Games</Link>
                             <Link className="dropdown-item" to="/help">Help</Link>
                             <Nav.Item className="dropdown-item" onClick={logoutHandler}>Logout</Nav.Item>
                         </NavDropdown>

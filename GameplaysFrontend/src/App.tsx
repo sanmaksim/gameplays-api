@@ -34,8 +34,8 @@ function App() {
         {/* Private Routes */}
         { userInfo ? (
           <Route path='' element={<PrivateRoute />}>
-            <Route path={`/user/${userInfo.username}`} element={<ProfilePage />} />
-            <Route path={`/user/${userInfo.username}/games`} element={<GamesPage />} />
+            <Route path='/user/profile' element={<ProfilePage />} />
+            <Route path='/user/games' element={<GamesPage />} />
           </Route>
         ) : (
           <>
