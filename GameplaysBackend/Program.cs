@@ -3,6 +3,7 @@ using GameplaysBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +13,6 @@ if (builder.Environment.IsDevelopment())
     DotNetEnv.Env.Load(); // read from .env
 }
 
-// Retrieve PFX cert pwd from app settings
-var pfxPassword = Environment.GetEnvironmentVariable("GAMEPLAYS_PFXPASSWORD");
-
 // Define ports
 var httpPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTP_PORT")!);
 var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
@@ -23,10 +21,16 @@ var originPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_ORIGIN_
 // Configure Kestrel to Use HTTPS
 builder.WebHost.ConfigureKestrel(options =>
 {
+    var certPath = "/etc/ssl/certs/gameplays.valhalla.loc+1.pem";
+    var keyPath = "/etc/ssl/certs/gameplays.valhalla.loc+1-key.pem";
+
+    var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+    certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
+    
     options.ListenAnyIP(httpPort);
     options.ListenAnyIP(httpsPort, listenOptions =>
     {
-        listenOptions.UseHttps(Path.Combine("certs","cert.pfx"), pfxPassword);
+        listenOptions.UseHttps(certificate);
     });
 });
 
@@ -34,7 +38,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOriginWithCredentials", builder =>
     {
-        builder.WithOrigins("http://localhost", $"http://localhost:{originPort}")
+        builder.WithOrigins($"http://localhost:{originPort}", "https://gameplays.valhalla.loc")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
