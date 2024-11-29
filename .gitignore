@@ -426,6 +426,5 @@ dist-ssr
 
 # Manually added
 appsettings.json
-certs/
 *.tsbuildinfo
 *.env
