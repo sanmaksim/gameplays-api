@@ -278,7 +278,7 @@ namespace GameplaysBackend.Controllers
 
                 if (existingUser == null)
                 {
-                    return NotFound();
+                    return NotFound(new { message = "User not found." });
                 }
                 
                 _context.Users.Remove(existingUser);
@@ -287,7 +287,7 @@ namespace GameplaysBackend.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok(new { message = "User deleted." });
             }
             else
             {

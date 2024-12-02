@@ -1,11 +1,12 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { RootState } from '../store';
-import { setCredentials } from '../slices/authSlice';
+import { clearCredentials, setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { UserType } from '../types/DataType';
-import { useUpdateUserMutation } from '../slices/usersApiSlice';
+import { useDeleteUserMutation, useUpdateUserMutation } from '../slices/usersApiSlice';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
@@ -19,9 +20,11 @@ function ProfilePage() {
     const [unTouched, setUnTouched] = useState(false);
     const [mailTouched, setMailTouched] = useState(false);
 
+    const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const [updateUser, { isLoading }] = useUpdateUserMutation();
+    const [deleteUser] = useDeleteUserMutation();
 
     const { userInfo } = useSelector((state: RootState) => state.auth);
 
@@ -62,6 +65,17 @@ function ProfilePage() {
             } catch (error: any) {
                 toast.error(error.data.message || "An error occurred.");
             }
+        }
+    };
+
+    const deleteUserHandler = async () => {
+        try {
+            const response = await deleteUser('').unwrap();
+            dispatch(clearCredentials());
+            navigate('/');
+            toast.success(response.message);
+        } catch (error: any) {
+            toast.error(error.data.message || "An error occurred.");
         }
     };
 
@@ -112,11 +126,31 @@ function ProfilePage() {
                                 onChange={ (evt) => setConfirmPwd(evt.target.value) } />
                         </Form.Group>
 
-                        { isLoading && <Loader /> }
+                        {/* { isLoading && <Loader /> } */}
 
-                        <Button variant="primary" type="submit">
-                            Save
-                        </Button>
+                        <Container className="m-0 p-0 row-cols-2">
+                            <div className="d-inline-flex justify-content-start">
+                                <Button 
+                                    variant="primary" 
+                                    type="submit"
+                                    disabled={isLoading}
+                                    style={{ height: '38px', width: '75px' }}
+                                >
+                                    { isLoading ? <Loader /> : 'Save' }
+                                </Button>
+                            </div>
+
+                            <div className="d-inline-flex justify-content-end">
+                                <Button 
+                                    variant="outline-danger" 
+                                    type="button"
+                                    style={{ height: '38px', width: '75px' }}
+                                    onClick={deleteUserHandler}
+                                >
+                                    Delete
+                                </Button>
+                                </div>
+                        </Container>
 
                     </Form>
 
