@@ -10,6 +10,7 @@ import { useDeleteUserMutation, useUpdateUserMutation } from '../slices/usersApi
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
+import Modal from 'react-bootstrap/Modal';
 import Loader from '../components/Loader';
 
 function ProfilePage() {
@@ -19,6 +20,7 @@ function ProfilePage() {
     const [confirmPwd, setConfirmPwd] = useState('');
     const [unTouched, setUnTouched] = useState(false);
     const [mailTouched, setMailTouched] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -42,6 +44,9 @@ function ProfilePage() {
         setMail(evt.target.value);
         setMailTouched(true);
     };
+
+    const handleCloseModal = () => setShowModal(false);
+    const handleShowModal = () => setShowModal(true);
 
     const formData: UserType = {
         userId: userInfo.userId,
@@ -145,7 +150,7 @@ function ProfilePage() {
                                     variant="outline-danger" 
                                     type="button"
                                     style={{ height: '38px', width: '75px' }}
-                                    onClick={deleteUserHandler}
+                                    onClick={handleShowModal}
                                 >
                                     Delete
                                 </Button>
@@ -156,6 +161,21 @@ function ProfilePage() {
 
                 </Card.Body>
             </Card>
+
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Delete Account</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to delete your user account?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={handleCloseModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="outline-danger" onClick={deleteUserHandler}>
+                        OK
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 }
