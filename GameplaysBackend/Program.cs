@@ -1,3 +1,4 @@
+using GameplaysBackend.Controllers;
 using GameplaysBackend.Data;
 using GameplaysBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,6 +68,9 @@ else
 builder.Services.AddTransient<JwtTokenService>();
 builder.Services.AddTransient<CookieService>();
 builder.Services.AddTransient<AuthService>();
+
+// Add HttpClient Service since we will be communicating directly with the Giant Bomb API
+builder.Services.AddHttpClient<GamesController>();
 
 // Retrieve the HmacSecretKey from app settings for JWT signing key comparison below
 var hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");

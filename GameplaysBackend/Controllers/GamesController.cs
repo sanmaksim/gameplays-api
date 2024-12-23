@@ -9,98 +9,38 @@ namespace GameplaysBackend.Controllers
     [Route("api/[controller]")]
     public class GamesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public GamesController(ApplicationDbContext context)
+        public GamesController(HttpClient httpClient)
         {
-            _context = context;
+            _httpClient = httpClient;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateGame(Game game)
+        [HttpGet("{query}")]
+        public async Task<IActionResult> GetGame(string query)
         {
-            _context.Games.Add(game);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetGame), new { id = game.GameId }, game);
-        }
+            string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
+            string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
+            string? appVersion = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_VERSION");
+            string? authorEmail = Environment.GetEnvironmentVariable("GIANT_BOMB_USER_AGENT_EMAIL");
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllGames()
-        {
-            var games = await _context.Games.ToListAsync();
-            return Ok(games);
-        }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetGame(int id)
-        {
-            var game = await _context.Games.FindAsync(id);
+            var url = $"http://www.giantbomb.com/api/search/?api_key={apiKey}&query={query}&format=json&resources=game";
 
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(game);
-        }
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateGame(int id, Game game)
-        {
-            var existingGame = await _context.Games.FindAsync(id);
-            if (existingGame == null)
-            {
-                return NotFound();
-            }
-
-            // Update only provided properties
-            if (!string.IsNullOrEmpty(game.Title))
-                existingGame.Title = game.Title;
+            // Create a new HttpRequestMessage
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
             
-            if (!string.IsNullOrEmpty(game.Genre))
-                existingGame.Genre = game.Genre;
-            
-            if (game.ReleaseDate != default(DateOnly))
-                existingGame.ReleaseDate = game.ReleaseDate;
+            // The Giant Bomb API requires a custom User-Agent
+            var userAgent = $"{appName}/{appVersion} ({authorEmail})";
+            request.Headers.Add("User-Agent", userAgent);
 
-            if (!string.IsNullOrEmpty(game.Developer))
-                existingGame.Developer = game.Developer;
-
-            existingGame.UpdateTimestamp();
-
-            try
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Games.Any(e => e.GameId == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                StatusCode((int)response.StatusCode);
             }
 
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(int id)
-        {
-            var existingGame = await _context.Games.FindAsync(id);
-            if (existingGame == null)
-            {
-                return NotFound();
-            }
-
-            _context.Games.Remove(existingGame);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var content = await response.Content.ReadAsStringAsync();
+            return Ok(content);
         }
     }
 }

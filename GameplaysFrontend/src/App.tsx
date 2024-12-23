@@ -17,6 +17,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import PrivateRoute from './components/PrivateRoute';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
+import SearchPage from './pages/SearchPage';
 import TosPage from './pages/TosPage';
 
 function App() {
@@ -43,12 +44,14 @@ function App() {
           </>
         )}
         
-
         {/* Info Routes */}
         <Route path='/about' element={<AboutPage />} />
         <Route path='/help' element={<HelpPage />} />
         <Route path='/privacy' element={<PrivacyPage />} />
         <Route path='/tos' element={<TosPage />} />
+
+        {/* Search Route */}
+        <Route path='/search' element={<SearchPage />} />
 
         <Route path='*' element={<NotFoundPage />} />
       </Route>

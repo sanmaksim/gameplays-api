@@ -5,13 +5,31 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageContext } from '../contexts/PageContext';
 import { RootState } from '../store';
-import { useContext } from 'react';
 import { toast } from 'react-toastify';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import React, { useContext, useState } from 'react';
+
+interface SearchResults {
+	results: [
+        {
+            deck: string,
+            id: number,
+            image: {
+                icon_url: string
+            },
+            name: string,
+            original_release_date: string,
+            platforms: {
+                id: number,
+                name: string
+            }
+        }
+    ]
+}
 
 function NavBar() {
     const { isLoginPageContext } = useContext(PageContext);
@@ -23,8 +41,7 @@ function NavBar() {
 
     const { userInfo } = useSelector((state: RootState) => state.auth);
 
-    // let isActive = false;
-    // const handleSelect = () => isActive ? isActive = false : isActive = true;
+    
 
     const logoutHandler = async () => {
         try {
@@ -35,7 +52,29 @@ function NavBar() {
         } catch (error: any) {
             toast.error(error.data.message);
         }
-    }
+    };
+
+    const [query, setQuery] = useState('');
+
+    const handleKeyDown = (evt: React.KeyboardEvent) => {
+        if (evt.key === 'Enter') {
+            evt.preventDefault();
+            fetchGameData();
+        }
+    };
+
+    const fetchGameData = async () => {
+        try {
+            const response = await fetch(`https://localhost:5001/api/games/${query}`);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            const data: SearchResults = await response.json();
+            navigate('/search', { state: { data: data } });
+        } catch (err: any) {
+            navigate('/search', { state: { data: err } });
+        }
+    };
 
     return (
         <Navbar expand="lg" bg="dark" data-bs-theme="dark">
@@ -57,9 +96,12 @@ function NavBar() {
                     </NavDropdown>
                     <Form style={{ width: '100%' }}>
                         <Form.Control
-                            type="search"
-                            placeholder="Search Games"
-                            aria-label="Search"
+                            type="text" 
+                            value={query} 
+                            onChange={(evt) => {setQuery(evt.target.value)}} 
+                            onKeyDown={handleKeyDown}
+                            placeholder="Search Games" 
+                            aria-label="Search" 
                         />
                     </Form>
                 </Nav>
