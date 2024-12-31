@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import { PageContextType } from "../types/ContextType";
 
-const initialPageContext: PageContextType = {
-    isLoginPageContext: false
+const pageContext = {
+    isLoginPageContext: false,
+    isRegisterPageContext: false
 }
 
-export const PageContext = createContext<PageContextType>(initialPageContext);
+export const PageContext = createContext(pageContext);
