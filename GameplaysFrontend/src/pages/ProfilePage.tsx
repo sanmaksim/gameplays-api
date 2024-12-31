@@ -139,9 +139,8 @@ function ProfilePage() {
                                     variant="primary" 
                                     type="submit"
                                     disabled={isLoading}
-                                    style={{ height: '38px', width: '75px' }}
-                                >
-                                    { isLoading ? <Loader /> : 'Save' }
+                                    style={{ height: '38px', width: '75px' }}>
+                                        { isLoading ? <Loader /> : 'Save' }
                                 </Button>
                             </div>
 
@@ -150,9 +149,8 @@ function ProfilePage() {
                                     variant="outline-danger" 
                                     type="button"
                                     style={{ height: '38px', width: '75px' }}
-                                    onClick={handleShowModal}
-                                >
-                                    Delete
+                                    onClick={handleShowModal}>
+                                        Delete
                                 </Button>
                                 </div>
                         </Container>

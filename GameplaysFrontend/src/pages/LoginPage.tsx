@@ -100,10 +100,11 @@ function LoginPage() {
                             <Form.Control.Feedback type="invalid">Please enter your password.</Form.Control.Feedback>
                         </Form.Group>
 
-                        { isLoading && <Loader /> }
-
-                        <Button variant="secondary" type="submit">
-                            Sign in
+                        <Button 
+                            variant="secondary"
+                            type="submit"
+                            style={{ height: '38px', width: '75px' }}>
+                                { isLoading ? <Loader /> : 'Sign in' }
                         </Button>
 
                     </Form>
