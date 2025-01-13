@@ -17,6 +17,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import PrivateRoute from './components/PrivateRoute';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
+import ResultPage from './pages/ResultPage';
 import SearchPage from './pages/SearchPage';
 import TosPage from './pages/TosPage';
 
@@ -52,6 +53,7 @@ function App() {
 
         {/* Search Route */}
         <Route path='/search' element={<SearchPage />} />
+        <Route path='/result' element={<ResultPage />} />
 
         <Route path='*' element={<NotFoundPage />} />
       </Route>

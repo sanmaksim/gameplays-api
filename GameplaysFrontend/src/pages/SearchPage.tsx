@@ -17,12 +17,13 @@ interface SearchResult {
 
 function SearchPage() {
     const location = useLocation();
+    // console.log(location.state);
 
     return (
         <Container className="mt-4">
-            {location.state.data.results.length > 0 ? (
+            {location.state.results.length > 0 ? (
                 <ListGroup>
-                    { location.state.data.results.map((result: SearchResult) => (
+                    { location.state.results.map((result: SearchResult) => (
                         <ListGroup.Item key={result.id} className="d-flex">
                             <img src={result.image.icon_url} alt={result.name} className="me-2" />
                             <div>
@@ -42,4 +43,4 @@ function SearchPage() {
     )
 }
 
-export default SearchPage
+export default SearchPage;

@@ -16,8 +16,8 @@ namespace GameplaysBackend.Controllers
             _httpClient = httpClient;
         }
 
-        [HttpGet("{query}")]
-        public async Task<IActionResult> GetGame(string query)
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query)
         {
             string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
             string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");

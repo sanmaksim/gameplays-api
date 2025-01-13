@@ -1,18 +1,20 @@
 import { clearCredentials } from '../slices/authSlice';
-import { Container, Dropdown, Form, NavbarCollapse } from 'react-bootstrap';
+import { Container, Dropdown, NavbarCollapse } from 'react-bootstrap';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
+import { OptionProps } from 'react-select';
 import { PageContext } from '../contexts/PageContext';
 import { RootState } from '../store';
 import { toast } from 'react-toastify';
+import { useContext, useEffect, useState } from 'react';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { useSelector, useDispatch } from 'react-redux';
+import AsyncSelect from 'react-select/async';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import ProfileIcon from './../assets/profile_icon.jpg';
-import React, { useContext, useEffect, useState } from 'react';
 
 interface SearchResults {
 	results: [
@@ -27,10 +29,19 @@ interface SearchResults {
             platforms: {
                 id: number,
                 name: string
-            }
+            },
+            site_detail_url: string
         }
     ]
 }
+
+interface Option {
+    value: string,
+    label: string,
+    url: string
+}
+
+type Options = Option[];
 
 function NavBar() {
     // use page context for displaying login/logout buttons
@@ -83,28 +94,75 @@ function NavBar() {
     };
 
     // to capture search query
-    const [query, setQuery] = useState('');
+    const [inputValue, setInputValue] = useState('');
+    let [searchResults, setSearchResults] = useState<SearchResults>();
 
     // run search when Enter is pressed
-    const handleKeyDown = (evt: React.KeyboardEvent) => {
+    const handleKeyDown = (evt: React.KeyboardEvent): void => {
         if (evt.key === 'Enter') {
             evt.preventDefault();
-            fetchGameData();
+            navigate(`/search?q=${inputValue}`, { state: searchResults });
         }
     };
 
-    // proxy search query via local API
-    const fetchGameData = async () => {
+    // must proxy search query via local API since GiantBomb blocks client based API calls
+    const fetchGameData = async (inputValue: string): Promise<Options> => {
         try {
-            const response = await fetch(`https://localhost:5001/api/games/${query}`);
+            const response = await fetch(`https://localhost:5001/api/games/search?q=${inputValue}`);
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
+
             const data: SearchResults = await response.json();
-            navigate('/search', { state: { data: data } });
+            setSearchResults(data);
+
+            let searchOptions: Options = [];
+            data.results.forEach((result) => {
+                searchOptions.push({ 
+                    value: result.name, 
+                    label: result.name,
+                    // url: result.site_detail_url
+                    url: '/result'
+                });
+            });
+
+            if (searchOptions) {
+                searchOptions.push({
+                    value: 'value',
+                    label: 'Show more results',
+                    url: `/search?q=${inputValue}`
+                });
+            }
+
+            return searchOptions;
         } catch (err: any) {
-            navigate('/search', { state: { data: err } });
+            return [];
         }
+    };
+
+    const search = () => {
+        navigate(`/search?q=${inputValue}`, { state: searchResults });
+    };
+
+    // add menu option styling
+    const CustomOption = (props: OptionProps<Option>) => {
+        const { data, innerRef, innerProps } = props;
+
+        return (
+            <div ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
+                {/* <a 
+                    href={data.url} 
+                    style={{ 
+                        textDecoration: 'none', 
+                        color: 'inherit'
+                    }}
+                >
+                    {data.label}
+                </a> */}
+                <Link onClick={search} to='#'>{data.label}</Link>
+            </div>
+        );
     };
 
     return (
@@ -119,16 +177,23 @@ function NavBar() {
                 </Navbar.Brand>
                 
                 {!isLoginPageContext && !isRegisterPageContext ? (
-                    <Form className="w-50">
-                        <Form.Control
-                            type="text" 
-                            value={query} 
-                            onChange={(evt) => {setQuery(evt.target.value)}} 
-                            onKeyDown={handleKeyDown}
-                            placeholder="Search Games" 
-                            aria-label="Search" 
-                        />
-                    </Form>
+                    <AsyncSelect 
+                        className="w-50" 
+                        components={{ 
+                            DropdownIndicator: null,
+                            Option: CustomOption
+                        }}
+                        inputValue={inputValue} 
+                        isSearchable={true} 
+                        loadOptions={fetchGameData} 
+                        loadingMessage={() => "Searching..."} 
+                        noOptionsMessage={() => "No results"} 
+                        onKeyDown={handleKeyDown} 
+                        onInputChange={(inputString) => {setInputValue(inputString)}}
+                        openMenuOnClick={false} 
+                        openMenuOnFocus={false} 
+                        placeholder="Search Games" 
+                    />
                 ) : null }
 
                 {userInfo ? (
