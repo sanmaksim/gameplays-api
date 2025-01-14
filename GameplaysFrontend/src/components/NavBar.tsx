@@ -14,34 +14,10 @@ import AsyncSelect from 'react-select/async';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import Option from '../types/OptionType';
+import Options from '../types/OptionsType';
 import ProfileIcon from './../assets/profile_icon.jpg';
-
-interface SearchResults {
-	results: [
-        {
-            deck: string,
-            id: number,
-            image: {
-                icon_url: string
-            },
-            name: string,
-            original_release_date: string,
-            platforms: {
-                id: number,
-                name: string
-            },
-            site_detail_url: string
-        }
-    ]
-}
-
-interface Option {
-    value: string,
-    label: string,
-    url: string
-}
-
-type Options = Option[];
+import SearchResults from '../types/SearchResultsType';
 
 function NavBar() {
     // use page context for displaying login/logout buttons
@@ -120,16 +96,13 @@ function NavBar() {
             let searchOptions: Options = [];
             data.results.forEach((result) => {
                 searchOptions.push({ 
-                    value: result.name, 
                     label: result.name,
-                    // url: result.site_detail_url
                     url: '/result'
                 });
             });
 
             if (searchOptions) {
                 searchOptions.push({
-                    value: 'value',
                     label: 'Show more results',
                     url: `/search?q=${inputValue}`
                 });
@@ -141,26 +114,13 @@ function NavBar() {
         }
     };
 
-    const search = () => {
-        navigate(`/search?q=${inputValue}`, { state: searchResults });
-    };
-
-    // add menu option styling
+    // custom select menu option styling
     const CustomOption = (props: OptionProps<Option>) => {
         const { data, innerRef, innerProps } = props;
 
         return (
             <div ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
-                {/* <a 
-                    href={data.url} 
-                    style={{ 
-                        textDecoration: 'none', 
-                        color: 'inherit'
-                    }}
-                >
-                    {data.label}
-                </a> */}
-                <Link onClick={search} to='#'>{data.label}</Link>
+                <Link to={data.url}>{data.label}</Link>
             </div>
         );
     };
@@ -176,6 +136,7 @@ function NavBar() {
                     </Link>
                 </Navbar.Brand>
                 
+                {/* do not show the search bar on login and register pages */}
                 {!isLoginPageContext && !isRegisterPageContext ? (
                     <AsyncSelect 
                         className="w-50" 

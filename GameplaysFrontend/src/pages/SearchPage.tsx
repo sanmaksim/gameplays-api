@@ -1,23 +1,9 @@
 import { Container, ListGroup } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-
-interface SearchResult {
-    deck: string,
-    id: number,
-    image: {
-        icon_url: string
-    },
-    name: string,
-    original_release_date: string,
-    platforms: {
-        id: number,
-        name: string
-    }
-}
+import SearchResult from "../types/SearchResultType";
 
 function SearchPage() {
     const location = useLocation();
-    // console.log(location.state);
 
     return (
         <Container className="mt-4">
