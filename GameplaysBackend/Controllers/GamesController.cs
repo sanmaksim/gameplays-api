@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GameplaysBackend.Models;
-using GameplaysBackend.Data;
 
 namespace GameplaysBackend.Controllers
 {
