@@ -6,17 +6,17 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRegisterMutation } from '../slices/usersApiSlice';
-import { UserType } from '../types/DataType';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import Loader from '../components/Loader';
+import UserType from '../types/UserType';
 
 function RegisterPage() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [register, { isLoading }] = useRegisterMutation();
+    const [register, {isLoading}] = useRegisterMutation();
 
     const { userInfo } = useSelector((state: RootState) => state.auth);
 
@@ -84,16 +84,16 @@ function RegisterPage() {
 
                     <Card.Title className="lg mb-3">Sign up with Gameplays</Card.Title>
 
-                    <Form onSubmit={ submitForm }>
+                    <Form onSubmit={submitForm}>
 
                         <Form.Group className="mb-3" controlId="formBasicUsername">
                             <Form.Label>Username</Form.Label>
                             <Form.Control
                                 type="username"
-                                value={ un }
-                                onChange={ handleUnInputChange }
+                                value={un}
+                                onChange={handleUnInputChange}
                                 required
-                                isInvalid={ !un && unTouched } />
+                                isInvalid={!un && unTouched} />
                             <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -101,10 +101,10 @@ function RegisterPage() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
-                                value={ mail }
-                                onChange={ handleMailInputChange }
+                                value={mail}
+                                onChange={handleMailInputChange}
                                 required
-                                isInvalid={ !mail && mailTouched } />
+                                isInvalid={!mail && mailTouched} />
                             <Form.Control.Feedback type="invalid">Please enter a valid email address.</Form.Control.Feedback>
                             <Form.Text className="text-muted">
                                 We'll never share your email with anyone else.
@@ -115,10 +115,10 @@ function RegisterPage() {
                             <Form.Label>Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                value={ pwd }
-                                onChange={ handlePwdInputChange }
+                                value={pwd}
+                                onChange={handlePwdInputChange}
                                 required
-                                isInvalid={ !pwd && pwdTouched } />
+                                isInvalid={!pwd && pwdTouched} />
                             <Form.Control.Feedback type="invalid">Please enter a valid password.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -126,14 +126,14 @@ function RegisterPage() {
                             <Form.Label>Confirm Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                value={ confirmPwd }
-                                onChange={ handleConfirmPwdInputChange }
+                                value={confirmPwd}
+                                onChange={handleConfirmPwdInputChange}
                                 required
-                                isInvalid={ !confirmPwd && confirmPwdTouched } />
+                                isInvalid={!confirmPwd && confirmPwdTouched} />
                             <Form.Control.Feedback type="invalid">Please confirm your password.</Form.Control.Feedback>
                         </Form.Group>
 
-                        { isLoading && <Loader /> }
+                        {isLoading && <Loader />}
 
                         <Button variant="primary" type="submit">
                             Register

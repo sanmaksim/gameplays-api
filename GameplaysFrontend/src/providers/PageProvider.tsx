@@ -1,9 +1,12 @@
-import { ChildrenNodeType } from "../types/DataType";
 import { PageContext } from "../contexts/PageContext";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-function PageProvider({ children }: ChildrenNodeType) {
+type Props = {
+    children: ReactNode
+}
+
+function PageProvider({children}: Props) {
     const [ isLoginPage, setIsLoginPage ] = useState(false);
     const [ isRegisterPage, setIsRegisterPage ] = useState(false);
 
@@ -28,8 +31,8 @@ function PageProvider({ children }: ChildrenNodeType) {
     }
 
     return (
-        <PageContext.Provider value={ pageContext }>
-            { children }
+        <PageContext.Provider value={pageContext}>
+            {children}
         </PageContext.Provider>
     );
 }

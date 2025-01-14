@@ -1,17 +1,17 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { clearCredentials, setCredentials } from '../slices/authSlice';
 import { Container } from 'react-bootstrap';
 import { RootState } from '../store';
-import { clearCredentials, setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { UserType } from '../types/DataType';
 import { useDeleteUserMutation, useUpdateUserMutation } from '../slices/usersApiSlice';
 import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../components/Loader';
+import UserType from '../types/UserType';
 
 function ProfilePage() {
     const [un, setUn] = useState('');
@@ -25,10 +25,10 @@ function ProfilePage() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [updateUser, { isLoading }] = useUpdateUserMutation();
+    const [updateUser, {isLoading}] = useUpdateUserMutation();
     const [deleteUser] = useDeleteUserMutation();
 
-    const { userInfo } = useSelector((state: RootState) => state.auth);
+    const {userInfo} = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
         setUn(userInfo.username);
@@ -91,16 +91,16 @@ function ProfilePage() {
 
                     <Card.Title className="lg mb-3">Edit your profile</Card.Title>
 
-                    <Form onSubmit={ submitForm }>
+                    <Form onSubmit={submitForm}>
 
                         <Form.Group className="mb-3" controlId="formBasicUsername">
                             <Form.Label>Username</Form.Label>
                             <Form.Control
                                 type="username"
-                                value={ un }
-                                onChange={ handleUnInputChange }
+                                value={un}
+                                onChange={handleUnInputChange}
                                 required
-                                isInvalid={ !un && unTouched } />
+                                isInvalid={!un && unTouched} />
                             <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -108,10 +108,10 @@ function ProfilePage() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
-                                value={ mail }
-                                onChange={ handleMailInputChange }
+                                value={mail}
+                                onChange={handleMailInputChange}
                                 required
-                                isInvalid={ !mail && mailTouched } />
+                                isInvalid={!mail && mailTouched} />
                             <Form.Control.Feedback type="invalid">Please enter a valid email address.</Form.Control.Feedback>
                         </Form.Group>
 
@@ -119,16 +119,16 @@ function ProfilePage() {
                             <Form.Label>Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                value={ pwd }
-                                onChange={ (evt) => setPwd(evt.target.value) } />
+                                value={pwd}
+                                onChange={(evt) => setPwd(evt.target.value)} />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
                             <Form.Label>Confirm Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                value={ confirmPwd }
-                                onChange={ (evt) => setConfirmPwd(evt.target.value) } />
+                                value={confirmPwd}
+                                onChange={(evt) => setConfirmPwd(evt.target.value)} />
                         </Form.Group>
 
                         {/* { isLoading && <Loader /> } */}
@@ -140,7 +140,7 @@ function ProfilePage() {
                                     type="submit"
                                     disabled={isLoading}
                                     style={{ height: '38px', width: '75px' }}>
-                                        { isLoading ? <Loader /> : 'Save' }
+                                        {isLoading ? <Loader /> : 'Save'}
                                 </Button>
                             </div>
 
