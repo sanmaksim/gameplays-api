@@ -1,6 +1,6 @@
+import { KeyboardEvent, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { OptionProps } from 'react-select';
-import { useState } from 'react';
+import { OptionProps, SelectInstance } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import Option from '../types/OptionType';
 import Options from '../types/OptionsType';
@@ -85,10 +85,16 @@ function SearchBar() {
         }
     };
 
+    // initialize ref object with the 'current' property set to null
+    const selectRef = useRef<SelectInstance<Option, boolean> | null>(null);
+
     // nav to search results page on Enter keydown
-    const handleKeyDown = (evt: React.KeyboardEvent): void => {
+    const handleKeyDown = (evt: KeyboardEvent): void => {
         if (evt.key === 'Enter') {
             evt.preventDefault();
+            if (selectRef.current) {
+                selectRef.current.blur(); // close the options menu
+            }
             if (inputValue.trim()) {
                 navigate(`/search?q=${encodeURIComponent(inputValue)}`);
             }
@@ -122,6 +128,7 @@ function SearchBar() {
             openMenuOnClick={false} 
             openMenuOnFocus={false} 
             placeholder="Search Games" 
+            ref={selectRef} // react auto sets the 'current' property of the ref to the instance of the AsyncSelect object after the component is mounted
         />
     )
 }
