@@ -81,7 +81,6 @@ function SearchBar() {
             return options;
 
         } catch (error) {
-            console.log(error);
             return options;
         }
     };
@@ -90,8 +89,9 @@ function SearchBar() {
     const handleKeyDown = (evt: React.KeyboardEvent): void => {
         if (evt.key === 'Enter') {
             evt.preventDefault();
-            // need to handle this query on results page
-            navigate(`/search?q=${inputValue}`, { state: searchResults });
+            if (inputValue.trim()) {
+                navigate(`/search?q=${encodeURIComponent(inputValue)}`);
+            }
         }
     };
 
