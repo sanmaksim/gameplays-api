@@ -1,6 +1,6 @@
-import { KeyboardEvent, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { OptionProps, SelectInstance } from 'react-select';
+import { ActionMeta, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import Option from '../types/OptionType';
 import Options from '../types/OptionsType';
@@ -8,8 +8,8 @@ import SearchResults from '../types/SearchResultsType';
 
 function SearchBar() {
     const navigate = useNavigate();
-    
-    let initSearchResults: SearchResults = { 
+
+    let initSearchResults: SearchResults = {
         results: [
             {
                 deck: '',
@@ -28,16 +28,30 @@ function SearchBar() {
     }
 
     // update search results
-    let [searchResults, setSearchResults] = useState(initSearchResults);
+    let [searchResults, setSearchResults] = useState<SearchResults>(initSearchResults);
 
     // update user input
-    const [inputValue, setInputValue] = useState('');
+    const [inputValue, setInputValue] = useState<string>('');
+    const [selectedOption, setSelectedOption] = useState<SingleValue<Option> | null>(null);
+
+    const handleChange = (option: SingleValue<Option> | MultiValue<Option>, actionMeta: ActionMeta<Option>) => {
+        setSelectedOption(null);
+        setInputValue('');
+        if (option && 'url' in option) {
+            navigate(option.url);
+        }
+    };
+
+    useEffect(() => {
+        // Reset the selected option on route changes
+        setSelectedOption(null);
+    }, [location]);
 
     // get search results
     const fetchGameData = async (inputString: string): Promise<SearchResults> => {
         try {
             // proxy search query via server API (GiantBomb blocks client API calls)
-            const response = await fetch(`https://localhost:5001/api/games/search?q=${inputString}`);
+            const response = await fetch(`https://localhost:5001/api/games/search?q=${encodeURIComponent(inputString)}`);
 
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
@@ -63,9 +77,9 @@ function SearchBar() {
 
             if (searchResults) {
                 searchResults.results.forEach((result) => {
-                    options.push({ 
+                    options.push({
                         label: result.name,
-                        url: '/result'
+                        url: `/result/${result.id}`
                     });
                 });
 
@@ -73,7 +87,7 @@ function SearchBar() {
                 if (options) {
                     options.push({
                         label: 'Show more results',
-                        url: `/search?q=${inputString}`
+                        url: `/search?q=${encodeURIComponent(inputString)}`
                     });
                 }
             }
@@ -112,23 +126,25 @@ function SearchBar() {
     };
 
     return (
-        <AsyncSelect 
-            className="w-50" 
-            components={{ 
+        <AsyncSelect
+            className="w-50"
+            components={{
                 DropdownIndicator: null,
                 Option: CustomOption
             }}
-            inputValue={inputValue} 
-            isSearchable={true} 
-            loadOptions={loadOption} 
-            loadingMessage={() => "Searching..."} 
-            noOptionsMessage={() => "No results"} 
-            onKeyDown={handleKeyDown} 
-            onInputChange={(inputString) => {setInputValue(inputString)}}
-            openMenuOnClick={false} 
-            openMenuOnFocus={false} 
-            placeholder="Search Games" 
+            inputValue={inputValue}
+            isSearchable={true}
+            loadOptions={loadOption}
+            loadingMessage={() => "Searching..."}
+            noOptionsMessage={() => "No results"}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onInputChange={(inputString) => { setInputValue(inputString) }}
+            openMenuOnClick={false}
+            openMenuOnFocus={false}
+            placeholder="Search Games"
             ref={selectRef} // react auto sets the 'current' property of the ref to the instance of the AsyncSelect object after the component is mounted
+            value={selectedOption}
         />
     )
 }
