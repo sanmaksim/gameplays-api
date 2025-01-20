@@ -7,6 +7,7 @@ import {
 import { RootState } from './store';
 import { useSelector } from 'react-redux';
 import AboutPage from './pages/AboutPage';
+import GamePage from './pages/GamePage';
 import GamesPage from './pages/GamesPage';
 import HelpPage from './pages/HelpPage';
 import HomePage from './pages/HomePage';
@@ -17,7 +18,6 @@ import PrivacyPage from './pages/PrivacyPage';
 import PrivateRoute from './components/PrivateRoute';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
-import ResultPage from './pages/ResultPage';
 import SearchPage from './pages/SearchPage';
 import TosPage from './pages/TosPage';
 
@@ -52,8 +52,8 @@ function App() {
         <Route path='/tos' element={<TosPage />} />
 
         {/* Search Route */}
+        <Route path='/game' element={<GamePage />} />
         <Route path='/search' element={<SearchPage />} />
-        <Route path='/result' element={<ResultPage />} />
 
         <Route path='*' element={<NotFoundPage />} />
       </Route>
