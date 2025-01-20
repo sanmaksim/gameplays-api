@@ -428,3 +428,4 @@ dist-ssr
 appsettings.json
 *.tsbuildinfo
 *.env
+*.tsconfig.app.tsbuildinfo
