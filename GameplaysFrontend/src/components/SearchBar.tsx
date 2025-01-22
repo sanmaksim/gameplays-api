@@ -1,6 +1,7 @@
+import { ActionMeta, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ActionMeta, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
+import { toast } from 'react-toastify';
 import AsyncSelect from 'react-select/async';
 import debounce from 'lodash.debounce';
 import Option from '../types/OptionType';
@@ -83,7 +84,6 @@ function SearchBar() {
         try {
             // proxy search query via server API (GiantBomb blocks client API calls)
             const response = await fetch(`https://localhost:5001/api/games/search?q=${encodeURIComponent(inputString)}`);
-
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
@@ -93,7 +93,8 @@ function SearchBar() {
 
             return data;
         } catch (error) {
-            console.error("Error fetching game data:", error);
+            console.error('Error fetching game data:', error);
+            toast.error('Failed to fetch game data.');
             return searchResults;
         }
     };
@@ -108,6 +109,9 @@ function SearchBar() {
                 }
         
                 const searchResults = await fetchGameData(inputString);
+                if (!searchResults) {
+                    throw new Error('Error returning game data.');
+                }
 
                 // map search results to options
                 const searchOptions = searchResults.results.map((result) => ({
@@ -123,7 +127,8 @@ function SearchBar() {
 
                 callback(searchOptions);
             } catch (error) {
-                console.error("Error creating results:", error);
+                console.error('Error displaying results:', error);
+                toast.error('Failed to display results.');
                 callback([]);
             }
         }, 300)
