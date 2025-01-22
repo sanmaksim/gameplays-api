@@ -28,28 +28,55 @@ function SearchBar() {
         ]
     }
 
-    // update user input
+    // track user input
     const [inputValue, setInputValue] = useState<string>('');
 
-    // update selected react-select option
-    const [selectedOption, setSelectedOption] = useState<SingleValue<Option> | null>(null);
+    // track AsyncSelect option
+    const [option, setOption] = useState<SingleValue<Option> | null>(null);
 
-    // update search results
+    // track AsyncSelect options
+    const [options, setOptions] = useState<Options>([]);
+
+    // track search results
     let [searchResults, setSearchResults] = useState<SearchResults>(initSearchResults);
 
-    // handle react-select option click
-    const handleChange = (option: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>) => {
-        setSelectedOption(null);
+    // initialize ref object with the 'current' property set to null
+    // ref selection is required for AsyncSelect's blur() and clearValue() methods
+    const selectRef = useRef<SelectInstance<Option, boolean> | null>(null);
+
+    // run post-render effects
+    useEffect(() => {
+        // reset the selected option on route changes
+        setOption(null);
+    }, [location]);
+
+    // handle the current AsyncSelect option
+    const handleChange = (currentOption: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>): void => {
+        setOption(null);
         setInputValue('');
-        if (option && 'url' in option) {
-            navigate(option.url);
+        if (currentOption && 'url' in currentOption) {
+            navigate(currentOption.url);
         }
     };
 
-    useEffect(() => {
-        // Reset the selected option on route changes
-        setSelectedOption(null);
-    }, [location]);
+    // handle AsyncSelect keydown
+    const handleKeyDown = (evt: KeyboardEvent): void => {
+        if (evt.key === 'Enter') {
+            evt.preventDefault();
+            selectRef.current?.blur(); // close the options menu
+            if (inputValue.trim()) {
+                navigate(`/search?q=${encodeURIComponent(inputValue)}`);
+            }
+        }
+    };
+
+    // handle AsyncSelect input change
+    const handleInputChange = (inputString: string): void => {
+        setInputValue(inputString);
+        if (inputString.trim() === '') {
+            setOptions([]);
+        }
+    };
 
     // get search results
     const fetchGameData = async (inputString: string): Promise<SearchResults> => {
@@ -65,66 +92,52 @@ function SearchBar() {
             setSearchResults(data);
 
             return data;
-
         } catch (error) {
-            console.log(error);
+            console.error("Error fetching game data:", error);
             return searchResults;
         }
     };
 
-    // convert debounced game data into options
+    // convert debounced game data into AsyncSelect options
     const debouncedFetchGameData = useRef(
-        debounce(async (inputString: string, callback: (options: Options) => void) => {
+        debounce(async (inputString: string, callback: (options: Options) => void): Promise<void> => {
             try {
+                if (inputString.trim() === '') {
+                    callback([]); // clear options
+                    return; // prevent API call
+                }
+        
                 const searchResults = await fetchGameData(inputString);
 
-                const options = searchResults.results.map((result) => ({
+                // map search results to options
+                const searchOptions = searchResults.results.map((result) => ({
                     label: result.name,
-                    url: `/game/${result.id}`
+                    url: `/game/${result.id}`,
                 }));
 
-                // add a final option to end of list
-                if (options) {
-                    options.push({
-                        label: 'Show more results',
-                        url: `/search?q=${encodeURIComponent(inputString)}`
-                    });
-                }
+                // Add "Show more results" to the options
+                searchOptions.push({
+                    label: "Show more results",
+                    url: `/search?q=${encodeURIComponent(inputString)}`,
+                });
 
-                callback(options);
+                callback(searchOptions);
             } catch (error) {
-                console.error("Error fetching game data:", error);
+                console.error("Error creating results:", error);
                 callback([]);
             }
         }, 300)
     ).current;
 
-    // load options into react-select menu after debounce delay
+    // Load options into react-select menu after debounce delay
     const loadOption = async (inputString: string): Promise<Options> => {
-        return new Promise<Options>((resolve) => {
-            debouncedFetchGameData(inputString, resolve);
+        return new Promise<Options>((callback) => {
+            debouncedFetchGameData(inputString, callback);
         });
     };
 
-    // initialize ref object with the 'current' property set to null
-    // ref object is required to trigger AsyncSelect's blur method
-    const selectRef = useRef<SelectInstance<Option, boolean> | null>(null);
-
-    // nav to search results page on Enter keydown
-    const handleKeyDown = (evt: KeyboardEvent): void => {
-        if (evt.key === 'Enter') {
-            evt.preventDefault();
-            if (selectRef.current) {
-                selectRef.current.blur(); // close the options menu
-            }
-            if (inputValue.trim()) {
-                navigate(`/search?q=${encodeURIComponent(inputValue)}`);
-            }
-        }
-    };
-
     // custom select menu option styling
-    const CustomOption = (props: OptionProps<Option>) => {
+    const CustomOption = (props: OptionProps<Option>): JSX.Element => {
         const { data, innerRef, innerProps } = props;
         return (
             <div ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
@@ -148,13 +161,14 @@ function SearchBar() {
             loadingMessage={() => "Searching..."}
             noOptionsMessage={() => "No results"}
             onChange={handleChange}
+            onInputChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onInputChange={(inputString) => { setInputValue(inputString) }}
             openMenuOnClick={false}
             openMenuOnFocus={false}
+            options={options}
             placeholder="Search Games"
             ref={selectRef} // react automatically sets the 'current' property of the ref to the instance of the AsyncSelect object after the component is mounted
-            value={selectedOption}
+            value={option}
         />
     )
 }
