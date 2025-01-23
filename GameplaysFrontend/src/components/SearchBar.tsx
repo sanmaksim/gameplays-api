@@ -17,7 +17,8 @@ function SearchBar() {
                 deck: '',
                 id: 0,
                 image: {
-                    icon_url: ''
+                    icon_url: '',
+                    tiny_url: ''
                 },
                 name: '',
                 original_release_date: '',
@@ -115,14 +116,20 @@ function SearchBar() {
 
                 // map search results to options
                 const searchOptions = searchResults.results.map((result) => ({
+                    icon: result.image.tiny_url,
+                    isDivider: true,
                     label: result.name,
-                    url: `/game/${result.id}`,
+                    release_date: result.original_release_date,
+                    url: `/game/${result.id}`
                 }));
 
                 // Add "Show more results" to the options
                 searchOptions.push({
-                    label: "Show more results",
-                    url: `/search?q=${encodeURIComponent(inputString)}`,
+                    icon: '',
+                    isDivider: false,
+                    label: "Show more results...",
+                    release_date: '',
+                    url: `/search?q=${encodeURIComponent(inputString)}`
                 });
 
                 callback(searchOptions);
@@ -143,11 +150,31 @@ function SearchBar() {
 
     // custom select menu option styling
     const CustomOption = (props: OptionProps<Option>): JSX.Element => {
-        const { data, innerRef, innerProps } = props;
+        const { data, innerRef, innerProps }: OptionProps<Option> = props;
+        let formattedDate: string;
+        if (data.release_date) {
+            const dateString: string = data.release_date;
+            const date: Date = new Date(dateString);
+            formattedDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(date));
+        }
         return (
-            <div ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
-                <Link to={data.url}>{data.label}</Link>
-            </div>
+            <>
+                <div className="d-flex" ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
+                    {data.icon ? (
+                        <>
+                            <img src={data.icon} alt={data.label} className="me-2" />
+                            <div>
+                                <Link to={data.url}>{data.label}</Link> - {formattedDate!}
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <Link to={data.url}>{data.label}</Link>
+                        </div>
+                    )}
+                </div>
+                {data.isDivider && <hr style={{ margin: 0 }} />}
+            </>
         );
     };
 

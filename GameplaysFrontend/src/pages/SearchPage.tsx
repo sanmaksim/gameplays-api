@@ -12,7 +12,8 @@ function SearchPage() {
                 deck: '',
                 id: 0,
                 image: {
-                    icon_url: ''
+                    icon_url: '',
+                    tiny_url: ''
                 },
                 name: '',
                 original_release_date: '',
