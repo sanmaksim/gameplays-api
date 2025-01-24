@@ -7,6 +7,7 @@ import debounce from 'lodash.debounce';
 import Option from '../types/OptionType';
 import Options from '../types/OptionsType';
 import SearchResults from '../types/SearchResultsType';
+import { CSSObjectWithLabel } from 'react-select';
 
 function SearchBar() {
     const navigate = useNavigate();
@@ -108,7 +109,7 @@ function SearchBar() {
                     callback([]); // clear options
                     return; // prevent API call
                 }
-        
+
                 const searchResults = await fetchGameData(inputString);
                 if (!searchResults) {
                     throw new Error('Error returning game data.');
@@ -148,7 +149,7 @@ function SearchBar() {
         });
     };
 
-    // custom select menu option styling
+    // custom react-select menu option styling
     const CustomOption = (props: OptionProps<Option>): JSX.Element => {
         const { data, innerRef, innerProps }: OptionProps<Option> = props;
         let formattedDate: string;
@@ -178,6 +179,17 @@ function SearchBar() {
         );
     };
 
+    const customStyles = {
+        menu: (menuStyles: CSSObjectWithLabel) => ({
+            ...menuStyles,
+            maxHeight: 'none' // remove the height limit for the menu
+        }),
+        menuList: (menuListStyles: CSSObjectWithLabel) => ({
+            ...menuListStyles,
+            maxHeight: 'none' // ensure the inner list expands too
+        })
+    };
+
     return (
         <AsyncSelect
             className="w-50"
@@ -200,6 +212,7 @@ function SearchBar() {
             options={options}
             placeholder="Search Games"
             ref={selectRef} // react automatically sets the 'current' property of the ref to the instance of the AsyncSelect object after the component is mounted
+            styles={customStyles}
             value={option}
         />
     )
