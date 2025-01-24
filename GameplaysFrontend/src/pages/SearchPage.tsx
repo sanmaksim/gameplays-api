@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import SearchResult from "../types/SearchResultType";
 import SearchResults from "../types/SearchResultsType";
+import { toast } from "react-toastify";
 
 function SearchPage() {
     let initSearchResults: SearchResults = { 
@@ -42,6 +43,8 @@ function SearchPage() {
 
             return data;
         } catch (error) {
+            console.error('Error fetching game data:', error);
+            toast.error('Failed to fetch game data.');
             return searchResults;
         }
     };
