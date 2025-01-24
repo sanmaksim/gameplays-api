@@ -1,5 +1,5 @@
-import { ActionMeta, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
-import { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { ActionMeta, CSSObjectWithLabel, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
+import { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AsyncSelect from 'react-select/async';
@@ -7,7 +7,6 @@ import debounce from 'lodash.debounce';
 import Option from '../types/OptionType';
 import Options from '../types/OptionsType';
 import SearchResults from '../types/SearchResultsType';
-import { CSSObjectWithLabel } from 'react-select';
 
 function SearchBar() {
     const navigate = useNavigate();
@@ -139,7 +138,7 @@ function SearchBar() {
                 toast.error('Failed to display results.');
                 callback([]);
             }
-        }, 300)
+        }, 500)
     ).current;
 
     // Load options into react-select menu after debounce delay
@@ -149,28 +148,33 @@ function SearchBar() {
         });
     };
 
-    // custom react-select menu option styling
+    // custom react-select option component with custom styles
     const CustomOption = (props: OptionProps<Option>): JSX.Element => {
-        const { data, innerRef, innerProps }: OptionProps<Option> = props;
+        const { data, innerRef, innerProps, getStyles }: OptionProps<Option> = props;
+        
+         // retrieve styles for the 'option' inner component
+        const optionStyles = getStyles('option', props) as CSSProperties; // cast CSSObjectWithLabel to React.CSSProperties for compatibility
+
         let formattedDate: string;
         if (data.release_date) {
             const dateString: string = data.release_date;
             const date: Date = new Date(dateString);
             formattedDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(date));
         }
+
         return (
             <>
-                <div className="d-flex" ref={innerRef} {...innerProps} style={{ padding: '5px', cursor: 'pointer' }}>
+                <div className="d-flex" ref={innerRef} {...innerProps} style={{ ...optionStyles }}>
                     {data.icon ? (
                         <>
                             <img src={data.icon} alt={data.label} className="me-2" />
                             <div>
-                                <Link to={data.url}>{data.label}</Link> - {formattedDate!}
+                                <Link to={data.url} style={{ textDecoration: 'none', color: 'inherit' }}>{data.label}</Link> - {formattedDate!}
                             </div>
                         </>
                     ) : (
                         <div>
-                            <Link to={data.url}>{data.label}</Link>
+                            <Link to={data.url} style={{ textDecoration: 'none', color: 'inherit' }}>{data.label}</Link>
                         </div>
                     )}
                 </div>
@@ -187,6 +191,15 @@ function SearchBar() {
         menuList: (menuListStyles: CSSObjectWithLabel) => ({
             ...menuListStyles,
             maxHeight: 'none' // ensure the inner list expands too
+        }),
+        option: (optionStyles: CSSObjectWithLabel, state: { isFocused: boolean }) => ({
+            ...optionStyles,
+            backgroundColor: state.isFocused ? 'black' : 'white',
+            color: state.isFocused ? 'white' : 'black',
+            cursor: 'pointer',
+            padding: '5px',
+            textDecoration: state.isFocused ? 'underline' : 'none',
+            transition: 'background-color 0.2s ease'
         })
     };
 
