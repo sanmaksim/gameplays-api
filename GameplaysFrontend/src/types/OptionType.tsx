@@ -1,8 +1,8 @@
-interface Option {
-    icon: string,
+import SearchResult from "./SearchResultType";
+
+interface Option extends SearchResult {
     isDivider: boolean, // used for custom react-select styling
     label: string,
-    release_date: string,
     url: string
 }
 

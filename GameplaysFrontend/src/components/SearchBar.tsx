@@ -115,20 +115,18 @@ function SearchBar() {
                 }
 
                 // map search results to options
-                const searchOptions = searchResults.results.map((result) => ({
-                    icon: result.image.tiny_url,
+                const searchOptions: Options = searchResults.results.map((result) => ({
+                    ...result,
                     isDivider: true,
                     label: result.name,
-                    release_date: result.original_release_date,
                     url: `/game/${result.id}`
                 }));
 
                 // Add "Show more results" to the options
                 searchOptions.push({
-                    icon: '',
+                    ...initSearchResults.results[0],
                     isDivider: false,
                     label: "Show more results...",
-                    release_date: '',
                     url: `/search?q=${encodeURIComponent(inputString)}`
                 });
 
@@ -156,8 +154,8 @@ function SearchBar() {
         const optionStyles = getStyles('option', props) as CSSProperties; // cast CSSObjectWithLabel to React.CSSProperties for compatibility
 
         let formattedDate: string;
-        if (data.release_date) {
-            const dateString: string = data.release_date;
+        if (data.original_release_date) {
+            const dateString: string = data.original_release_date;
             const date: Date = new Date(dateString);
             formattedDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(date));
         }
@@ -165,9 +163,9 @@ function SearchBar() {
         return (
             <>
                 <div className="d-flex" ref={innerRef} {...innerProps} style={{ ...optionStyles }}>
-                    {data.icon ? (
+                    {data.image.tiny_url ? (
                         <>
-                            <img src={data.icon} alt={data.label} className="me-2" />
+                            <img src={data.image.tiny_url} alt={data.label} className="me-2" />
                             <div>
                                 <Link to={data.url} style={{ textDecoration: 'none', color: 'inherit' }}>{data.label}</Link> - {formattedDate!}
                             </div>
