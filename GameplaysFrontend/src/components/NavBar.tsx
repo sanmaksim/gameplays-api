@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import ProfileIcon from './../assets/profile_icon.jpg';
+import ProfileIcon from './../assets/profile-icon.jpg';
 import SearchBar from './SearchBar';
 
 function NavBar() {
