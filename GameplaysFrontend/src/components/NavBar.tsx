@@ -1,5 +1,5 @@
 import { clearCredentials } from '../slices/authSlice';
-import { Container, Dropdown, NavbarCollapse } from 'react-bootstrap';
+import { Container, NavbarCollapse } from 'react-bootstrap';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
@@ -87,41 +87,37 @@ function NavBar() {
                             </Navbar.Toggle>
                         ) : (
                             <NavDropdown title={<img src={ProfileIcon} className="rounded-circle" alt="Profile Icon" width='40' height='40' />} align='end' style={{ color: 'white' }}>
-                                <Link className="dropdown-item" to="/user/profile">Profile</Link>
-                                <Link className="dropdown-item" to="/user/games">Games</Link>
-                                <Link className="dropdown-item" to="/help">Help</Link>
+                                <NavDropdown.Item as={Link} to="/user/profile">Profile</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/user/games">Games</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/help">Help</NavDropdown.Item>
                                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
                             </NavDropdown>
                         )}
                     </>
                 ) : isLoginPageContext ? (
-                    <Nav.Link href="#">
-                        <Link to="/register">
+                    <Nav.Link as={Link} to="/register">
                             <button
                                 type="button"
                                 className="btn btn-primary btn-med px-2">
                                     Sign up
                             </button>
-                        </Link>
                     </Nav.Link>
                 ) : (
-                    <Nav.Link href="#">
-                        <Link to="/login">
+                    <Nav.Link as={Link} to="/login">
                             <button
                                 type="button"
                                 className="btn btn-secondary btn-med px-2">
                                     Sign in
                             </button>
-                        </Link>
                     </Nav.Link>
                 )}
 
                 {isBelowMobileThreshold ? (
                     <NavbarCollapse id="navbar-nav">
-                        <Dropdown.Item><Link className="dropdown-item text-light" to="/user/profile">Profile</Link></Dropdown.Item>
-                        <Dropdown.Item><Link className="dropdown-item text-light" to="/user/games">Games</Link></Dropdown.Item>
-                        <Dropdown.Item><Link className="dropdown-item text-light" to="/help">Help</Link></Dropdown.Item>
-                        <Dropdown.Item className="dropdown-item text-light" onClick={handleLogout}>Logout</Dropdown.Item>
+                        <NavDropdown.Item className="text-light" as={Link} to="/user/profile">Profile</NavDropdown.Item>
+                        <NavDropdown.Item className="text-light" as={Link} to="/user/games">Games</NavDropdown.Item>
+                        <NavDropdown.Item className="text-light" as={Link} to="/help">Help</NavDropdown.Item>
+                        <NavDropdown.Item className="text-light" onClick={handleLogout}>Logout</NavDropdown.Item>
                     </NavbarCollapse>
                 ) : null }
 
