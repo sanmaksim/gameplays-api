@@ -4,14 +4,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AsyncSelect from 'react-select/async';
 import debounce from 'lodash.debounce';
-import Option from '../types/OptionType';
-import Options from '../types/OptionsType';
-import SearchResults from '../types/SearchResultsType';
+import type Option from '../types/OptionType';
+import type Options from '../types/OptionsType';
+import type SearchResults from '../types/SearchResultsType';
 
 function SearchBar() {
     const navigate = useNavigate();
 
     let initSearchResults: SearchResults = {
+        error: '',
+        limit: 0,
+        offset: 0,
+        number_of_page_results: 0,
+        number_of_total_results: 0,
+        status_code: 0,
         results: [
             {
                 deck: '',

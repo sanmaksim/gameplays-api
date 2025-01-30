@@ -1,4 +1,4 @@
-import UserType from '../types/UserType';
+import type UserType from '../types/UserType';
 
 const apiUrl = 'https://localhost:5001'
 

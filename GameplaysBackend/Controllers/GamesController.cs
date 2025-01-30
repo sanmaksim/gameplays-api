@@ -14,14 +14,22 @@ namespace GameplaysBackend.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query)
+        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query, [FromQuery(Name = "page")] string? page)
         {
             string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
             string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
             string? appVersion = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_VERSION");
             string? authorEmail = Environment.GetEnvironmentVariable("GIANT_BOMB_USER_AGENT_EMAIL");
 
-            var url = $"http://www.giantbomb.com/api/search/?api_key={apiKey}&query={query}&format=json&resources=game";
+            string? url;
+            if (page != "")
+            {
+                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&limit=20&api_key={apiKey}&query={query}&page={page}";
+            }
+            else
+            {
+                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&limit=20&api_key={apiKey}&query={query}";
+            }
 
             // Create a new HttpRequestMessage
             var request = new HttpRequestMessage(HttpMethod.Get, url);

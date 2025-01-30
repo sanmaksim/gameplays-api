@@ -11,7 +11,7 @@ import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../components/Loader';
-import UserType from '../types/UserType';
+import type UserType from '../types/UserType';
 
 function ProfilePage() {
     const [un, setUn] = useState('');

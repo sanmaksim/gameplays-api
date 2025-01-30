@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/esm/Button';
 import Card from 'react-bootstrap/esm/Card';
 import Form from 'react-bootstrap/esm/Form';
 import Loader from '../components/Loader';
-import UserType from '../types/UserType';
+import type UserType from '../types/UserType';
 
 function RegisterPage() {
     const navigate = useNavigate();
