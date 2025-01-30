@@ -29,9 +29,7 @@ function SearchPage() {
 
             return data;
         } catch (error) {
-            console.error('Error fetching game data:', error);
             toast.error('Failed to fetch game data.');
-            // return searchResults;
             return {
                 error: `${error}`,
                 limit: 0,

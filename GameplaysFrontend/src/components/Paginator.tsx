@@ -8,10 +8,10 @@ type Props = {
 
 function Paginator({ searchResults }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
-  // const searchQuery: string = searchParams.get('q') || '';
+
   const currentPage: number = parseInt(searchParams.get('page') || '1', 10);
   const totalPages: number = Math.ceil(searchResults.number_of_total_results / searchResults.limit);
-  console.log(`Total Pages: ${totalPages}`);
+  
   let active = currentPage;
   let pages = [];
   for (let page = 1; page <= totalPages; page++) {

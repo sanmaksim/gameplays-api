@@ -24,11 +24,11 @@ namespace GameplaysBackend.Controllers
             string? url;
             if (page != "")
             {
-                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&limit=20&api_key={apiKey}&query={query}&page={page}";
+                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&api_key={apiKey}&query={query}&page={page}";
             }
             else
             {
-                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&limit=20&api_key={apiKey}&query={query}";
+                url = $"http://www.giantbomb.com/api/search/?format=json&resources=game&api_key={apiKey}&query={query}";
             }
 
             // Create a new HttpRequestMessage
