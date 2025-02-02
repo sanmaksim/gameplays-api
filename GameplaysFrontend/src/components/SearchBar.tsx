@@ -1,4 +1,11 @@
-import { ActionMeta, CSSObjectWithLabel, MultiValue, OptionProps, SelectInstance, SingleValue } from 'react-select';
+import { 
+    CSSObjectWithLabel, 
+    InputActionMeta, 
+    MultiValue, 
+    OptionProps, 
+    SelectInstance, 
+    SingleValue 
+} from 'react-select';
 import { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -54,16 +61,29 @@ function SearchBar() {
 
     // run post-render effects
     useEffect(() => {
-        // reset the selected option on route changes
+        // clear the current option on route changes
         setOption(null);
     }, [location]);
 
     // handle the current AsyncSelect option
-    const handleChange = (currentOption: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>): void => {
-        setOption(null);
-        setInputValue('');
+    const handleChange = (currentOption: SingleValue<Option> | MultiValue<Option>): void => {
+        // nav to the url of the selected option
         if (currentOption && 'url' in currentOption) {
             navigate(currentOption.url);
+        }
+    };
+
+    // handle AsyncSelect input change
+    const handleInputChange = (inputString: string, actionMeta: InputActionMeta): void => {
+        // set the input value to the user entered input but do not update the 
+        // in-built input-blur and menu-close actions to prevent the user input from 
+        // being cleared by react-select's default behaviour
+        if (actionMeta.action !== 'input-blur' && actionMeta.action !== 'menu-close') {
+            setInputValue(inputString);
+        }
+        // clear the Options array if the user input is empty
+        if (inputString.trim() === '') {
+            setOptions([]);
         }
     };
 
@@ -75,14 +95,6 @@ function SearchBar() {
             if (inputValue.trim()) {
                 navigate(`/search?q=${encodeURIComponent(inputValue)}`);
             }
-        }
-    };
-
-    // handle AsyncSelect input change
-    const handleInputChange = (inputString: string): void => {
-        setInputValue(inputString);
-        if (inputString.trim() === '') {
-            setOptions([]);
         }
     };
 
@@ -155,8 +167,8 @@ function SearchBar() {
     // custom react-select option component with custom styles
     const CustomOption = (props: OptionProps<Option>): JSX.Element => {
         const { data, innerRef, innerProps, getStyles }: OptionProps<Option> = props;
-        
-         // retrieve styles for the 'option' inner component
+
+        // retrieve styles for the 'option' inner component
         const optionStyles = getStyles('option', props) as CSSProperties; // cast CSSObjectWithLabel to React.CSSProperties for compatibility
 
         let formattedDate: string;
