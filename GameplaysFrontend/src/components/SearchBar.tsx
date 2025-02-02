@@ -210,7 +210,6 @@ function SearchBar() {
     return (
         <AsyncSelect
             className="w-50"
-            cacheOptions
             components={{
                 DropdownIndicator: null,
                 Option: CustomOption
