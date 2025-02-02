@@ -1,34 +1,31 @@
 import { Container, ListGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchMutation } from "../slices/gamesApiSlice";
 import { useSearchParams } from "react-router-dom";
 import Paginator from "../components/Paginator";
 import type SearchResult from "../types/SearchResultType";
 import type SearchResults from "../types/SearchResultsType";
 
 function SearchPage() {
+    const [search] = useSearchMutation();
+
     const [searchParams] = useSearchParams();
     const searchTerm = searchParams.get('q') || '';
     const searchPage = searchParams.get('page') || '';
 
     const fetchGameData = async (searchString: string, pageString: string): Promise<SearchResults> => {
         try {
-            // proxy search query via server API (GiantBomb blocks client API calls)
-            let response;
+            let queryParams: { q: string, page?: string } = {
+                q: searchString
+            }
             if (pageString) {
-                response = await fetch(`https://localhost:5001/api/games/search?q=${searchString}&page=${pageString}`);
-            } else {
-                response = await fetch(`https://localhost:5001/api/games/search?q=${searchString}`);
+                queryParams.page = pageString;
             }
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            return data;
-        } catch (error) {
+            // dispatch the query via redux
+            const response = await search(queryParams).unwrap();
+            return response;
+        } catch (error: any) {
             toast.error('Failed to fetch game data.');
             return {
                 error: `${error}`,
@@ -43,7 +40,7 @@ function SearchPage() {
     };
 
     // track query params and fetch data when they change
-    const {data, isLoading, error} = useQuery({
+    const { data, isLoading, error } = useQuery({
         queryKey: ['query', searchTerm, searchPage],
         queryFn: () => fetchGameData(searchTerm, searchPage)
     })
