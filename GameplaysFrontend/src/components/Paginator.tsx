@@ -11,10 +11,39 @@ function Paginator({ searchResults }: Props) {
 
   const currentPage: number = parseInt(searchParams.get('page') || '1', 10);
   const totalPages: number = Math.ceil(searchResults.number_of_total_results / searchResults.limit);
-  
+
   let active = currentPage;
   let pages = [];
-  for (let page = 1; page <= totalPages; page++) {
+
+  const adjacent = 2;
+  const visible = 5;
+
+  // add elipsis on the left if active page 
+  // moves past the center of the paginator
+  if (active > (visible - adjacent)) {
+    pages.push(<Pagination.Ellipsis />);
+  }
+
+  // handle paginator edges
+  let adjacentLeft = adjacent;
+  let adjacentRight = adjacent;
+  if (active === adjacent) {
+    adjacentLeft = adjacent - 1;
+    adjacentRight = adjacent + 1;
+  } else if (active === adjacent - 1) {
+    adjacentLeft = adjacent - 2;
+    adjacentRight = adjacent + 2;
+  }
+  if (active === totalPages - 1) {
+    adjacentRight = adjacent - 1;
+    adjacentLeft = adjacent + 1;
+  } else if (active === totalPages) {
+    adjacentRight = adjacent - 2;
+    adjacentLeft = adjacent + 2;
+  }
+
+  // display pages based on active page and adjacency
+  for (let page = (active - adjacentLeft); page <= (active + adjacentRight); page++) {
     pages.push(
       <Pagination.Item
         key={page}
@@ -24,6 +53,12 @@ function Paginator({ searchResults }: Props) {
         {page}
       </Pagination.Item>
     );
+  }
+
+  // add elipsis on the right if active page 
+  // moves past the center of the paginator
+  if (active < (totalPages - adjacent)) {
+    pages.push(<Pagination.Ellipsis />);
   }
 
   const changePage = (newPage: number) => {
