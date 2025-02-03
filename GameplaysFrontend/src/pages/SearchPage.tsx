@@ -23,10 +23,11 @@ function SearchPage() {
                 queryParams.page = pageString;
             }
             // dispatch the query via redux
-            const response = await search(queryParams).unwrap();
+            const response = await search({ queryParams: queryParams, limit: "20" }).unwrap();
             return response;
         } catch (error: any) {
             toast.error('Failed to fetch game data.');
+            console.error(error);
             return {
                 error: `${error}`,
                 limit: 0,

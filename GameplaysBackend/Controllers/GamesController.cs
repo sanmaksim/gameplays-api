@@ -15,7 +15,7 @@ namespace GameplaysBackend.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query, [FromQuery(Name = "page")] string? page)
+        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query, [FromQuery(Name = "page")] string? page, [FromHeader(Name = "Result-Limit")] string? limit = "10")
         {
             string? apiUrl = Environment.GetEnvironmentVariable("GIANT_BOMB_API_URL");
             string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
@@ -32,11 +32,12 @@ namespace GameplaysBackend.Controllers
             // assemble search parameters
             var queryParams = new Dictionary<string, string?>
             {
-                { "format", "json" },
-                { "resouces", "game" },
                 { "api_key", apiKey },
+                { "format", "json" },
+                { "limit", limit },
+                { "page", page },
                 { "query", query },
-                { "page", page }
+                { "resouces", "game" },
             };
 
             // build the search url
