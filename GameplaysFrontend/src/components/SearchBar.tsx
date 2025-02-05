@@ -43,16 +43,16 @@ function SearchBar() {
         ]
     }
 
-    // track user input
+    // track user entered input
     const [inputValue, setInputValue] = useState<string>('');
 
-    // track AsyncSelect option
+    // track a single AsyncSelect option
     const [option, setOption] = useState<SingleValue<Option> | null>(null);
 
-    // track AsyncSelect options
+    // track a list of AsyncSelect options
     const [options, setOptions] = useState<Options>([]);
 
-    // track search results
+    // track returned results object
     let [searchResults, setSearchResults] = useState<SearchResults>(initSearchResults);
 
     // initialize ref object with the 'current' property set to null
@@ -81,8 +81,8 @@ function SearchBar() {
         if (actionMeta.action !== 'input-blur' && actionMeta.action !== 'menu-close') {
             setInputValue(inputString);
         }
-        // clear the Options array if the user input is empty
-        if (inputString.trim() === '') {
+        // clear the Options array if the input value is empty
+        if (inputValue.trim() === '') {
             setOptions([]);
         }
     };
@@ -119,6 +119,7 @@ function SearchBar() {
     };
 
     // convert debounced game data into AsyncSelect options
+    // useRef to ensure debounce timer does not reset each time inputString is updated and the component re-rendered
     const debouncedFetchGameData = useRef(
         debounce(async (inputString: string, callback: (options: Options) => void): Promise<void> => {
             try {
@@ -148,6 +149,7 @@ function SearchBar() {
                     url: `/search?q=${encodeURIComponent(inputString)}`
                 });
 
+                setOptions(searchOptions);
                 callback(searchOptions);
             } catch (error) {
                 console.error('Error displaying results:', error);
@@ -159,8 +161,8 @@ function SearchBar() {
 
     // Load options into react-select menu after debounce delay
     const loadOption = async (inputString: string): Promise<Options> => {
-        return new Promise<Options>((callback) => {
-            debouncedFetchGameData(inputString, callback);
+        return new Promise<Options>((resolve) => {
+            debouncedFetchGameData(inputString, resolve);
         });
     };
 
@@ -226,7 +228,7 @@ function SearchBar() {
                 DropdownIndicator: null,
                 Option: CustomOption
             }}
-            defaultOptions
+            defaultOptions={options}
             inputValue={inputValue}
             isSearchable={true}
             loadOptions={loadOption}
@@ -235,8 +237,6 @@ function SearchBar() {
             onChange={handleChange}
             onInputChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            openMenuOnClick={false}
-            openMenuOnFocus={false}
             options={options}
             placeholder="Search Games"
             ref={selectRef} // react automatically sets the 'current' property of the ref to the instance of the AsyncSelect object after the component is mounted
