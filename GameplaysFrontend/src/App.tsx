@@ -52,7 +52,7 @@ function App() {
         <Route path='/tos' element={<TosPage />} />
 
         {/* Search Route */}
-        <Route path='/game' element={<GamePage />} />
+        <Route path='/game/:gameId' element={<GamePage />} />
         <Route path='/search' element={<SearchPage />} />
 
         <Route path='*' element={<NotFoundPage />} />

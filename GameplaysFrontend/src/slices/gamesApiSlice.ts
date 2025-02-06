@@ -4,6 +4,14 @@ const GAMES_URL = '/api/games';
 
 export const gamesApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        getGame: builder.mutation({
+            query: (id: string) => {
+                return {
+                    url: `${GAMES_URL}/${id}`,
+                    method: 'GET'
+                };
+            }
+        }),
         search: builder.mutation({
             query: ({ queryParams, limit = "10" }: { queryParams: { q: string, page?: string }, limit?: string }) => {
                 const queryString = new URLSearchParams(queryParams).toString();
@@ -20,4 +28,4 @@ export const gamesApiSlice = apiSlice.injectEndpoints({
     })
 });
 
-export const { useSearchMutation } = gamesApiSlice;
+export const { useGetGameMutation, useSearchMutation } = gamesApiSlice;
