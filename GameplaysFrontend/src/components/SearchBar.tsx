@@ -28,17 +28,18 @@ function SearchBar() {
         results: [
             {
                 deck: '',
+                description: '',
                 id: 0,
                 image: {
                     icon_url: '',
-                    tiny_url: ''
+                    tiny_url: '',
+                    small_url: ''
                 },
                 name: '',
                 original_release_date: '',
-                platforms: {
-                    id: 0,
-                    name: ''
-                }
+                platforms: [
+                    { name: '' }
+                ]
             }
         ]
     }
