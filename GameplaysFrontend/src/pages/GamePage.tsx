@@ -65,7 +65,7 @@ function GamePage() {
               <Card.Text>{data.deck}</Card.Text>
               <Card.Title>Platforms</Card.Title>
               {data.platforms.map((platform) => (
-                <li style={{ listStyle: 'none' }}>{platform.name}</li>
+                <li key={platform.name} style={{ listStyle: 'none' }}>{platform.name}</li>
               ))}
             </div>
           </Card.Body>
