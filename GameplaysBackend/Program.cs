@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +70,26 @@ builder.Services.AddTransient<JwtTokenService>();
 builder.Services.AddTransient<CookieService>();
 builder.Services.AddTransient<AuthService>();
 
+// Rate limit proxied API requests to 1 per second and provide a response upon rejection
+builder.Services.AddRateLimiter(options => {
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => 
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: "global",
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 1,
+                QueueLimit = 5,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                Window = TimeSpan.FromSeconds(1)
+            }
+        ));
+    options.OnRejected = async (context, token) => 
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", cancellationToken: token);
+    };
+});
+
 // Add HttpClient Service since we will be communicating directly with the Giant Bomb API
 builder.Services.AddHttpClient<GamesController>();
 
@@ -130,6 +151,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors("AllowSpecificOriginWithCredentials");
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
