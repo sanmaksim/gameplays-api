@@ -1,11 +1,15 @@
 import { Card, Container } from "react-bootstrap";
+import { RootState } from "../store";
 import { toast } from "react-toastify";
 import { useGetGameMutation } from "../slices/gamesApiSlice";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import Loader from "../components/Loader";
 import type SearchResult from "../types/SearchResultType";
 
 function GamePage() {
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const [getGame] = useGetGameMutation();
   const { gameId } = useParams();
 
@@ -52,8 +56,8 @@ function GamePage() {
   }
 
   return (
-    <Container>
-      {isLoading && <p>Loading...</p>}
+    <Container className="mt-4">
+      {isLoading && <Loader />}
       {error && <p>Error: {error.message}</p>}
       {data && (
         <Card className="my-2">
@@ -67,6 +71,13 @@ function GamePage() {
               {data.platforms.map((platform) => (
                 <li key={platform.name} style={{ listStyle: 'none' }}>{platform.name}</li>
               ))}
+              {userInfo ? (
+                <div className="mt-auto">
+                  Add to: Playing | Played | Wish List | Backlog
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
           </Card.Body>
         </Card>
