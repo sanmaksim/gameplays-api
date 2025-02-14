@@ -1,8 +1,8 @@
 import { Container, ListGroup } from "react-bootstrap";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchMutation } from "../slices/gamesApiSlice";
-import { useSearchParams } from "react-router-dom";
 import Paginator from "../components/Paginator";
 import type SearchResult from "../types/SearchResultType";
 import type SearchResults from "../types/SearchResultsType";
@@ -57,7 +57,7 @@ function SearchPage() {
                             <ListGroup.Item key={result.id} className="d-flex">
                                 <img src={result.image.icon_url} alt={result.name} className="me-2" />
                                 <div>
-                                    <h6><strong>{result.name}</strong></h6>
+                                    <h6><strong><Link to={`/game/${result.id}`}>{result.name}</Link></strong></h6>
                                     <p>{result.deck}</p>
                                 </div>
                             </ListGroup.Item>
