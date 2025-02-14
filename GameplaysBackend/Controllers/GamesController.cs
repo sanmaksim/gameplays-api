@@ -39,7 +39,7 @@ namespace GameplaysBackend.Controllers
                 { "limit", limit },
                 { "page", page },
                 { "query", query },
-                { "resouces", "game" },
+                { "resources", "game" },
             };
 
             // build the search url
