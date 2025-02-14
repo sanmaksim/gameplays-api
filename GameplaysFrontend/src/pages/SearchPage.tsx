@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchMutation } from "../slices/gamesApiSlice";
+import Loader from "../components/Loader";
 import Paginator from "../components/Paginator";
 import type SearchResult from "../types/SearchResultType";
 import type SearchResults from "../types/SearchResultsType";
@@ -49,7 +50,7 @@ function SearchPage() {
     return (
         <>
             <Container className="mt-4">
-                {isLoading && <p>Loading...</p>}
+                {isLoading && <Loader />}
                 {error && <p>Error: {error.message}</p>}
                 {data && (
                     <ListGroup>
