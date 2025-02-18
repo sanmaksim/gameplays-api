@@ -21,9 +21,6 @@ namespace GameplaysBackend.Models
 
         public required int GameId { get; set; }
 
-        [ForeignKey("GameId")]
-        public Game? Game { get; set; } // will be null initially, EF will auto-populate when db is queried by ID
-
         public int RunId { get; set; } = 1;
 
         public PlayStatus Status { get; set; } = PlayStatus.Unplayed;
