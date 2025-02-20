@@ -98,7 +98,7 @@ namespace GameplaysApi.Controllers
                 existingPlay.GameId = play.GameId;
             }
 
-            if (play.Status != PlayStatus.Unplayed) // Unplayed is the default
+            if (play.Status != PlayStatus.Backlog) // Backlog is the default
             {
                 existingPlay.Status = play.Status;
             }

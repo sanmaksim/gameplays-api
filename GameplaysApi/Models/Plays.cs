@@ -4,9 +4,10 @@ namespace GameplaysApi.Models
 {
     public enum PlayStatus
     {
-        Unplayed,
-        InProgress,
-        Completed
+        Playing,
+        Played,
+        Wishlist,
+        Backlog
     }
 
     public class Play
@@ -22,7 +23,7 @@ namespace GameplaysApi.Models
 
         public int RunId { get; set; } = 1;
 
-        public PlayStatus Status { get; set; } = PlayStatus.Unplayed;
+        public PlayStatus Status { get; set; } = PlayStatus.Backlog;
 
         [Column(TypeName = "decimal(5,2)")]
         public decimal PercentageCompleted { get; set; } = 0.00m;
