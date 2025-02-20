@@ -1,13 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using GameplaysApi.Data;
+using GameplaysApi.DTOs;
 using GameplaysApi.Filters;
 using GameplaysApi.Models;
-using GameplaysApi.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/users/{userId}/[controller]")]
+    [Route("api/[controller]")]
     [ValidateUserExists]
     public class PlaysController : ControllerBase
     {
@@ -18,158 +21,99 @@ namespace GameplaysApi.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreatePlay(int userId, Play play)
+        public async Task<IActionResult> AddPlay([FromBody] AddPlayDto playDto)
         {
-            if (userId != play.UserId)
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest(new { message = "UserId in the route does not match the UserId in the play object." });
-            }
-            
-            // Check if the Game exists
-            var gameExists = await _context.Games.AnyAsync(g => g.GameId == play.GameId);
-            if (!gameExists)
-            {
-                return BadRequest(new { message = "The specified Game does not exist." });
+                return Forbid();
             }
 
-            // Get the count of plays for this user and game
-            var playCount = await _context.Plays
-                .CountAsync(p => p.UserId == userId && p.GameId == play.GameId);
-
-            // Set RunId based on the count
-            play.RunId = playCount > 0 ? playCount + 1 : 1;
-
-            _context.Plays.Add(play);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetPlay), new { userId = play.UserId, playId = play.PlayId }, play);
-        }
-        
-        [HttpGet]
-        public async Task<IActionResult> GetAllPlays(int userId)
-        {
-            var plays = await _context.Plays
-                .Where(p => p.UserId == userId)
-                .Include(p => p.User)
-                .ToListAsync();
-            
-            if (plays == null || !plays.Any())
+            if (int.TryParse(userId, out int uId))
             {
-                return NotFound(new { message = "No plays found for this user." });
-            }
-
-            return Ok(plays);
-        }
-        
-        [HttpGet("{playId}")]
-        public async Task<IActionResult> GetPlay(int userId, int playId)
-        {
-            var play = await _context.Plays
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
-
-            if (play == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(play);
-        }
-        
-        [HttpPut("{playId}")]
-        public async Task<IActionResult> UpdatePlay(int userId, int playId, Play play)
-        {
-            var existingPlay = await _context.Plays
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
-            
-            if (existingPlay == null)
-            {
-                return NotFound(new { message = "Play not found." });
-            }
-
-            if (play.GameId != 0 && existingPlay.GameId != play.GameId)
-            {
-                // Verify the new game exists
-                var newGameExists = await _context.Games.AnyAsync(g => g.GameId == play.GameId);
-                if (!newGameExists)
+                if (uId != playDto.UserId)
                 {
-                    return NotFound(new { message = "Game not found." });
+                    return BadRequest(new { message = "The user is not authorized." });
                 }
-                existingPlay.GameId = play.GameId;
-            }
 
-            if (play.Status != PlayStatus.Backlog) // Backlog is the default
-            {
-                existingPlay.Status = play.Status;
-            }
+                var user = await _context.Users.FindAsync(playDto.UserId);
 
-            if (play.PercentageCompleted >= 0 && play.PercentageCompleted <= 100)
-            {
-                existingPlay.PercentageCompleted = play.PercentageCompleted;
-            }
-            else if (play.PercentageCompleted != 0)
-            {
-                return BadRequest(new { message = "PercentageCompleted must be between 0 and 100." });
-            }
-
-            if (play.HoursPlayed >= 0)
-            {
-                existingPlay.HoursPlayed = play.HoursPlayed;
-            }
-            else if (play.HoursPlayed != 0)
-            {
-                return BadRequest(new { message = "HoursPlayed must be non-negative." });
-            }
-
-            if (play.LastPlayedAt.HasValue)
-            {
-                if (play.LastPlayedAt.Value <= DateOnly.FromDateTime(DateTime.UtcNow))
+                if (user == null)
                 {
-                    existingPlay.LastPlayedAt = play.LastPlayedAt;
+                    return NotFound();
+                }
+
+                var newPlay = new Play
+                {
+                    UserId = playDto.UserId,
+                    GameId = playDto.GameId
+                };
+
+                // Get the count of plays for this user and game
+                var playCount = await _context.Plays
+                    .CountAsync(p => p.UserId == playDto.UserId && p.GameId == playDto.GameId);
+
+                // Set RunId based on the count
+                newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
+
+                // If the status is not the default then set it
+                if (playDto.Status != (int)PlayStatus.Backlog)
+                {
+                    newPlay.Status = (PlayStatus)playDto.Status;
+                }
+
+                _context.Plays.Add(newPlay);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetPlay), new { playId = newPlay.PlayId }, newPlay);
+            }
+            else
+            {
+                return BadRequest(new { message = "The token string is not a valid integer." });
+            }
+        }
+        
+        [Authorize]
+        [HttpGet("{playId}")]
+        public async Task<IActionResult> GetPlay(string playId)
+        {
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Forbid();
+            }
+
+            if (int.TryParse(userId, out int uId))
+            {
+                var user = await _context.Users.FindAsync(uId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                if (int.TryParse(playId, out int pId))
+                {
+                    var play = await _context.Plays
+                        .Include(p => p.User)
+                        .FirstOrDefaultAsync(p => p.UserId == uId && p.PlayId == pId);
+
+                    return Ok(play);
                 }
                 else
-                {
-                    return BadRequest(new { message = "LastPlayedAt cannot be in the future." });
-                }
-            }
-
-            existingPlay.UpdateTimestamp();
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch(DbUpdateConcurrencyException)
-            {
-                if (!_context.Plays.Any(p => p.PlayId == playId))
                 {
                     return NotFound(new { message = "Play not found." });
                 }
-                else
-                {
-                    throw;
-                }
             }
-
-            return NoContent();
-        }
-
-        [HttpDelete("{playId}")]
-        public async Task<IActionResult> DeletePlay(int userId, int playId)
-        {
-            var existingPlay = await _context.Plays
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.PlayId == playId);
-            
-            if (existingPlay == null)
+            else
             {
-                return NotFound(new { message = "Play not found for this user." });
+                return BadRequest(new { message = "The token string is not a valid integer." });
             }
-
-            _context.Plays.Remove(existingPlay);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
     }
 }
