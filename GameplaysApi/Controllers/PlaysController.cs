@@ -1,6 +1,5 @@
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
-using GameplaysApi.Filters;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,6 @@ namespace GameplaysApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [ValidateUserExists]
     public class PlaysController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -60,11 +58,8 @@ namespace GameplaysApi.Controllers
                 // Set RunId based on the count
                 newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
 
-                // If the status is not the default then set it
-                if (playDto.Status != (int)PlayStatus.Backlog)
-                {
-                    newPlay.Status = (PlayStatus)playDto.Status;
-                }
+                // Set the play status
+                newPlay.Status = (PlayStatus)playDto.Status;
 
                 _context.Plays.Add(newPlay);
                 await _context.SaveChangesAsync();
