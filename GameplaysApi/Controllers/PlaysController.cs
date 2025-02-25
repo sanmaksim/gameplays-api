@@ -25,21 +25,22 @@ namespace GameplaysApi.Controllers
         {
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Forbid();
             }
 
+            // Parse the retrieved token ID string to an int
             if (int.TryParse(userId, out int uId))
             {
+                // Check if the token ID matches the FromBody ID
                 if (uId != playDto.UserId)
                 {
                     return BadRequest(new { message = "The user is not authorized." });
                 }
 
+                // Make sure the user exists in the database
                 var user = await _context.Users.FindAsync(playDto.UserId);
-
                 if (user == null)
                 {
                     return NotFound();
@@ -57,7 +58,7 @@ namespace GameplaysApi.Controllers
 
                 // Set RunId based on the count
                 newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
-
+                
                 // Set the play status
                 newPlay.Status = (PlayStatus)playDto.Status;
 
