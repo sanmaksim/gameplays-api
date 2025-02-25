@@ -10,6 +10,7 @@
     <PublishDir>./publish/</PublishDir>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a37d89ad-ea38-43e0-9a48-2e4eb40cbe7f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
