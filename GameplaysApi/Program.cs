@@ -4,7 +4,6 @@ using GameplaysApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
