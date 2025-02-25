@@ -21,15 +21,9 @@ var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PO
 // Configure Kestrel to Use HTTPS
 builder.WebHost.ConfigureKestrel(options =>
 {
-    var certPath = "/etc/ssl/certs/gameplays.test+1.pem";
-    var keyPath = "/etc/ssl/certs/gameplays.test+1-key.pem";
-
-    var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
-    certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
-    
     options.ListenAnyIP(httpsPort, listenOptions =>
     {
-        listenOptions.UseHttps(certificate);
+        listenOptions.UseHttps(Environment.GetEnvironmentVariable("GAMEPLAYS_CERTIFICATE_PATH")!);
     });
 });
 
