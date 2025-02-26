@@ -56,15 +56,62 @@ namespace GameplaysApi.Controllers
                 var playCount = await _context.Plays
                     .CountAsync(p => p.UserId == playDto.UserId && p.GameId == playDto.GameId);
 
-                // Set RunId based on the count
-                newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
-                
-                // Set the play status
-                newPlay.Status = (PlayStatus)playDto.Status;
+                if (playCount > 0)
+                {
+                    var existingPlays = await _context.Plays
+                        .Where(p => p.UserId == playDto.UserId && p.GameId == playDto.GameId)
+                        .ToListAsync();
+
+                    if (existingPlays != null)
+                    {
+                        foreach (var play in existingPlays)
+                        {
+                            // Only add additional play for Played and Playing statuses
+                            if (play.Status == PlayStatus.Playing || play.Status == PlayStatus.Played 
+                                && (PlayStatus)playDto.Status == PlayStatus.Playing || (PlayStatus)playDto.Status == PlayStatus.Played)
+                            {
+                                // Increment the run ID based on the count
+                                newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
+
+                                // Set the play status
+                                newPlay.Status = (PlayStatus)playDto.Status;
+                            }
+                            else if (play.Status == PlayStatus.Wishlist
+                                && (PlayStatus)playDto.Status == PlayStatus.Wishlist)
+                            {
+                                return Ok(new { message = "Wishlist item already exists." });
+                            }
+                            else if (play.Status == PlayStatus.Backlog 
+                                && (PlayStatus)playDto.Status == PlayStatus.Backlog)
+                            {
+                                return Ok(new { message = "Backlog item already exists." });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "Plays not found." });
+                    }
+                }
+                else
+                {
+                    // Add a playthrough
+                    newPlay.RunId = 1;
+
+                    // Set the play status
+                    newPlay.Status = (PlayStatus)playDto.Status;
+                }
 
                 _context.Plays.Add(newPlay);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetPlay), new { playId = newPlay.PlayId }, newPlay);
+                return CreatedAtAction(
+                    nameof(GetPlay), 
+                    new { playId = newPlay.PlayId }, 
+                    new {
+                        Message = "Play item created.",
+                        Play = newPlay 
+                    }
+                );
             }
             else
             {
