@@ -86,6 +86,11 @@ namespace GameplaysApi.Controllers
                             {
                                 return Ok(new { message = "Backlog item already exists." });
                             }
+                            else
+                            {
+                                // Set the play status
+                                newPlay.Status = (PlayStatus)playDto.Status;
+                            }
                         }
                     }
                     else
