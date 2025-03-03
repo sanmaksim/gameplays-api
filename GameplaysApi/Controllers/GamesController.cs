@@ -75,6 +75,7 @@ namespace GameplaysApi.Controllers
             string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
             string? appVersion = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_VERSION");
             string? authorEmail = Environment.GetEnvironmentVariable("GIANT_BOMB_USER_AGENT_EMAIL");
+            string? resourcePrefix = Environment.GetEnvironmentVariable("GAMEPLAYS_RESOURCE_PREFIX");
 
             // verify api config is present
             if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey))
@@ -82,7 +83,7 @@ namespace GameplaysApi.Controllers
                 return StatusCode(500, "Giant Bomb API configuration is missing.");
             }
 
-            apiUrl = $"{apiUrl}/game/3030-{gameId}";
+            apiUrl = $"{apiUrl}/game/{resourcePrefix}-{gameId}";
 
             // assemble search parameters
             var queryParams = new Dictionary<string, string?>
