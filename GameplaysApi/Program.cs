@@ -4,6 +4,7 @@ using GameplaysApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -22,7 +23,20 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(httpsPort, listenOptions =>
     {
-        listenOptions.UseHttps(Environment.GetEnvironmentVariable("GAMEPLAYS_CERTIFICATE_PATH")!);
+        if (builder.Environment.IsDevelopment())
+        {
+            listenOptions.UseHttps(Environment.GetEnvironmentVariable("GAMEPLAYS_CERTIFICATE_PATH")!);
+        }
+        else
+        {
+            var certPath = "/etc/ssl/certs/gameplays.test+1.pem";
+            var keyPath = "/etc/ssl/certs/gameplays.test+1-key.pem";
+
+            var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+            certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
+
+            listenOptions.UseHttps(certificate);
+        }
     });
 });
 
