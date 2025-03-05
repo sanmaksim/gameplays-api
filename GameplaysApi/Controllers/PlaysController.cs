@@ -149,6 +149,7 @@ namespace GameplaysApi.Controllers
                 {
                     var play = await _context.Plays
                         .Include(p => p.User)
+                        .Include(p => p.Game)
                         .FirstOrDefaultAsync(p => p.UserId == uId && p.PlayId == pId);
 
                     return Ok(play);

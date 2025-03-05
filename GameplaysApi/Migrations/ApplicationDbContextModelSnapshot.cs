@@ -54,7 +54,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasKey("GameId");
 
-                    b.ToTable("Games");
+                    b.ToTable("Games", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Play", b =>
@@ -74,8 +74,8 @@ namespace GameplaysApi.Migrations
                     b.Property<decimal>("HoursPlayed")
                         .HasColumnType("decimal(5,2)");
 
-                    b.Property<DateOnly?>("LastPlayedAt")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("LastPlayedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("PercentageCompleted")
                         .HasColumnType("decimal(5,2)");
@@ -94,9 +94,11 @@ namespace GameplaysApi.Migrations
 
                     b.HasKey("PlayId");
 
+                    b.HasIndex("GameId");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Plays");
+                    b.ToTable("Plays", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.User", b =>
@@ -133,16 +135,24 @@ namespace GameplaysApi.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Play", b =>
                 {
+                    b.HasOne("GameplaysApi.Models.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GameplaysApi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Game");
 
                     b.Navigation("User");
                 });
