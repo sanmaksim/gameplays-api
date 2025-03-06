@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameplaysApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240902132912_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240902132912_InitialCreateUsers")]
+    partial class InitialCreateUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
