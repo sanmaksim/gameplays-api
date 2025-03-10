@@ -9,15 +9,33 @@ namespace GameplaysApi.Models
 
         [Required]
         [MaxLength(255)]
-        public required string Title { get; set; }
+        public required string Name { get; set; }
 
         [MaxLength(255)]
-        public string? Genre { get; set; }
-
-        public DateOnly? ReleaseDate { get; set; }
+        public string? Deck { get; set; }
 
         [MaxLength(255)]
-        public string? Developer { get; set; }
+        public string? Description { get; set; }
+
+        [MaxLength(255)]
+        public string? Developers { get; set; }
+
+        [MaxLength(255)]
+        public string? Franchises { get; set; }
+
+        [MaxLength(255)]
+        public string? Genres { get; set; }
+
+        [MaxLength(255)]
+        public string? Images { get; set; }
+
+        public DateOnly? OriginalReleaseDate { get; set; }
+
+        [MaxLength(255)]
+        public string? Platforms { get; set; }
+
+        [MaxLength(255)]
+        public string? Publishers { get; set; }
 
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
