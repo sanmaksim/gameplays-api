@@ -27,7 +27,7 @@ namespace GameplaysApi.Models
         public string? Genres { get; set; }
 
         [MaxLength(255)]
-        public string? Images { get; set; }
+        public string? Image { get; set; }
 
         public DateOnly? OriginalReleaseDate { get; set; }
 
