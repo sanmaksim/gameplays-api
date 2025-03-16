@@ -14,7 +14,7 @@ namespace GameplaysApi.Filters
             {
                 var dbContext = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
 
-                var userExists = await dbContext.Users.AnyAsync(u => u.UserId == userId);
+                var userExists = await dbContext.Users.AnyAsync(u => u.Id == userId);
                 if (!userExists)
                 {
                     context.Result = new NotFoundObjectResult(new { message = "User not found." });
