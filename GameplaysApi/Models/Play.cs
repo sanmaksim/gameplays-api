@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GameplaysApi.Models
@@ -12,16 +13,17 @@ namespace GameplaysApi.Models
 
     public class Play
     {
-        public int PlayId { get; set; }
+        [Key]
+        public int Id { get; set; }
 
-        public required int UserId { get; set; }
+        public int UserId { get; set; }
 
-        [ForeignKey("UserId")]
+        [ForeignKey(nameof(UserId))]
         public User? User { get; set; } // will be null initially, EF will auto-populate when db is queried by ID
 
-        public required int GameId { get; set; }
+        public int GameId { get; set; }
 
-        [ForeignKey("GameId")]
+        [ForeignKey(nameof(GameId))]
         public Game? Game { get; set; } // will be null initially, EF will auto-populate when db is queried by ID
 
         public int RunId { get; set; } = 1;
@@ -36,7 +38,7 @@ namespace GameplaysApi.Models
 
         public DateOnly? LastPlayedAt { get; set; }
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

@@ -5,10 +5,13 @@ namespace GameplaysApi.Models
     public class Game
     {
         [Key]
-        public int GameId { get; set; }
+        public int Id { get; set; }
 
         [Required]
+        public required int GameId { get; set; } // Alternate Key
+
         [MaxLength(255)]
+        [Required]
         public required string Name { get; set; }
 
         [MaxLength(255)]
@@ -17,27 +20,22 @@ namespace GameplaysApi.Models
         [MaxLength(255)]
         public string? Description { get; set; }
 
-        [MaxLength(255)]
-        public string? Developers { get; set; }
+        public ICollection<Developer>? Developers { get; set; }
+
+        public ICollection<Franchise>? Franchises { get; set; }
+
+        public ICollection<Genre>? Genres { get; set; }
 
         [MaxLength(255)]
-        public string? Franchises { get; set; }
-
-        [MaxLength(255)]
-        public string? Genres { get; set; }
-
-        [MaxLength(255)]
-        public string? Image { get; set; }
+        public string? Image { get; set; } // Column Type = "json"
 
         public DateOnly? OriginalReleaseDate { get; set; }
 
-        [MaxLength(255)]
-        public string? Platforms { get; set; }
+        public ICollection<Platform>? Platforms { get; set; }
 
-        [MaxLength(255)]
-        public string? Publishers { get; set; }
+        public ICollection<Publisher>? Publishers { get; set; }
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

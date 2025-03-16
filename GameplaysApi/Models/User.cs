@@ -7,18 +7,18 @@ namespace GameplaysApi.Models
         private string _password = string.Empty;
 
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
-        [Required]
         [MaxLength(255)]
+        [Required]
         public required string Username { get; set; }
 
-        [Required]
         [MaxLength(255)]
-        public required string Email { get; set; }
+        [Required]
+        public required string Email { get; set; } // Alternate Key
 
-        [Required]
         [MaxLength(255)]
+        [Required]
         public required string Password
         { 
             get { return _password; } 
@@ -35,8 +35,8 @@ namespace GameplaysApi.Models
             }
         }
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public void UpdateTimestamp()
