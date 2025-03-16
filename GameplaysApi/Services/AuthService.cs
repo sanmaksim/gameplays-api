@@ -28,7 +28,7 @@ namespace GameplaysApi.Services
                 // create JWT
                 var payload = new List<Claim>
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iss, validIssuer),
                     new Claim(JwtRegisteredClaimNames.Aud, validAudience)
