@@ -43,7 +43,14 @@ namespace GameplaysApi.Controllers
                 var user = await _context.Users.FindAsync(playDto.UserId);
                 if (user == null)
                 {
-                    return NotFound();
+                    return NotFound(new { message = "User not found." });
+                }
+
+                // Make sure the game exists in the database
+                var game = await _context.Games.FindAsync(playDto.GameId);
+                if (game == null)
+                {
+                    return NotFound(new { message = "Game not found." });
                 }
 
                 var newPlay = new Play
@@ -111,7 +118,7 @@ namespace GameplaysApi.Controllers
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(
                     nameof(GetPlay), 
-                    new { playId = newPlay.PlayId }, 
+                    new { playId = newPlay.Id }, 
                     new {
                         Message = "Play item created.",
                         Play = newPlay 
@@ -150,7 +157,7 @@ namespace GameplaysApi.Controllers
                     var play = await _context.Plays
                         .Include(p => p.User)
                         .Include(p => p.Game)
-                        .FirstOrDefaultAsync(p => p.UserId == uId && p.PlayId == pId);
+                        .FirstOrDefaultAsync(p => p.UserId == uId && p.Id == pId);
 
                     return Ok(play);
                 }

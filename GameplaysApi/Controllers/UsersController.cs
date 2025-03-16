@@ -57,7 +57,7 @@ namespace GameplaysApi.Controllers
                 // Now that the UserId is set, create the cookie
                 _authService.CreateAuthCookie(newUser, Response);
 
-                return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
+                return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
 
             }
             catch (DbUpdateException)
@@ -238,7 +238,7 @@ namespace GameplaysApi.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        if (!_context.Users.Any(e => e.UserId == id))
+                        if (!_context.Users.Any(e => e.Id == id))
                         {
                             return NotFound();
                         }
