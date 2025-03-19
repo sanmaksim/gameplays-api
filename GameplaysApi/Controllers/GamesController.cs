@@ -1,3 +1,4 @@
+using GameplaysApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -7,10 +8,12 @@ namespace GameplaysApi.Controllers
     [Route("api/[controller]")]
     public class GamesController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
 
-        public GamesController(HttpClient httpClient)
+        public GamesController(ApplicationDbContext context, HttpClient httpClient)
         {
+            _context = context;
             _httpClient = httpClient;
         }
 
@@ -70,6 +73,16 @@ namespace GameplaysApi.Controllers
         [HttpGet("{gameId}")]
         public async Task<IActionResult> GetGame(string gameId)
         {
+            // check whether game is in the database
+            if (int.TryParse(gameId, out int id))
+            {
+                var existingGame = await _context.Games.FindAsync(id);
+                if (existingGame != null)
+                {
+                    return Ok(existingGame);
+                }
+            }
+
             string? apiUrl = Environment.GetEnvironmentVariable("GIANT_BOMB_API_URL");
             string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
             string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
