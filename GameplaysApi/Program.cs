@@ -64,7 +64,7 @@ var connectionString = Environment.GetEnvironmentVariable("GAMEPLAYS_CONNECTION_
 if (connectionString != null)
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 39)))
+        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 41)))
     );
 }
 else
