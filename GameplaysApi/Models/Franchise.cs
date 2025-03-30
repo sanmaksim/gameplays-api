@@ -7,10 +7,12 @@ namespace GameplaysApi.Models
         [Key]
         public int Id { get; set; }
 
-        [MaxLength(255)]
         [Required]
-        public required string Name { get; set; }
+        public required int FranchiseId { get; set; }
 
-        public required ICollection<Game> Games { get; set; }
+        [MaxLength(255)]
+        public string? Name { get; set; }
+
+        public ICollection<Game>? Games { get; set; }
     }
 }
