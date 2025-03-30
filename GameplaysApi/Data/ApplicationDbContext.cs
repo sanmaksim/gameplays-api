@@ -20,9 +20,12 @@ namespace GameplaysApi.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
-            modelBuilder.Entity<User>()
-                .HasAlternateKey(u => u.Email);
+
+            modelBuilder.Entity<Developer>()
+                .HasAlternateKey(d => d.DeveloperId);
+
+            modelBuilder.Entity<Franchise>()
+                .HasAlternateKey(f => f.FranchiseId);
 
             modelBuilder.Entity<Game>(entity =>
             {
@@ -72,6 +75,18 @@ namespace GameplaysApi.Data
                         j => j.HasOne<Game>().WithMany().HasForeignKey("GameId")
                     );
             });
+
+            modelBuilder.Entity<Genre>()
+                .HasAlternateKey(g => g.GenreId);
+
+            modelBuilder.Entity<Platform>()
+                .HasAlternateKey(p => p.PlatformId);
+
+            modelBuilder.Entity<Publisher>()
+                .HasAlternateKey(p => p.PublisherId);
+
+            modelBuilder.Entity<User>()
+                .HasAlternateKey(u => u.Email);
         }
     }
 }
