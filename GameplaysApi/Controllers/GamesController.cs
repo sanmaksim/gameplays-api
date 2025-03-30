@@ -1,6 +1,10 @@
+using GameplaysApi.Converters;
 using GameplaysApi.Data;
+using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace GameplaysApi.Controllers
 {
@@ -76,7 +80,9 @@ namespace GameplaysApi.Controllers
             // check whether game is in the database
             if (int.TryParse(gameId, out int id))
             {
-                var existingGame = await _context.Games.FindAsync(id);
+                var existingGame = await _context.Games
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(g => g.GameId == id);
                 if (existingGame != null)
                 {
                     return Ok(existingGame);
@@ -127,6 +133,23 @@ namespace GameplaysApi.Controllers
 
             // get the content from the request
             var content = await response.Content.ReadAsStringAsync();
+
+            // create JsonSerializerOptions and add the custom converter
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new GameConverter() }
+            };
+
+            // deserialize the content using the custom converter
+            var game = JsonSerializer.Deserialize<Game>(content, options);
+
+            // save the game to the database
+            if (game != null)
+            {
+                _context.Games.Add(game);
+                await _context.SaveChangesAsync();
+            }
+
             return Ok(content);
         }
     }
