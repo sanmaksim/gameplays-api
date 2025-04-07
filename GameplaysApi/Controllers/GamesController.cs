@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GameplaysApi.Controllers
 {
@@ -81,11 +82,28 @@ namespace GameplaysApi.Controllers
             if (int.TryParse(gameId, out int id))
             {
                 var existingGame = await _context.Games
+                    .Include(game => game.Developers)
+                    .Include(game => game.Franchises)
+                    .Include(game => game.Genres)
+                    .Include(game => game.Platforms)
+                    .Include(game => game.Publishers)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(g => g.GameId == id);
+                    .FirstOrDefaultAsync(game => game.GameId == id);
+
+                var jsonOpts = new JsonSerializerOptions
+                {
+                    // avoid infinite loops from models with many-to-many
+                    // relationships by tracking object references
+                    ReferenceHandler = ReferenceHandler.Preserve,
+                    // increase max depth since object graph is deeper
+                    // than the default 32
+                    MaxDepth = 64
+                };
+
                 if (existingGame != null)
                 {
-                    return Ok(existingGame);
+                    var jsonObj = JsonSerializer.Serialize(existingGame, jsonOpts);
+                    return Ok(jsonObj);
                 }
             }
 
