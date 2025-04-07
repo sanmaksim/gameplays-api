@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace GameplaysApi.Models
 {
@@ -27,7 +29,7 @@ namespace GameplaysApi.Models
         public ICollection<Genre>? Genres { get; set; }
 
         [MaxLength(255)]
-        public string? Image { get; set; } // Column Type = "json"
+        public string? ImageJson { get; set; } // Column Type = "json"
 
         public DateOnly? OriginalReleaseDate { get; set; }
 
@@ -42,6 +44,14 @@ namespace GameplaysApi.Models
         public void UpdateTimestamp()
         {
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        // This is the non-mapped property that holds the Image object
+        [NotMapped]
+        public Image? Image
+        {
+            get => string.IsNullOrEmpty(ImageJson) ? null : JsonSerializer.Deserialize<Image>(ImageJson);
+            set => ImageJson = JsonSerializer.Serialize(value);
         }
     }
 }
