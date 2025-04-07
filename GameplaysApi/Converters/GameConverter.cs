@@ -16,7 +16,6 @@ namespace GameplaysApi.Converters
                     GameId = root.GetProperty("results").GetProperty("id").GetInt32(),
                     Name = root.GetProperty("results").GetProperty("name").GetString()!,
                     Deck = root.GetProperty("results").GetProperty("deck").GetString(),
-                    //Description = root.GetProperty("results").GetProperty("description").GetString(),
                     Developers = root.GetProperty("results").GetProperty("developers")
                                     .EnumerateArray()
                                     .Select(d => new Developer 
@@ -41,7 +40,18 @@ namespace GameplaysApi.Converters
                                         Name = g.GetProperty("name").GetString()
                                     })
                                     .ToList(),
-                    //Image = root.GetProperty("results").GetProperty("image").GetString(),
+                    Image = new Image
+                    {
+                        IconUrl = root.GetProperty("results").GetProperty("image").GetProperty("icon_url").GetString(),
+                        MediumUrl = root.GetProperty("results").GetProperty("image").GetProperty("medium_url").GetString(),
+                        ScreenUrl = root.GetProperty("results").GetProperty("image").GetProperty("screen_url").GetString(),
+                        SmallUrl = root.GetProperty("results").GetProperty("image").GetProperty("small_url").GetString(),
+                        SuperUrl = root.GetProperty("results").GetProperty("image").GetProperty("super_url").GetString(),
+                        ThumbUrl = root.GetProperty("results").GetProperty("image").GetProperty("thumb_url").GetString(),
+                        TinyUrl = root.GetProperty("results").GetProperty("image").GetProperty("tiny_url").GetString(),
+                        OriginalUrl = root.GetProperty("results").GetProperty("image").GetProperty("original_url").GetString(),
+                        ImageTags = root.GetProperty("results").GetProperty("image").GetProperty("image_tags").GetString()
+                    },
                     OriginalReleaseDate = DateOnly.FromDateTime(root.GetProperty("results").GetProperty("original_release_date").GetDateTime()),
                     Platforms = root.GetProperty("results").GetProperty("platforms")
                                     .EnumerateArray()
@@ -61,15 +71,8 @@ namespace GameplaysApi.Converters
                                     .ToList()
                 };
 
-                // deserialize the Image field from the JSON string into an ImageDetails object
-                if (root.GetProperty("results").TryGetProperty("image", out JsonElement imageElement) && imageElement.ValueKind == JsonValueKind.String)
-                {
-                    var imageJson = imageElement.GetString();
-                    if (!string.IsNullOrEmpty(imageJson))
-                    {
-                        game.Image = imageJson;
-                    }
-                }
+                // Serialize the Image object to a JSON string and store it in the ImageJson property
+                game.ImageJson = JsonSerializer.Serialize(game.Image);
 
                 return game;
             }
@@ -79,18 +82,5 @@ namespace GameplaysApi.Converters
         {
             throw new NotImplementedException();
         }
-    }
-
-    public class ImageDetails
-    {
-        public string? IconUrl { get; set; }
-        public string? MediumUrl { get; set; }
-        public string? ScreenUrl { get; set; }
-        public string? SmallUrl { get; set; }
-        public string? SuperUrl { get; set; }
-        public string? ThumbUrl { get; set; }
-        public string? TinyUrl { get; set; }
-        public string? OriginalUrl { get; set; }
-        public string? ImageTags { get; set; }
     }
 }
