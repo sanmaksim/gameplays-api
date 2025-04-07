@@ -31,7 +31,7 @@ namespace GameplaysApi.Data
             {
                 entity.HasAlternateKey(g => g.GameId);
 
-                entity.Property(g => g.Image)
+                entity.Property(g => g.ImageJson)
                     .HasColumnType("json");
 
                 // junction table customizations
