@@ -22,20 +22,20 @@ namespace GameplaysApi.Models
         //[MaxLength(255)]
         //public string? Description { get; set; }
 
-        public ICollection<Developer>? Developers { get; set; }
+        public List<Developer>? Developers { get; set; }
 
-        public ICollection<Franchise>? Franchises { get; set; }
+        public List<Franchise>? Franchises { get; set; }
 
-        public ICollection<Genre>? Genres { get; set; }
+        public List<Genre>? Genres { get; set; }
 
         [MaxLength(255)]
         public string? ImageJson { get; set; } // Column Type = "json"
 
         public DateOnly? OriginalReleaseDate { get; set; }
 
-        public ICollection<Platform>? Platforms { get; set; }
+        public List<Platform>? Platforms { get; set; }
 
-        public ICollection<Publisher>? Publishers { get; set; }
+        public List<Publisher>? Publishers { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

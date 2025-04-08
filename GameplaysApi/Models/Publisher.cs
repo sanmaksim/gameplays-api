@@ -13,6 +13,6 @@ namespace GameplaysApi.Models
         [MaxLength(255)]
         public string? Name { get; set; }
 
-        public ICollection<Game>? Games { get; set; }
+        public List<Game>? Games { get; set; }
     }
 }
