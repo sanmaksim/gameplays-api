@@ -1,6 +1,7 @@
 using GameplaysApi.Converters;
 using GameplaysApi.Data;
 using GameplaysApi.Models;
+using GameplaysApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace GameplaysApi.Controllers
     public class GamesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly EntityTrackingService _entityTrackingService;
         private readonly HttpClient _httpClient;
-
-        public GamesController(ApplicationDbContext context, HttpClient httpClient)
+        
+        public GamesController(ApplicationDbContext context, EntityTrackingService entityTrackingService, HttpClient httpClient)
         {
             _context = context;
+            _entityTrackingService = entityTrackingService;
             _httpClient = httpClient;
         }
 
@@ -158,12 +161,18 @@ namespace GameplaysApi.Controllers
                 Converters = { new GameConverter() }
             };
 
-            // deserialize the content using the custom converter
+            // deserialize the returned content using the custom converter
             var game = JsonSerializer.Deserialize<Game>(content, options);
 
             // save the game to the database
             if (game != null)
             {
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Developers, "DeveloperId");
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Franchises, "FranchiseId");
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Genres, "GenreId");
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Platforms, "PlatformId");
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Publishers, "PublisherId");
+
                 _context.Games.Add(game);
                 await _context.SaveChangesAsync();
             }
