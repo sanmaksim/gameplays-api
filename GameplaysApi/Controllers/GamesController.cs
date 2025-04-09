@@ -1,5 +1,6 @@
 using GameplaysApi.Converters;
 using GameplaysApi.Data;
+using GameplaysApi.DTOs;
 using GameplaysApi.Models;
 using GameplaysApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -81,7 +82,7 @@ namespace GameplaysApi.Controllers
         [HttpGet("{gameId}")]
         public async Task<IActionResult> GetGame(string gameId)
         {
-            // check whether game is in the database
+            // check whether the game can be retreived from the database
             if (int.TryParse(gameId, out int id))
             {
                 var existingGame = await _context.Games
@@ -90,23 +91,36 @@ namespace GameplaysApi.Controllers
                     .Include(game => game.Genres)
                     .Include(game => game.Platforms)
                     .Include(game => game.Publishers)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(game => game.GameId == id);
+                    .Where(game => game.GameId == id)
+                    .Select(game => new ResultsWrapperDto
+                    {
+                        Results = new GameResultDto
+                        {
+                            Name = game.Name,
+                            Deck = game.Deck,
+                            Developers = game.Developers!.Select(developer => new DeveloperDto { Name = developer.Name }).ToList(),
+                            Franchises = game.Franchises!.Select(franchise => new FranchiseDto { Name = franchise.Name }).ToList(),
+                            Genres = game.Genres!.Select(genre => new GenreDto { Name = genre.Name }).ToList(),
+                            Image = game.Image,
+                            OriginalReleaseDate = game.OriginalReleaseDate,
+                            Platforms = game.Platforms!.Select(platform => new PlatformDto { Name = platform.Name }).ToList(),
+                            Publishers = game.Publishers!.Select(publisher => new PublisherDto { Name = publisher.Name }).ToList()
+                        }
+                    })
+                    .FirstOrDefaultAsync();
 
-                var jsonOpts = new JsonSerializerOptions
+                var writeOptions = new JsonSerializerOptions
                 {
-                    // avoid infinite loops from models with many-to-many
-                    // relationships by tracking object references
-                    ReferenceHandler = ReferenceHandler.Preserve,
-                    // increase max depth since object graph is deeper
-                    // than the default 32
+                    // avoid infinite loops from models with many-to-many relationships by tracking object references
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    // increase max depth since object graph is deeper than the default 32
                     MaxDepth = 64
                 };
 
                 if (existingGame != null)
                 {
-                    var jsonObj = JsonSerializer.Serialize(existingGame, jsonOpts);
-                    return Ok(jsonObj);
+                    var json = JsonSerializer.Serialize(existingGame, writeOptions);
+                    return Ok(json);
                 }
             }
 
@@ -156,13 +170,13 @@ namespace GameplaysApi.Controllers
             var content = await response.Content.ReadAsStringAsync();
 
             // create JsonSerializerOptions and add the custom converter
-            var options = new JsonSerializerOptions
+            var readOptions = new JsonSerializerOptions
             {
                 Converters = { new GameConverter() }
             };
 
             // deserialize the returned content using the custom converter
-            var game = JsonSerializer.Deserialize<Game>(content, options);
+            var game = JsonSerializer.Deserialize<Game>(content, readOptions);
 
             // save the game to the database
             if (game != null)
