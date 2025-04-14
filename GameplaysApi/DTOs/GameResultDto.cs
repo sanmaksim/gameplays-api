@@ -44,30 +44,45 @@ namespace GameplaysApi.DTOs
 
     public class DeveloperDto
     {
+        [JsonPropertyName("id")]
+        public int? DeveloperId { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
 
     public class FranchiseDto
     {
+        [JsonPropertyName("id")]
+        public int? FranchiseId { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
 
     public class GenreDto
     {
+        [JsonPropertyName("id")]
+        public int? GenreId { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
 
     public class PlatformDto
     {
+        [JsonPropertyName("id")]
+        public int? PlatformId { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
 
     public class PublisherDto
     {
+        [JsonPropertyName("id")]
+        public int? PublisherId { get; set; }
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
     }
