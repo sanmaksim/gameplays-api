@@ -98,13 +98,38 @@ namespace GameplaysApi.Controllers
                         {
                             Name = game.Name,
                             Deck = game.Deck,
-                            Developers = game.Developers!.Select(developer => new DeveloperDto { Name = developer.Name }).ToList(),
-                            Franchises = game.Franchises!.Select(franchise => new FranchiseDto { Name = franchise.Name }).ToList(),
-                            Genres = game.Genres!.Select(genre => new GenreDto { Name = genre.Name }).ToList(),
+                            Developers = game.Developers!.Select(
+                                developer => new DeveloperDto
+                                {
+                                    DeveloperId = developer.DeveloperId,
+                                    Name = developer.Name
+                                }).ToList(),
+                            Franchises = game.Franchises!.Select(
+                                franchise => new FranchiseDto
+                                {
+                                    FranchiseId = franchise.FranchiseId,
+                                    Name = franchise.Name
+                                }).ToList(),
+                            Genres = game.Genres!.Select(
+                                genre => new GenreDto
+                                {
+                                    GenreId = genre.GenreId,
+                                    Name = genre.Name
+                                }).ToList(),
                             Image = game.Image,
                             OriginalReleaseDate = game.OriginalReleaseDate,
-                            Platforms = game.Platforms!.Select(platform => new PlatformDto { Name = platform.Name }).ToList(),
-                            Publishers = game.Publishers!.Select(publisher => new PublisherDto { Name = publisher.Name }).ToList()
+                            Platforms = game.Platforms!.Select(
+                                platform => new PlatformDto
+                                {
+                                    PlatformId = platform.PlatformId,
+                                    Name = platform.Name
+                                }).ToList(),
+                            Publishers = game.Publishers!.Select(
+                                publisher => new PublisherDto
+                                {
+                                    PublisherId = publisher.PublisherId,
+                                    Name = publisher.Name
+                                }).ToList()
                         }
                     })
                     .FirstOrDefaultAsync();
