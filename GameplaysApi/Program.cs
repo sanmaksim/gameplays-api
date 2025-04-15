@@ -77,8 +77,9 @@ builder.Services.AddTransient<JwtTokenService>();
 builder.Services.AddTransient<CookieService>();
 builder.Services.AddTransient<AuthService>();
 
-// Register EntityTrackingService
+// Register ApplicationDbContext helper services
 builder.Services.AddScoped<EntityTrackingService>();
+builder.Services.AddScoped<GameHelperService>();
 
 // Rate limit proxied API requests to 1 per second and provide a response upon rejection
 builder.Services.AddRateLimiter(options => {
