@@ -17,12 +17,18 @@ namespace GameplaysApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly EntityTrackingService _entityTrackingService;
+        private readonly GameHelperService _gameHelperService;
         private readonly HttpClient _httpClient;
         
-        public GamesController(ApplicationDbContext context, EntityTrackingService entityTrackingService, HttpClient httpClient)
+        public GamesController(
+            ApplicationDbContext context, 
+            EntityTrackingService entityTrackingService, 
+            GameHelperService gameHelperService,
+            HttpClient httpClient)
         {
             _context = context;
             _entityTrackingService = entityTrackingService;
+            _gameHelperService = gameHelperService;
             _httpClient = httpClient;
         }
 
@@ -85,54 +91,7 @@ namespace GameplaysApi.Controllers
             // check whether the game can be retreived from the database
             if (int.TryParse(gameId, out int id))
             {
-                var existingGame = await _context.Games
-                    .Include(game => game.Developers)
-                    .Include(game => game.Franchises)
-                    .Include(game => game.Genres)
-                    .Include(game => game.Platforms)
-                    .Include(game => game.Publishers)
-                    .Where(game => game.GameId == id)
-                    .Select(game => new ResultsWrapperDto
-                    {
-                        Results = new GameResultDto
-                        {
-                            Name = game.Name,
-                            Deck = game.Deck,
-                            Developers = game.Developers!.Select(
-                                developer => new DeveloperDto
-                                {
-                                    DeveloperId = developer.DeveloperId,
-                                    Name = developer.Name
-                                }).ToList(),
-                            Franchises = game.Franchises!.Select(
-                                franchise => new FranchiseDto
-                                {
-                                    FranchiseId = franchise.FranchiseId,
-                                    Name = franchise.Name
-                                }).ToList(),
-                            Genres = game.Genres!.Select(
-                                genre => new GenreDto
-                                {
-                                    GenreId = genre.GenreId,
-                                    Name = genre.Name
-                                }).ToList(),
-                            Image = game.Image,
-                            OriginalReleaseDate = game.OriginalReleaseDate,
-                            Platforms = game.Platforms!.Select(
-                                platform => new PlatformDto
-                                {
-                                    PlatformId = platform.PlatformId,
-                                    Name = platform.Name
-                                }).ToList(),
-                            Publishers = game.Publishers!.Select(
-                                publisher => new PublisherDto
-                                {
-                                    PublisherId = publisher.PublisherId,
-                                    Name = publisher.Name
-                                }).ToList()
-                        }
-                    })
-                    .FirstOrDefaultAsync();
+                var existingGame = await _gameHelperService.GetExistingGame(id);
 
                 var writeOptions = new JsonSerializerOptions
                 {
