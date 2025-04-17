@@ -15,7 +15,8 @@ namespace GameplaysApi.Services
         public async Task AttachOrUpdateEntityAsync<TMain, TRelated>(
             TMain mainEntity, 
             List<TRelated>? relatedEntities,
-            string uniqueIdentifierProperty)
+            string uniqueIdentifierProperty,
+            bool toUpdate)
             where TMain : class
             where TRelated : class
         {
@@ -44,8 +45,16 @@ namespace GameplaysApi.Services
 
                     if (existingEntity != null)
                     {
-                        // Attach the existing related entity to the context (mark it as Unchanged)
-                        _context.Entry(existingEntity).State = EntityState.Unchanged;
+                        if (toUpdate == true)
+                        {
+                            // Attach the existing related entity to the context (mark it as Changed)
+                            _context.Entry(existingEntity).State = EntityState.Modified;
+                        }
+                        else
+                        {
+                            // Attach the existing related entity to the context (mark it as Unchanged)
+                            _context.Entry(existingEntity).State = EntityState.Unchanged;
+                        }
 
                         // Reassign the reference in the main entity's collection
                         var relatedEntityProperty = typeof(TMain).GetProperty(typeof(TRelated).Name + "s");
