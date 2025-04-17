@@ -40,6 +40,9 @@ namespace GameplaysApi.DTOs
 
         [JsonPropertyName("publishers")]
         public List<PublisherDto>? Publishers { get; set; }
+
+        [JsonPropertyName("updated_at")]
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class DeveloperDto
