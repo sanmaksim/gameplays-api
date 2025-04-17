@@ -1,6 +1,5 @@
 using GameplaysApi.Converters;
 using GameplaysApi.Data;
-using GameplaysApi.DTOs;
 using GameplaysApi.Models;
 using GameplaysApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -88,6 +87,8 @@ namespace GameplaysApi.Controllers
         [HttpGet("{gameId}")]
         public async Task<IActionResult> GetGame(string gameId)
         {
+            bool updateEntity = false;
+
             // check whether the game can be retreived from the database
             if (int.TryParse(gameId, out int id))
             {
@@ -101,10 +102,16 @@ namespace GameplaysApi.Controllers
                     MaxDepth = 64
                 };
 
-                if (existingGame != null)
+                if (existingGame != null 
+                    && existingGame.Results != null 
+                    && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 1)
                 {
                     var json = JsonSerializer.Serialize(existingGame, writeOptions);
                     return Ok(json);
+                }
+                else
+                {
+                    updateEntity = true;
                 }
             }
 
@@ -165,13 +172,28 @@ namespace GameplaysApi.Controllers
             // save the game to the database
             if (game != null)
             {
-                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Developers, "DeveloperId");
-                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Franchises, "FranchiseId");
-                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Genres, "GenreId");
-                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Platforms, "PlatformId");
-                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Publishers, "PublisherId");
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Developers, "DeveloperId", updateEntity);
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Franchises, "FranchiseId", updateEntity);
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Genres, "GenreId", updateEntity);
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Platforms, "PlatformId", updateEntity);
+                await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Publishers, "PublisherId", updateEntity);
 
-                _context.Games.Add(game);
+                // Check if the entity is tracked before calling Add or Update
+                var trackedGame = _context.ChangeTracker.Entries<Game>().FirstOrDefault(e => e.Entity.GameId == game.GameId);
+
+                if (trackedGame != null)
+                {
+                    trackedGame.Entity.UpdateTimestamp();
+                    // Mark the main game entity as changed
+                    _context.Entry(trackedGame.Entity).State = EntityState.Modified;
+                    // Mark the main game entity's primary key as unmodified to avoid errors
+                    _context.Entry(trackedGame.Entity).Property(e => e.Id).IsModified = false;
+                }
+                else
+                {
+                    _context.Games.Add(game);
+                }
+                
                 await _context.SaveChangesAsync();
             }
 
