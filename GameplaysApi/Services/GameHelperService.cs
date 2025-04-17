@@ -59,7 +59,8 @@ namespace GameplaysApi.Services
                             {
                                 PublisherId = publisher.PublisherId,
                                 Name = publisher.Name
-                            }).ToList()
+                            }).ToList(),
+                        UpdatedAt = game.UpdatedAt
                     }
                 })
                 .FirstOrDefaultAsync();
