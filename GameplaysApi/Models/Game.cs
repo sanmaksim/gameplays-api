@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 
@@ -15,6 +16,9 @@ namespace GameplaysApi.Models
         [MaxLength(255)]
         [Required]
         public required string Name { get; set; }
+
+        [Precision(0)]
+        public DateTime? DateLastUpdated { get; set; }
 
         [MaxLength(255)]
         public string? Deck { get; set; }

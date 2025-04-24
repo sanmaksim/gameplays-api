@@ -1,4 +1,5 @@
 ﻿using GameplaysApi.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 namespace GameplaysApi.DTOs
@@ -13,6 +14,9 @@ namespace GameplaysApi.DTOs
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
+
+        [JsonPropertyName("date_last_updated")]
+        public DateTime? DateLastUpdated { get; set; }
 
         [JsonPropertyName("deck")]
         public string? Deck { get; set; }
