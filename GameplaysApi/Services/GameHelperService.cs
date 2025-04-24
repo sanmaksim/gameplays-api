@@ -28,6 +28,7 @@ namespace GameplaysApi.Services
                     {
                         Name = game.Name,
                         Deck = game.Deck,
+                        DateLastUpdated = game.DateLastUpdated,
                         Developers = game.Developers!.Select(
                             developer => new DeveloperDto
                             {

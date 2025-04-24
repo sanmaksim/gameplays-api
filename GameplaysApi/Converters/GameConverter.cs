@@ -15,6 +15,10 @@ namespace GameplaysApi.Converters
                 {
                     GameId = root.GetProperty("results").GetProperty("id").GetInt32(),
                     Name = root.GetProperty("results").GetProperty("name").GetString()!,
+                    DateLastUpdated = DateTime.ParseExact(
+                        root.GetProperty("results").GetProperty("date_last_updated").GetString()!, 
+                        "yyyy-MM-dd HH:mm:ss", 
+                        System.Globalization.CultureInfo.InvariantCulture),
                     Deck = root.GetProperty("results").GetProperty("deck").GetString(),
                     Developers = root.GetProperty("results").GetProperty("developers")
                                     .EnumerateArray()
