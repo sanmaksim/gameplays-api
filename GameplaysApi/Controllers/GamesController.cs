@@ -178,16 +178,28 @@ namespace GameplaysApi.Controllers
                 await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Platforms, "PlatformId", updateEntity);
                 await _entityTrackingService.AttachOrUpdateEntityAsync(game, game.Publishers, "PublisherId", updateEntity);
 
-                // Check if the entity is tracked before calling Add or Update
+                // Check whether the 'game' entity is already tracked in the db for update purposes
                 var trackedGame = _context.ChangeTracker.Entries<Game>().FirstOrDefault(e => e.Entity.GameId == game.GameId);
 
                 if (trackedGame != null)
                 {
-                    trackedGame.Entity.UpdateTimestamp();
-                    // Mark the main game entity as changed
-                    _context.Entry(trackedGame.Entity).State = EntityState.Modified;
-                    // Mark the main game entity's primary key as unmodified to avoid errors
-                    _context.Entry(trackedGame.Entity).Property(e => e.Id).IsModified = false;
+                    if (updateEntity == true)
+                    {
+                        // Copy non-PK values from API object to the tracked entity
+                        foreach (var property in _context.Entry(trackedGame.Entity).Properties)
+                        {
+                            if (!property.Metadata.IsPrimaryKey())
+                            {
+                                var newValue = typeof(Game).GetProperty(property.Metadata.Name)?.GetValue(game);
+                                property.CurrentValue = newValue;
+                            }
+                        }
+                        trackedGame.Entity.UpdateTimestamp();
+                    }
+                    else
+                    {
+                        _context.Entry(trackedGame.Entity).State = EntityState.Unchanged;
+                    }
                 }
                 else
                 {
