@@ -188,7 +188,7 @@ namespace GameplaysApi.Controllers
                         // Copy non-PK values from API object to the tracked entity
                         foreach (var property in _context.Entry(trackedGame.Entity).Properties)
                         {
-                            if (!property.Metadata.IsPrimaryKey())
+                            if (!property.Metadata.IsPrimaryKey() && property.Metadata.Name != nameof(Game.CreatedAt))
                             {
                                 var newValue = typeof(Game).GetProperty(property.Metadata.Name)?.GetValue(game);
                                 property.CurrentValue = newValue;
