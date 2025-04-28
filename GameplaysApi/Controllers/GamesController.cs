@@ -185,13 +185,12 @@ namespace GameplaysApi.Controllers
                 {
                     if (updateEntity == true)
                     {
-                        // Copy relevant values from API object to the tracked entity
+                        // Copy relevant values from the main API entity to the main tracked entity
                         foreach (var property in _context.Entry(trackedGame.Entity).Properties)
                         {
                             if (!property.Metadata.IsPrimaryKey() && property.Metadata.Name != nameof(Game.CreatedAt))
                             {
-                                var newValue = typeof(Game).GetProperty(property.Metadata.Name)?.GetValue(game);
-                                property.CurrentValue = newValue;
+                                property.CurrentValue = typeof(Game).GetProperty(property.Metadata.Name)?.GetValue(game);
                             }
                         }
                         trackedGame.Entity.UpdateTimestamp();
