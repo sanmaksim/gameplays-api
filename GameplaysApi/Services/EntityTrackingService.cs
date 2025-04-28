@@ -47,12 +47,17 @@ namespace GameplaysApi.Services
                     {
                         if (toUpdate == true)
                         {
-                            // Attach the existing related entity to the context (mark it as Changed)
-                            _context.Entry(existingEntity).State = EntityState.Modified;
+                            // Copy relevant properties from the related API entity to the related tracked entity
+                            foreach (var property in _context.Entry(existingEntity).Properties)
+                            {
+                                if (!property.Metadata.IsPrimaryKey())
+                                {
+                                    property.CurrentValue = typeof(TRelated).GetProperty(property.Metadata.Name)?.GetValue(relatedEntity);
+                                }
+                            }
                         }
                         else
                         {
-                            // Attach the existing related entity to the context (mark it as Unchanged)
                             _context.Entry(existingEntity).State = EntityState.Unchanged;
                         }
 
