@@ -102,9 +102,10 @@ namespace GameplaysApi.Controllers
                     MaxDepth = 64
                 };
 
+                // refresh existing game entity after 30 days
                 if (existingGame != null 
                     && existingGame.Results != null 
-                    && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 1)
+                    && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 30)
                 {
                     var json = JsonSerializer.Serialize(existingGame, writeOptions);
                     return Ok(json);
