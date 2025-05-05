@@ -47,7 +47,7 @@ namespace GameplaysApi.Controllers
                 }
 
                 // Make sure the game exists in the database
-                var game = await _context.Games.FindAsync(playDto.GameId);
+                var game = await _context.Games.FirstOrDefaultAsync(g => g.GameId == playDto.GameId);
                 if (game == null)
                 {
                     return NotFound(new { message = "Game not found." });
@@ -56,17 +56,17 @@ namespace GameplaysApi.Controllers
                 var newPlay = new Play
                 {
                     UserId = playDto.UserId,
-                    GameId = playDto.GameId
+                    GameId = game.Id // we want our local game ID, not the Giant Bomb API game ID
                 };
 
                 // Get the count of plays for this user and game
                 var playCount = await _context.Plays
-                    .CountAsync(p => p.UserId == playDto.UserId && p.GameId == playDto.GameId);
+                    .CountAsync(p => p.UserId == playDto.UserId && p.GameId == game.Id);
 
                 if (playCount > 0)
                 {
                     var existingPlays = await _context.Plays
-                        .Where(p => p.UserId == playDto.UserId && p.GameId == playDto.GameId)
+                        .Where(p => p.UserId == playDto.UserId && p.GameId == game.Id)
                         .ToListAsync();
 
                     if (existingPlays != null)
