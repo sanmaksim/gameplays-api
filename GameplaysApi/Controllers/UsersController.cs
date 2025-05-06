@@ -57,7 +57,13 @@ namespace GameplaysApi.Controllers
                 // Now that the UserId is set, create the cookie
                 _authService.CreateAuthCookie(newUser, Response);
 
-                return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
+                return CreatedAtAction(nameof(GetUser), 
+                                        new { id = newUser.Id }, 
+                                        new {
+                                            id = newUser.Id,
+                                            username = newUser.Username,
+                                            email = newUser.Email
+                                        });
 
             }
             catch (DbUpdateException)
@@ -96,7 +102,11 @@ namespace GameplaysApi.Controllers
                 if (user.VerifyPassword(authDto.Password, user.Password))
                 {
                     _authService.CreateAuthCookie(user, Response);
-                    return Ok(user);
+                    return Ok(new { 
+                        id = user.Id,
+                        username = user.Username,
+                        email = user.Email
+                    });
                 }
                 else
                 {
