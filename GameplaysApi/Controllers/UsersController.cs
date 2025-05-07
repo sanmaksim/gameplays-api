@@ -130,17 +130,6 @@ namespace GameplaysApi.Controllers
             return Ok( new { message = "Logged out successfully." });
         }
 
-        // @desc Get all users
-        // route GET /api/users
-        // @access Private
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            var users = await _context.Users.ToListAsync();
-            return Ok(users);
-        }
-
         // @desc Get user
         // route GET /api/users/profile
         // @access Private
