@@ -259,7 +259,11 @@ namespace GameplaysApi.Controllers
                     }
                 }
 
-                return Ok(existingUser);
+                return Ok(new { 
+                    id = existingUser.Id,
+                    username = existingUser.Username,
+                    email = existingUser.Email
+                });
             }
             else
             {
