@@ -120,7 +120,7 @@ namespace GameplaysApi.Controllers
         }
 
         // @desc Delete auth cookie
-        // route GET /api/users/logout
+        // route POST /api/users/logout
         // @access Private
         [Authorize]
         [HttpPost("logout")]
@@ -163,7 +163,7 @@ namespace GameplaysApi.Controllers
         }
 
         // @desc Update user
-        // route PUT /api/users/settings
+        // route PUT /api/users/profile
         // @access Private
         [Authorize]
         [HttpPut("profile")]
@@ -261,7 +261,7 @@ namespace GameplaysApi.Controllers
         }
 
         // @desc Delete user
-        // route DELETE /api/users/settings
+        // route DELETE /api/users/profile
         // @access Private
         [Authorize]
         [HttpDelete("profile")]
