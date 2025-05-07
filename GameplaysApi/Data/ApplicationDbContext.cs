@@ -86,7 +86,8 @@ namespace GameplaysApi.Data
                 .HasAlternateKey(p => p.PublisherId);
 
             modelBuilder.Entity<User>()
-                .HasAlternateKey(u => u.Email);
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }
