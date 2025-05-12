@@ -56,7 +56,8 @@ namespace GameplaysApi.Controllers
                 var newPlay = new Play
                 {
                     UserId = playDto.UserId,
-                    GameId = game.Id // we want our local game ID, not the Giant Bomb API game ID
+                    GameId = game.Id, // local game ID, not the Giant Bomb API game ID
+                    ApiGameId = playDto.GameId // this is the Giant Bomb API game ID
                 };
 
                 // Get the count of plays for this user and game
@@ -73,29 +74,28 @@ namespace GameplaysApi.Controllers
                     {
                         foreach (var play in existingPlays)
                         {
-                            // Only add additional play for Played and Playing statuses
-                            if (play.Status == PlayStatus.Playing || play.Status == PlayStatus.Played 
-                                && (PlayStatus)playDto.Status == PlayStatus.Playing || (PlayStatus)playDto.Status == PlayStatus.Played)
+                            if (play.Status == PlayStatus.Playing
+                                && (PlayStatus)playDto.Status == PlayStatus.Playing)
                             {
-                                // Increment the run ID based on the count
-                                newPlay.RunId = playCount > 0 ? playCount + 1 : 1;
-
-                                // Set the play status
-                                newPlay.Status = (PlayStatus)playDto.Status;
+                                return Ok(new { message = "Playing item already exists." });
+                            }
+                            else if (play.Status == PlayStatus.Played
+                                && (PlayStatus)playDto.Status == PlayStatus.Played)
+                            {
+                                return Ok(new { message = "Played item already exists." });
                             }
                             else if (play.Status == PlayStatus.Wishlist
                                 && (PlayStatus)playDto.Status == PlayStatus.Wishlist)
                             {
                                 return Ok(new { message = "Wishlist item already exists." });
                             }
-                            else if (play.Status == PlayStatus.Backlog 
+                            else if (play.Status == PlayStatus.Backlog
                                 && (PlayStatus)playDto.Status == PlayStatus.Backlog)
                             {
                                 return Ok(new { message = "Backlog item already exists." });
                             }
                             else
                             {
-                                // Set the play status
                                 newPlay.Status = (PlayStatus)playDto.Status;
                             }
                         }
