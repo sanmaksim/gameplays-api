@@ -31,7 +31,7 @@ namespace GameplaysApi.Controllers
             }
 
             // Parse the retrieved token ID string to an int
-            if (int.TryParse(userId, out int uId))
+            if (int.TryParse(userId, out int uId) && int.TryParse(playDto.GameId, out int gId))
             {
                 // Check if the token ID matches the FromBody ID
                 if (uId != playDto.UserId)
@@ -47,7 +47,7 @@ namespace GameplaysApi.Controllers
                 }
 
                 // Make sure the game exists in the database
-                var game = await _context.Games.FirstOrDefaultAsync(g => g.GameId == playDto.GameId);
+                var game = await _context.Games.FirstOrDefaultAsync(g => g.GameId == gId);
                 if (game == null)
                 {
                     return NotFound(new { message = "Game not found." });
@@ -57,7 +57,7 @@ namespace GameplaysApi.Controllers
                 {
                     UserId = playDto.UserId,
                     GameId = game.Id, // local game ID, not the Giant Bomb API game ID
-                    ApiGameId = playDto.GameId // this is the Giant Bomb API game ID
+                    ApiGameId = gId // this is the Giant Bomb API game ID
                 };
 
                 // Get the count of plays for this user and game
@@ -132,8 +132,8 @@ namespace GameplaysApi.Controllers
         }
         
         [Authorize]
-        [HttpGet("{playId}")]
-        public async Task<IActionResult> GetPlay(string playId)
+        [HttpGet("{gameId}")]
+        public async Task<IActionResult> GetPlay(string gameId)
         {
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
@@ -152,18 +152,29 @@ namespace GameplaysApi.Controllers
                     return NotFound();
                 }
 
-                if (int.TryParse(playId, out int pId))
+                if (int.TryParse(gameId, out int gId))
                 {
-                    var play = await _context.Plays
-                        .Include(p => p.User)
-                        .Include(p => p.Game)
-                        .FirstOrDefaultAsync(p => p.UserId == uId && p.Id == pId);
+                    var plays = await _context.Plays
+                        .Where(p => p.UserId == uId && p.ApiGameId == gId)
+                        .ToListAsync();
 
-                    return Ok(play);
+                    if (plays != null)
+                    {
+                        var statusList = new List<int>();
+                        foreach (Play play in plays)
+                        {
+                            statusList.Add((int)play.Status);
+                        }
+                        return Ok(statusList.ToArray());
+                    }
+                    else
+                    {
+                        return Ok(new { message = "No plays found." });
+                    }
                 }
                 else
                 {
-                    return NotFound(new { message = "Play not found." });
+                    return NotFound(new { message = "The game ID is not valid." });
                 }
             }
             else
