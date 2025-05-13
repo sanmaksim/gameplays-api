@@ -118,11 +118,8 @@ namespace GameplaysApi.Controllers
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(
                     nameof(GetPlay), 
-                    new { playId = newPlay.Id }, 
-                    new {
-                        Message = "Play item created.",
-                        Play = newPlay 
-                    }
+                    new { GameId = gId }, 
+                    new { Message = "Play item created." }
                 );
             }
             else
