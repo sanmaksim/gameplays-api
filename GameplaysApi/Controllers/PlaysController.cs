@@ -127,6 +127,52 @@ namespace GameplaysApi.Controllers
                 return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
+
+        [Authorize]
+        [HttpDelete("{playId}")]
+        public async Task<IActionResult> DeletePlay(string playId)
+        {
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Forbid();
+            }
+
+            if (int.TryParse(userId, out int uId))
+            {
+                var user = await _context.Users.FindAsync(uId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                if (int.TryParse(playId, out int pId))
+                {
+                    var existingPlay = await _context.Plays.FindAsync(pId);
+
+                    if (existingPlay == null)
+                    {
+                        return NotFound(new { message = "Play not found." });
+                    }
+
+                    _context.Plays.Remove(existingPlay);
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { message = "Play deleted." });
+                }
+                else
+                {
+                    return BadRequest(new { message = "The play ID is not valid." });
+                }
+            }
+            else
+            {
+                return BadRequest(new { message = "The token string is not a valid integer." });
+            }
+        }
         
         [Authorize]
         [HttpGet("{gameId}")]
@@ -134,7 +180,6 @@ namespace GameplaysApi.Controllers
         {
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Forbid();
@@ -157,12 +202,15 @@ namespace GameplaysApi.Controllers
 
                     if (plays != null)
                     {
-                        var statusList = new List<int>();
+                        var statusList = new List<PlayStatusDto>();
                         foreach (Play play in plays)
                         {
-                            statusList.Add((int)play.Status);
+                            statusList.Add(new PlayStatusDto { 
+                                PlayId = play.Id, 
+                                Status = (int)play.Status 
+                            });
                         }
-                        return Ok(statusList.ToArray());
+                        return Ok(statusList);
                     }
                     else
                     {
