@@ -117,7 +117,7 @@ namespace GameplaysApi.Controllers
                 _context.Plays.Add(newPlay);
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(
-                    nameof(GetPlays), 
+                    nameof(GetPlaysByGameId), 
                     new { GameId = gId }, 
                     new { Message = "Play item created." }
                 );
@@ -175,8 +175,8 @@ namespace GameplaysApi.Controllers
         }
         
         [Authorize]
-        [HttpGet("{gameId}")]
-        public async Task<IActionResult> GetPlays(string gameId)
+        [HttpGet("game/{gameId}")]
+        public async Task<IActionResult> GetPlaysByGameId(string gameId)
         {
             // Retrieve the user ID string from the JWT 'sub' claim
             var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
