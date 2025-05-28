@@ -26,6 +26,12 @@ namespace GameplaysApi.DTOs
 
         [JsonPropertyName("last_played_at")]
         public DateOnly? LastPlayedAt { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("api_game_id")]
+        public int ApiGameId { get; set; }
     }
 
     public class DevDto
