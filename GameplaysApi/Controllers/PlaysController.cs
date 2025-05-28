@@ -227,5 +227,61 @@ namespace GameplaysApi.Controllers
                 return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
+
+        [Authorize]
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetPlaysByUserId(string userId)
+        {
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var jwtUserId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
+            {
+                return Forbid();
+            }
+
+            if (int.TryParse(userId, out int uId))
+            {
+                var user = await _context.Users.FindAsync(uId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                
+                var plays = await _context.Plays
+                    .Include(p => p.Game)
+                    .Where(p => p.UserId == uId)
+                    .Select(p => new UserPlaysDto
+                    {
+                        Id = p.Id,
+                        Name = p.Game!.Name,
+                        Developers = p.Game.Developers!.Select(
+                            dev => new DevDto
+                            {
+                                DevId = dev.Id,
+                                Name = dev.Name
+                            }).ToList(),
+                        OriginalReleaseDate = p.Game.OriginalReleaseDate,
+                        CreatedAt = DateOnly.FromDateTime(p.CreatedAt),
+                        HoursPlayed = p.HoursPlayed,
+                        PercentageCompleted = p.PercentageCompleted,
+                        LastPlayedAt = p.LastPlayedAt
+                    })
+                    .ToListAsync();
+
+                if (plays != null)
+                {
+                    return Ok(plays);
+                }
+                else
+                {
+                    return Ok(new { message = "No plays found." });
+                }
+            }
+            else
+            {
+                return BadRequest(new { message = "The token string is not a valid integer." });
+            }
+        }
     }
 }
