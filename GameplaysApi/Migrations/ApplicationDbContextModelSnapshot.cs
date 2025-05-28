@@ -41,7 +41,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("DeveloperId");
 
-                    b.ToTable("Developers");
+                    b.ToTable("Developers", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Franchise", b =>
@@ -63,7 +63,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("FranchiseId");
 
-                    b.ToTable("Franchises");
+                    b.ToTable("Franchises", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Game", b =>
@@ -107,7 +107,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("GameId");
 
-                    b.ToTable("Games");
+                    b.ToTable("Games", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Genre", b =>
@@ -129,7 +129,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("GenreId");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Platform", b =>
@@ -151,7 +151,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("PlatformId");
 
-                    b.ToTable("Platforms");
+                    b.ToTable("Platforms", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Play", b =>
@@ -198,7 +198,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Plays");
+                    b.ToTable("Plays", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Publisher", b =>
@@ -220,7 +220,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasAlternateKey("PublisherId");
 
-                    b.ToTable("Publishers");
+                    b.ToTable("Publishers", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.User", b =>
@@ -257,7 +257,7 @@ namespace GameplaysApi.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GamesDevelopers", b =>
@@ -272,7 +272,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("GamesDevelopers");
+                    b.ToTable("GamesDevelopers", (string)null);
                 });
 
             modelBuilder.Entity("GamesFranchises", b =>
@@ -287,7 +287,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("GamesFranchises");
+                    b.ToTable("GamesFranchises", (string)null);
                 });
 
             modelBuilder.Entity("GamesGenres", b =>
@@ -302,7 +302,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("GamesGenres");
+                    b.ToTable("GamesGenres", (string)null);
                 });
 
             modelBuilder.Entity("GamesPlatforms", b =>
@@ -317,7 +317,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("PlatformId");
 
-                    b.ToTable("GamesPlatforms");
+                    b.ToTable("GamesPlatforms", (string)null);
                 });
 
             modelBuilder.Entity("GamesPublishers", b =>
@@ -332,7 +332,7 @@ namespace GameplaysApi.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("GamesPublishers");
+                    b.ToTable("GamesPublishers", (string)null);
                 });
 
             modelBuilder.Entity("GameplaysApi.Models.Play", b =>
