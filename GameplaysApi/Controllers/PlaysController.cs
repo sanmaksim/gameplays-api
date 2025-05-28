@@ -265,7 +265,9 @@ namespace GameplaysApi.Controllers
                         CreatedAt = DateOnly.FromDateTime(p.CreatedAt),
                         HoursPlayed = p.HoursPlayed,
                         PercentageCompleted = p.PercentageCompleted,
-                        LastPlayedAt = p.LastPlayedAt
+                        LastPlayedAt = p.LastPlayedAt,
+                        Status = (int)p.Status,
+                        ApiGameId = p.ApiGameId
                     })
                     .ToListAsync();
 
