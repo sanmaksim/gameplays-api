@@ -77,22 +77,22 @@ namespace GameplaysApi.Controllers
                             if (play.Status == PlayStatus.Playing
                                 && (PlayStatus)playDto.Status == PlayStatus.Playing)
                             {
-                                return Ok(new { message = "Playing item already exists." });
+                                return Ok(new { message = "Item already shelved as playing." });
                             }
                             else if (play.Status == PlayStatus.Played
                                 && (PlayStatus)playDto.Status == PlayStatus.Played)
                             {
-                                return Ok(new { message = "Played item already exists." });
+                                return Ok(new { message = "Item already shelved as played." });
                             }
                             else if (play.Status == PlayStatus.Wishlist
                                 && (PlayStatus)playDto.Status == PlayStatus.Wishlist)
                             {
-                                return Ok(new { message = "Wishlist item already exists." });
+                                return Ok(new { message = "Item already wishlisted." });
                             }
                             else if (play.Status == PlayStatus.Backlog
                                 && (PlayStatus)playDto.Status == PlayStatus.Backlog)
                             {
-                                return Ok(new { message = "Backlog item already exists." });
+                                return Ok(new { message = "Item already backlogged." });
                             }
                             else
                             {
