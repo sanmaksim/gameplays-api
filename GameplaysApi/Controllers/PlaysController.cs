@@ -77,22 +77,22 @@ namespace GameplaysApi.Controllers
                             if (play.Status == PlayStatus.Playing
                                 && (PlayStatus)playDto.Status == PlayStatus.Playing)
                             {
-                                return Ok(new { message = "Item already shelved as playing." });
+                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}." });
                             }
                             else if (play.Status == PlayStatus.Played
                                 && (PlayStatus)playDto.Status == PlayStatus.Played)
                             {
-                                return Ok(new { message = "Item already shelved as played." });
+                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}." });
                             }
                             else if (play.Status == PlayStatus.Wishlist
                                 && (PlayStatus)playDto.Status == PlayStatus.Wishlist)
                             {
-                                return Ok(new { message = "Item already wishlisted." });
+                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}ed." });
                             }
                             else if (play.Status == PlayStatus.Backlog
                                 && (PlayStatus)playDto.Status == PlayStatus.Backlog)
                             {
-                                return Ok(new { message = "Item already backlogged." });
+                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}ged." });
                             }
                             else
                             {
@@ -119,7 +119,7 @@ namespace GameplaysApi.Controllers
                 return CreatedAtAction(
                     nameof(GetPlaysByGameId), 
                     new { GameId = gId }, 
-                    new { Message = "Play item created." }
+                    new { Message = $"Added to {Enum.GetName(typeof(PlayStatus), playDto.Status)}." }
                 );
             }
             else
@@ -154,18 +154,18 @@ namespace GameplaysApi.Controllers
 
                     if (existingPlay == null)
                     {
-                        return NotFound(new { message = "Play not found." });
+                        return NotFound(new { message = "Game not shelved." });
                     }
 
                     _context.Plays.Remove(existingPlay);
 
                     await _context.SaveChangesAsync();
 
-                    return Ok(new { message = "Play deleted." });
+                    return Ok(new { message = $"Removed from {Enum.GetName(typeof(PlayStatus), existingPlay.Status)}." });
                 }
                 else
                 {
-                    return BadRequest(new { message = "The play ID is not valid." });
+                    return BadRequest(new { message = "The playId is not valid." });
                 }
             }
             else
@@ -196,25 +196,18 @@ namespace GameplaysApi.Controllers
 
                 if (int.TryParse(gameId, out int gId))
                 {
-                    var plays = await _context.Plays
-                        .Where(p => p.UserId == uId && p.ApiGameId == gId)
-                        .ToListAsync();
+                    var play = await _context.Plays.FirstOrDefaultAsync(p => p.UserId == uId && p.ApiGameId == gId);
 
-                    if (plays != null)
+                    if (play != null)
                     {
-                        var statusList = new List<PlayStatusDto>();
-                        foreach (Play play in plays)
-                        {
-                            statusList.Add(new PlayStatusDto { 
-                                PlayId = play.Id, 
-                                Status = (int)play.Status 
-                            });
-                        }
-                        return Ok(statusList);
+                        return Ok(new { 
+                            PlayId = play.Id,
+                            Status = (int)play.Status
+                        });
                     }
                     else
                     {
-                        return Ok(new { message = "No plays found." });
+                        return Ok(new { message = "Game not shelved." });
                     }
                 }
                 else
@@ -277,7 +270,7 @@ namespace GameplaysApi.Controllers
                 }
                 else
                 {
-                    return Ok(new { message = "No plays found." });
+                    return Ok(new { message = "No games shelved." });
                 }
             }
             else
