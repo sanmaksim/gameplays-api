@@ -117,8 +117,8 @@ namespace GameplaysApi.Controllers
                 _context.Plays.Add(newPlay);
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(
-                    nameof(GetPlaysByGameId), 
-                    new { GameId = gId }, 
+                    nameof(GetPlaysByGameId),
+                    new { GameId = gId },
                     new { Message = $"Added to {Enum.GetName(typeof(PlayStatus), playDto.Status)}." }
                 );
             }
@@ -173,7 +173,7 @@ namespace GameplaysApi.Controllers
                 return BadRequest(new { message = "The token string is not a valid integer." });
             }
         }
-        
+
         [Authorize]
         [HttpGet("game/{gameId}")]
         public async Task<IActionResult> GetPlaysByGameId(string gameId)
@@ -200,7 +200,8 @@ namespace GameplaysApi.Controllers
 
                     if (play != null)
                     {
-                        return Ok(new { 
+                        return Ok(new
+                        {
                             PlayId = play.Id,
                             Status = (int)play.Status
                         });
@@ -240,7 +241,7 @@ namespace GameplaysApi.Controllers
                 {
                     return NotFound();
                 }
-                
+
                 var plays = await _context.Plays
                     .Include(p => p.Game)
                     .Where(p => p.UserId == uId)
