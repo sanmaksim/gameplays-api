@@ -428,3 +428,5 @@ dist-ssr
 appsettings.json
 *.env
 Properties/
+bin/
+obj/
