@@ -1,3 +1,4 @@
+using GameplaysApi.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -5,7 +6,7 @@ using System.Text;
 
 namespace GameplaysApi.Services
 {
-    public class JwtTokenService
+    public class JwtTokenService : IJwtTokenService
     {
         private readonly JwtSecurityTokenHandler _tokenHandler;
 

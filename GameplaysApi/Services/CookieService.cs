@@ -1,6 +1,8 @@
+using GameplaysApi.Interfaces;
+
 namespace GameplaysApi.Services
 {
-    public class CookieService
+    public class CookieService : ICookieService
     {
         public void CreateCookie(HttpResponse response, string cookieName, string cookieValue, int expDays)
         {

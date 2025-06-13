@@ -1,19 +1,26 @@
+using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace GameplaysApi.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
-        private readonly CookieService _cookieService;
-        private readonly JwtTokenService _jwtTokenService;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ICookieService _cookieService;
+        private readonly IJwtTokenService _jwtTokenService;
         private readonly string _cookieName = "jwt";
-
-        public AuthService(CookieService cookieService, JwtTokenService jwtTokenService)
+        
+        public AuthService(
+            IHttpContextAccessor contextAccessor,
+            ICookieService cookieService,
+            IJwtTokenService jwtTokenService)
         {
+            _contextAccessor = contextAccessor;
             _cookieService = cookieService;
             _jwtTokenService = jwtTokenService;
+
         }
 
         public void CreateAuthCookie(User user, HttpResponse response)
@@ -49,6 +56,16 @@ namespace GameplaysApi.Services
         public void DeleteAuthCookie(HttpResponse response)
         {
             _cookieService.DeleteCookie(response, _cookieName);
+        }
+
+        public string GetCurrentUserId()
+        {
+            var userId = _contextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (userId == null)
+            {
+                throw new InvalidOperationException("User ID claim (sub) is missing.");
+            }
+            return userId;
         }
     }
 }
