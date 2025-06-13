@@ -1,5 +1,6 @@
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
+using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,18 @@ namespace GameplaysApi.Controllers
     [Route("api/[controller]")]
     public class PlaysController : ControllerBase
     {
+        private readonly IAuthService _authService;
         private readonly ApplicationDbContext _context;
+        private readonly IPlaysRepository _playsRepository;
 
-        public PlaysController(ApplicationDbContext context)
+        public PlaysController(
+            IAuthService authService,
+            ApplicationDbContext context,
+            IPlaysRepository playsRepository)
         {
+            _authService = authService;
             _context = context;
+            _playsRepository = playsRepository;
         }
 
         [Authorize]
@@ -227,57 +235,31 @@ namespace GameplaysApi.Controllers
         public async Task<IActionResult> GetPlaysByUserId(string userId)
         {
             // Retrieve the user ID string from the JWT 'sub' claim
-            var jwtUserId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var jwtUserId = _authService.GetCurrentUserId();
             if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
             {
                 return Forbid();
             }
 
-            if (int.TryParse(userId, out int uId))
-            {
-                var user = await _context.Users.FindAsync(uId);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                var plays = await _context.Plays
-                    .Include(p => p.Game)
-                    .Where(p => p.UserId == uId)
-                    .Select(p => new UserPlaysDto
-                    {
-                        Id = p.Id,
-                        Name = p.Game!.Name,
-                        Developers = p.Game.Developers!.Select(
-                            dev => new DevDto
-                            {
-                                DevId = dev.Id,
-                                Name = dev.Name
-                            }).ToList(),
-                        OriginalReleaseDate = p.Game.OriginalReleaseDate,
-                        CreatedAt = DateOnly.FromDateTime(p.CreatedAt),
-                        HoursPlayed = p.HoursPlayed,
-                        PercentageCompleted = p.PercentageCompleted,
-                        LastPlayedAt = p.LastPlayedAt,
-                        Status = (int)p.Status,
-                        ApiGameId = p.ApiGameId
-                    })
-                    .ToListAsync();
-
-                if (plays != null)
-                {
-                    return Ok(plays);
-                }
-                else
-                {
-                    return Ok(new { message = "No games shelved." });
-                }
-            }
-            else
+            int uId;
+            if (!int.TryParse(userId, out uId))
             {
                 return BadRequest(new { message = "The token string is not a valid integer." });
             }
+
+            var user = await _playsRepository.GetUserByIdAsync(uId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            var plays = await _playsRepository.GetPlaysByUserIdAsync(uId);
+            if (plays == null || !plays.Any())
+            {
+                return Ok(new { message = "No games shelved." });
+            }
+
+            return Ok(plays);
         }
     }
 }
