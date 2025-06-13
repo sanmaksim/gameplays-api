@@ -1,7 +1,7 @@
 using GameplaysApi.Models;
 using GameplaysApi.Data;
 using GameplaysApi.DTOs;
-using GameplaysApi.Services;
+using GameplaysApi.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +14,9 @@ namespace GameplaysApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public UsersController(ApplicationDbContext context, AuthService authService)
+        public UsersController(ApplicationDbContext context, IAuthService authService)
         {
             _context = context;
             _authService = authService;
