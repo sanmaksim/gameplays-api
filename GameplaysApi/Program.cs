@@ -1,5 +1,7 @@
 using GameplaysApi.Controllers;
 using GameplaysApi.Data;
+using GameplaysApi.Interfaces;
+using GameplaysApi.Repositories;
 using GameplaysApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -10,15 +12,24 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Read from the .env file in dev
 if (builder.Environment.IsDevelopment())
 {
-    DotNetEnv.Env.Load(); // read from .env
+    DotNetEnv.Env.Load();
 }
 
 // Define ports
 var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
 
-// Configure Kestrel to Use HTTPS
+// Define JWT config
+var hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
+var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
+var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
+
+// Define database connection string
+var connectionString = Environment.GetEnvironmentVariable("GAMEPLAYS_CONNECTION_STRING");
+
+// Add Kestrel HTTPS config
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(httpsPort, listenOptions =>
@@ -40,6 +51,7 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
+// Add CORS policies
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOriginWithCredentials", builder =>
@@ -51,16 +63,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllersWithViews();
-
-// Retrieve connection string from app settings
-var connectionString = Environment.GetEnvironmentVariable("GAMEPLAYS_CONNECTION_STRING");
-
-// Add DbContext with MySQL configuration
+// Add the database context for MySQL
 if (connectionString != null)
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -72,18 +75,9 @@ else
     throw new Exception("DefaultConnection string must not be null.");
 }
 
-// Add custom JWT and cookie handling middleware
-builder.Services.AddTransient<JwtTokenService>();
-builder.Services.AddTransient<CookieService>();
-builder.Services.AddTransient<AuthService>();
-
-// Register ApplicationDbContext helper services
-builder.Services.AddScoped<EntityTrackingService>();
-builder.Services.AddScoped<GameHelperService>();
-
 // Rate limit proxied API requests to 1 per second and provide a response upon rejection
 builder.Services.AddRateLimiter(options => {
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => 
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: "global",
             factory: partition => new FixedWindowRateLimiterOptions
@@ -94,26 +88,16 @@ builder.Services.AddRateLimiter(options => {
                 Window = TimeSpan.FromSeconds(1)
             }
         ));
-    options.OnRejected = async (context, token) => 
+    options.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = 429;
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", cancellationToken: token);
     };
 });
 
-// Add HttpClient Service since we will be communicating directly with the Giant Bomb API
-builder.Services.AddHttpClient<GamesController>();
-
-// Retrieve the HmacSecretKey from app settings for JWT signing key comparison below
-var hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
-
-// Define JWT settings
-var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
-var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
-
+// Add authentication middleware
 if (hmacSecretKey != null)
 {
-    // Add authentication middleware
     builder.Services.AddAuthentication(options => {
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
@@ -145,9 +129,31 @@ else
     throw new Exception("HmacSecretKey must not be null.");
 }
 
-// Add authorization middleware
+// Add authorization policy services
 builder.Services.AddAuthorization();
 
+// Add services to the container
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllersWithViews();
+
+// Required for communicating with the Giant Bomb API
+builder.Services.AddHttpClient<GamesController>();
+
+// Required by AuthService for accessing HttpContext.User outside the scope of a Controller
+builder.Services.AddHttpContextAccessor();
+
+// Add custom user auth related services
+builder.Services.AddTransient<IJwtTokenService, JwtTokenService>(); // does NOT rely on a request-scoped object
+builder.Services.AddScoped<ICookieService, CookieService>();        // relies on request-scoped object HttpResponse
+builder.Services.AddScoped<IAuthService, AuthService>();            // relies on request-scoped object HttpResponse
+
+// Add the data access repository for plays
+builder.Services.AddScoped<IPlaysRepository, PlaysRepository>();
+
+// Add ApplicationDbContext helper services
+builder.Services.AddScoped<EntityTrackingService>();    // relies on request-scoped object ApplicationDbContext
+builder.Services.AddScoped<GameHelperService>();        // relies on request-scoped object ApplicationDbContext
 
 var app = builder.Build();
 
