@@ -1,11 +1,8 @@
-using GameplaysApi.Data;
 using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace GameplaysApi.Controllers
 {
@@ -14,240 +11,172 @@ namespace GameplaysApi.Controllers
     public class PlaysController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ApplicationDbContext _context;
+        private readonly IGamesRepository _gamesRepository;
         private readonly IPlaysRepository _playsRepository;
+        private readonly IUsersRepository _usersRepository;
 
         public PlaysController(
             IAuthService authService,
-            ApplicationDbContext context,
-            IPlaysRepository playsRepository)
+            IGamesRepository gamesRepository,
+            IPlaysRepository playsRepository,
+            IUsersRepository usersRepository)
         {
             _authService = authService;
-            _context = context;
+            _gamesRepository = gamesRepository;
             _playsRepository = playsRepository;
+            _usersRepository = usersRepository;
         }
 
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddPlay([FromBody] AddPlayDto playDto)
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId) || playDto.UserId != jwtUserId)
             {
                 return Forbid();
             }
 
-            // Parse the retrieved token ID string to an int
-            if (int.TryParse(userId, out int uId) && int.TryParse(playDto.GameId, out int gId))
+            if (!int.TryParse(playDto.UserId, out int uId))
             {
-                // Check if the token ID matches the FromBody ID
-                if (uId != playDto.UserId)
-                {
-                    return BadRequest(new { message = "The user is not authorized." });
-                }
+                return BadRequest(new { message = "The user ID is invalid." });
+            }
 
-                // Make sure the user exists in the database
-                var user = await _context.Users.FindAsync(playDto.UserId);
-                if (user == null)
-                {
-                    return NotFound(new { message = "User not found." });
-                }
+            var user = await _usersRepository.GetUserByIdAsync(uId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
 
-                // Make sure the game exists in the database
-                var game = await _context.Games.FirstOrDefaultAsync(g => g.GameId == gId);
-                if (game == null)
-                {
-                    return NotFound(new { message = "Game not found." });
-                }
+            if (!int.TryParse(playDto.GameId, out int apiGameId))
+            {
+                return BadRequest(new { message = "The game ID is invalid." });
+            }
 
+            var game = await _gamesRepository.GetGameByExternalIdAsync(apiGameId);
+            if (game == null)
+            {
+                return NotFound(new { message = "Game not found." });
+            }
+
+            var play = await _playsRepository.GetPlayByUserIdAndInternalGameIdAsync(uId, game.Id);
+            if (play != null)
+            {
+                await _playsRepository.UpdatePlayStatusAsync(play, playDto.Status);
+                return Ok(new { Message = $"Moved to {Enum.GetName(typeof(PlayStatus), playDto.Status)}." });
+            }
+            else
+            {
                 var newPlay = new Play
                 {
-                    UserId = playDto.UserId,
-                    GameId = game.Id, // local game ID, not the Giant Bomb API game ID
-                    ApiGameId = gId // this is the Giant Bomb API game ID
+                    UserId = uId,
+                    GameId = game.Id, // this refers to our local database's game ID
+                    ApiGameId = apiGameId, // this refers to the Giant Bomb API's game ID
+                    RunId = 1,
+                    Status = (PlayStatus)playDto.Status
                 };
 
-                // Get the count of plays for this user and game
-                var playCount = await _context.Plays
-                    .CountAsync(p => p.UserId == playDto.UserId && p.GameId == game.Id);
-
-                if (playCount > 0)
-                {
-                    var existingPlays = await _context.Plays
-                        .Where(p => p.UserId == playDto.UserId && p.GameId == game.Id)
-                        .ToListAsync();
-
-                    if (existingPlays != null)
-                    {
-                        foreach (var play in existingPlays)
-                        {
-                            if (play.Status == PlayStatus.Playing
-                                && (PlayStatus)playDto.Status == PlayStatus.Playing)
-                            {
-                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}." });
-                            }
-                            else if (play.Status == PlayStatus.Played
-                                && (PlayStatus)playDto.Status == PlayStatus.Played)
-                            {
-                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}." });
-                            }
-                            else if (play.Status == PlayStatus.Wishlist
-                                && (PlayStatus)playDto.Status == PlayStatus.Wishlist)
-                            {
-                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}ed." });
-                            }
-                            else if (play.Status == PlayStatus.Backlog
-                                && (PlayStatus)playDto.Status == PlayStatus.Backlog)
-                            {
-                                return Ok(new { message = $"Already {Enum.GetName(typeof(PlayStatus), play.Status)}ged." });
-                            }
-                            else
-                            {
-                                newPlay.Status = (PlayStatus)playDto.Status;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "Plays not found." });
-                    }
-                }
-                else
-                {
-                    // Add a playthrough
-                    newPlay.RunId = 1;
-
-                    // Set the play status
-                    newPlay.Status = (PlayStatus)playDto.Status;
-                }
-
-                _context.Plays.Add(newPlay);
-                await _context.SaveChangesAsync();
+                await _playsRepository.AddPlayAsync(newPlay);
                 return CreatedAtAction(
-                    nameof(GetPlaysByGameId),
-                    new { GameId = gId },
+                    nameof(GetPlayByUserAndExternalGameId),
+                    new {
+                        userId = newPlay.UserId,
+                        apiGameId = newPlay.ApiGameId
+                    },
                     new { Message = $"Added to {Enum.GetName(typeof(PlayStatus), playDto.Status)}." }
                 );
             }
-            else
-            {
-                return BadRequest(new { message = "The token string is not a valid integer." });
-            }
         }
 
         [Authorize]
-        [HttpDelete("{playId}")]
-        public async Task<IActionResult> DeletePlay(string playId)
+        [HttpDelete("user/{userId}/play/{playId}")]
+        public async Task<IActionResult> DeletePlay(string userId, string playId)
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId))
             {
                 return Forbid();
             }
 
-            if (int.TryParse(userId, out int uId))
+            if (!int.TryParse(userId, out int uId))
             {
-                var user = await _context.Users.FindAsync(uId);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                if (int.TryParse(playId, out int pId))
-                {
-                    var existingPlay = await _context.Plays.FindAsync(pId);
-
-                    if (existingPlay == null)
-                    {
-                        return NotFound(new { message = "Game not shelved." });
-                    }
-
-                    _context.Plays.Remove(existingPlay);
-
-                    await _context.SaveChangesAsync();
-
-                    return Ok(new { message = $"Removed from {Enum.GetName(typeof(PlayStatus), existingPlay.Status)}." });
-                }
-                else
-                {
-                    return BadRequest(new { message = "The playId is not valid." });
-                }
+                return BadRequest(new { message = "The user ID is invalid." });
             }
-            else
+
+
+            var user = await _usersRepository.GetUserByIdAsync(uId);
+            if (user == null)
             {
-                return BadRequest(new { message = "The token string is not a valid integer." });
+                return NotFound();
             }
+
+            if (!int.TryParse(playId, out int pId))
+            {
+                return BadRequest(new { message = "The play ID is invalid." });
+            }
+
+            var play = await _playsRepository.GetPlayByIdAsync(pId);
+            if (play == null)
+            {
+                return NotFound(new { message = "Game not shelved." });
+            }
+
+            await _playsRepository.RemovePlayAsync(play);
+
+            return Ok(new { message = $"Removed from {Enum.GetName(typeof(PlayStatus), play.Status)}." });
         }
 
         [Authorize]
-        [HttpGet("game/{gameId}")]
-        public async Task<IActionResult> GetPlaysByGameId(string gameId)
+        [HttpGet("user/{userId}/game/{apiGameId}")]
+        public async Task<IActionResult> GetPlayByUserAndExternalGameId(string userId, string apiGameId)
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Forbid();
-            }
-
-            if (int.TryParse(userId, out int uId))
-            {
-                var user = await _context.Users.FindAsync(uId);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                if (int.TryParse(gameId, out int gId))
-                {
-                    var play = await _context.Plays.FirstOrDefaultAsync(p => p.UserId == uId && p.ApiGameId == gId);
-
-                    if (play != null)
-                    {
-                        return Ok(new
-                        {
-                            PlayId = play.Id,
-                            Status = (int)play.Status
-                        });
-                    }
-                    else
-                    {
-                        return Ok(new { message = "Game not shelved." });
-                    }
-                }
-                else
-                {
-                    return NotFound(new { message = "The game ID is not valid." });
-                }
-            }
-            else
-            {
-                return BadRequest(new { message = "The token string is not a valid integer." });
-            }
-        }
-
-        [Authorize]
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetPlaysByUserId(string userId)
-        {
-            // Retrieve the user ID string from the JWT 'sub' claim
             var jwtUserId = _authService.GetCurrentUserId();
             if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
             {
                 return Forbid();
             }
 
-            int uId;
-            if (!int.TryParse(userId, out uId))
+            if (!int.TryParse(userId, out int uId))
             {
-                return BadRequest(new { message = "The token string is not a valid integer." });
+                return BadRequest(new { message = "The user ID is invalid." });
             }
 
-            var user = await _playsRepository.GetUserByIdAsync(uId);
+            var user = await _usersRepository.GetUserByIdAsync(uId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!int.TryParse(apiGameId, out int extGameId))
+            {
+                return BadRequest(new { message = "The game ID is invalid." });
+            }
+            
+            var play = await _playsRepository.GetPlayByUserIdAndExternalGameIdAsync(uId, extGameId);
+            if (play == null)
+            {
+                return Ok(new { message = "Game not shelved." });
+            }
+            
+            return Ok(play);
+        }
+
+        [Authorize]
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetPlaysByUserId(string userId)
+        {
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
+            {
+                return Forbid();
+            }
+
+            if (!int.TryParse(userId, out int uId))
+            {
+                return BadRequest(new { message = "The user ID is invalid." });
+            }
+
+            var user = await _usersRepository.GetUserByIdAsync(uId);
             if (user == null)
             {
                 return NotFound();
