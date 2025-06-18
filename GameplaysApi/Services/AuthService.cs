@@ -60,6 +60,7 @@ namespace GameplaysApi.Services
 
         public string GetCurrentUserId()
         {
+            // Retrieve the user ID string from the JWT 'sub' claim
             var userId = _contextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             if (userId == null)
             {
