@@ -15,11 +15,16 @@ namespace GameplaysApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
+        private readonly IUsersRepository _usersRepository;
 
-        public UsersController(ApplicationDbContext context, IAuthService authService)
+        public UsersController(
+            ApplicationDbContext context,
+            IAuthService authService,
+            IUsersRepository usersRepository)
         {
             _context = context;
             _authService = authService;
+            _usersRepository = usersRepository;
         }
 
         // @desc Register user/set token
@@ -131,35 +136,25 @@ namespace GameplaysApi.Controllers
         }
 
         // @desc Get user
-        // route GET /api/users/profile
+        // route GET /api/users/profile/{id}
         // @access Private
         [Authorize]
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetUser()
+        [HttpGet("profile/{id}")]
+        public async Task<IActionResult> GetUser(int id)
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId) || id.ToString() != jwtUserId)
             {
                 return Forbid();
             }
 
-            if (int.TryParse(userId, out int id))
+            var user = await _usersRepository.GetUserByIdAsync(id);
+            if (user == null)
             {
-                var user = await _context.Users.FindAsync(id);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(user);
+                return NotFound();
             }
-            else
-            {
-                return BadRequest(new { message = "The token string is not a valid integer." });
-            }
+
+            return Ok();
         }
 
         // @desc Update user
