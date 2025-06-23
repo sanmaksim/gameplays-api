@@ -158,101 +158,86 @@ namespace GameplaysApi.Controllers
         }
 
         // @desc Update user
-        // route PUT /api/users/profile
+        // route PUT /api/users/profile/{id}
         // @access Private
         [Authorize]
-        [HttpPut("profile")]
+        [HttpPut("profile/{id}")]
         public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
+            // Does the user's JWT sub match the provided user ID
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId) || userDto.UserId.ToString() != jwtUserId)
             {
                 return Forbid();
             }
 
-            if (int.TryParse(userId, out int id))
+            // Does the user exist in the database
+            var user = await _usersRepository.GetUserByIdAsync(userDto.UserId);
+            if (user == null)
             {
-                var existingUser = await _context.Users.FindAsync(id);
-
-                if (existingUser == null)
-                {
-                    return NotFound();
-                }
-                if (id != userDto.UserId)
-                {
-                    return Forbid();
-                }
-
-                bool hasChanges = false;
-
-                // Update only provided properties
-                if (userDto.Username != null && userDto.Username != existingUser.Username)
-                {
-                    bool usernameExists = await _context.Users.AnyAsync(u => u.Username == userDto.Username);
-
-                    if (!usernameExists)
-                    {
-                        existingUser.Username = userDto.Username;
-                        hasChanges = true;
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "The username already exists." });
-                    }
-                }
-                if (userDto.Email != null && userDto.Email != existingUser.Email)
-                {
-                    bool emailExists = await _context.Users.AnyAsync(u => u.Email == userDto.Email);
-
-                    if (!emailExists)
-                    {
-                        existingUser.Email = userDto.Email;
-                        hasChanges = true;
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "The email is already in use."});
-                    }
-                }
-                if (!string.IsNullOrEmpty(userDto.Password))
-                {
-                    existingUser.Password = userDto.Password;
-                    hasChanges = true;
-                }
-
-                if (hasChanges)
-                {
-                    existingUser.UpdateTimestamp();
-
-                    try
-                    {
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!_context.Users.Any(e => e.Id == id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                }
-
-                return Ok(new { 
-                    id = existingUser.Id,
-                    username = existingUser.Username,
-                    email = existingUser.Email
-                });
+                return NotFound();
             }
-            else
+
+            // Flag to update only the provided user properties
+            bool hasChanges = false;
+
+            // Is the provided username different to the original
+            if (userDto.Username != null && userDto.Username != user.Username)
             {
-                return BadRequest(new { message = "The token string is not a valid integer." });
+                // Does the provided username match an existing user's
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
+                if (existingUser != null && userDto.Username == existingUser.Username)
+                {
+                    return BadRequest(new { message = "The username already exists." });
+                }
+
+                // Update username to the new string
+                user.Username = userDto.Username;
+                hasChanges = true;
             }
+
+            // Is the provided email address different to the original
+            if (userDto.Email != null && userDto.Email != user.Email)
+            {
+                // Does the provided email address match an existing user's
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+                if (existingUser != null && userDto.Email == existingUser.Email)
+                {
+                    return BadRequest(new { message = "The email is already in use." });
+                }
+
+                // Update email to the new address
+                user.Email = userDto.Email;
+                hasChanges = true;
+            }
+
+            // Has the user provided a password string
+            if (!string.IsNullOrEmpty(userDto.Password))
+            {
+                // Update password to the new string
+                user.Password = userDto.Password;
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                try
+                {
+                    await _usersRepository.UpdateUserAsync(user);
+                    return Ok(new
+                    {
+                        id = user.Id,
+                        username = user.Username,
+                        email = user.Email
+                    });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Conflict("There was an issue saving the record. Please reload and try again.");
+                }
+            }
+
+            return Ok(new { message = "No changes detected." });
         }
 
         // @desc Delete user
