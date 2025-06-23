@@ -4,7 +4,7 @@ namespace GameplaysApi.DTOs
 {
     public class UserDto
     {
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
 
         [MaxLength(255)]
         public string? Username { get; set; }
