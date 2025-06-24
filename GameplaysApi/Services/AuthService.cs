@@ -29,7 +29,6 @@ namespace GameplaysApi.Services
             var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
             var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
             
-            //if (validIssuers != null && validAudiences != null)
             if (validIssuer != null && validAudience != null)
             {
                 // create JWT
