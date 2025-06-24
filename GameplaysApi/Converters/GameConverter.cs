@@ -48,7 +48,7 @@ namespace GameplaysApi.Converters
                             : "",
 
                     Developers = root.GetProperty("results").TryGetProperty("developers", out var devsProp)
-                                    && devsProp.ValueKind == JsonValueKind.Array
+                                    && devsProp.ValueKind != JsonValueKind.Null && devsProp.ValueKind == JsonValueKind.Array
                                     ? devsProp.EnumerateArray()
                                         .Select(d => new Developer 
                                         {
@@ -59,7 +59,7 @@ namespace GameplaysApi.Converters
                                     : new List<Developer>(),
 
                     Franchises = root.GetProperty("results").TryGetProperty("franchises", out var franchisesProp)
-                                    && franchisesProp.ValueKind == JsonValueKind.Array
+                                    && franchisesProp.ValueKind != JsonValueKind.Null && franchisesProp.ValueKind == JsonValueKind.Array
                                     ? franchisesProp.EnumerateArray()
                                         .Select(f => new Franchise
                                         {
@@ -70,7 +70,7 @@ namespace GameplaysApi.Converters
                                     : new List<Franchise>(),
 
                     Genres = root.GetProperty("results").TryGetProperty("genres", out var genresProp)
-                                && genresProp.ValueKind == JsonValueKind.Array
+                                && genresProp.ValueKind != JsonValueKind.Null && genresProp.ValueKind == JsonValueKind.Array
                                 ? genresProp.EnumerateArray()
                                     .Select(g => new Genre
                                     {
@@ -86,63 +86,63 @@ namespace GameplaysApi.Converters
                         // therefore we need to test whether the JsonValueKind is an Object prior to
                         // testing the nested properties for Null values
                         IconUrl = root.GetProperty("results").TryGetProperty("image", out var imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("icon_url", out var iconUrlProp)
                                         && iconUrlProp.ValueKind != JsonValueKind.Null
                                         ? iconUrlProp.GetString()
                                         : null
                                     : null,
                         MediumUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("medium_url", out var medUrlProp)
                                         && medUrlProp.ValueKind != JsonValueKind.Null
                                         ? medUrlProp.GetString()
                                         : null
                                     : null,
                         ScreenUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("screen_url", out var screenUrlProp)
                                         && screenUrlProp.ValueKind != JsonValueKind.Null
                                         ? screenUrlProp.GetString()
                                         : null
                                     : null,
                         SmallUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("small_url", out var smallUrlProp)
                                         && smallUrlProp.ValueKind != JsonValueKind.Null
                                         ? smallUrlProp.GetString()
                                         : null
                                     : null,
                         SuperUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("super_url", out var superUrlProp)
                                         && superUrlProp.ValueKind != JsonValueKind.Null
                                         ? superUrlProp.GetString()
                                         : null
                                     : null,
                         ThumbUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("thumb_url", out var thumbUrlProp)
                                         && thumbUrlProp.ValueKind != JsonValueKind.Null
                                         ? thumbUrlProp.GetString()
                                         : null
                                     : null,
                         TinyUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("tiny_url", out var tinyUrlProp)
                                         && tinyUrlProp.ValueKind != JsonValueKind.Null
                                         ? tinyUrlProp.GetString()
                                         : null
                                     : null,
                         OriginalUrl = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("original_url", out var originalUrlProp)
                                         && originalUrlProp.ValueKind != JsonValueKind.Null
                                         ? originalUrlProp.GetString()
                                         : null
                                     : null,
                         ImageTags = root.GetProperty("results").TryGetProperty("image", out imgProp)
-                                    && imgProp.ValueKind == JsonValueKind.Object
+                                    && imgProp.ValueKind != JsonValueKind.Null && imgProp.ValueKind == JsonValueKind.Object
                                     ? imgProp.TryGetProperty("image_tags", out var imgTagsProp)
                                         && imgTagsProp.ValueKind != JsonValueKind.Null
                                         ? imgTagsProp.GetString()
@@ -156,7 +156,7 @@ namespace GameplaysApi.Converters
                                             : null,
 
                     Platforms = root.GetProperty("results").TryGetProperty("platforms", out var plaformsProp)
-                                    && plaformsProp.ValueKind == JsonValueKind.Array
+                                    && plaformsProp.ValueKind != JsonValueKind.Null && plaformsProp.ValueKind == JsonValueKind.Array
                                     ? plaformsProp.EnumerateArray()
                                         .Select(p => new Platform
                                         {
@@ -167,7 +167,7 @@ namespace GameplaysApi.Converters
                                     : new List<Platform>(),
 
                     Publishers = root.GetProperty("results").TryGetProperty("publishers", out var pubsProp)
-                                    && pubsProp.ValueKind != JsonValueKind.Array
+                                    && pubsProp.ValueKind != JsonValueKind.Null && pubsProp.ValueKind == JsonValueKind.Array
                                     ? pubsProp.EnumerateArray()
                                         .Select(p => new Publisher
                                         {
