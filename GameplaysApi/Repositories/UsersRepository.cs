@@ -19,6 +19,16 @@ namespace GameplaysApi.Repositories
             return await _context.Users.FindAsync(userId);
         }
 
+        public async Task DeleteUserAsync(User user)
+        {
+            if (_context.Entry(user).State == EntityState.Detached)
+            {
+                _context.Attach(user);
+            }
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task UpdateUserAsync(User user)
         {
             if (_context.Entry(user).State == EntityState.Detached)

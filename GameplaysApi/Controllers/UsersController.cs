@@ -247,35 +247,27 @@ namespace GameplaysApi.Controllers
         [HttpDelete("profile")]
         public async Task<IActionResult> DeleteUser()
         {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
+            var jwtUserId = _authService.GetCurrentUserId();
+            if (string.IsNullOrEmpty(jwtUserId))
             {
                 return Forbid();
             }
 
-            if (int.TryParse(userId, out int id))
-            {
-                var existingUser = await _context.Users.FindAsync(id);
-
-                if (existingUser == null)
-                {
-                    return NotFound(new { message = "User not found." });
-                }
-                
-                _context.Users.Remove(existingUser);
-                
-                _authService.DeleteAuthCookie(Response);
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new { message = "User deleted." });
-            }
-            else
+            if (!int.TryParse(jwtUserId, out int userId))
             {
                 return BadRequest(new { message = "The token string is not a valid integer." });
             }
+
+            var user = await _usersRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+                
+            await _usersRepository.DeleteUserAsync(user);
+            _authService.DeleteAuthCookie(Response);
+
+            return Ok(new { message = "User deleted." });
         }
     }
 }
