@@ -89,7 +89,6 @@ namespace GameplaysApi.Controllers
         {
             var validator = new AuthDtoValidator();
             var result = validator.Validate(authDto);
-
             if (!result.IsValid)
             {
                 foreach (var error in result.Errors)
@@ -99,28 +98,34 @@ namespace GameplaysApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authDto.Username || u.Email == authDto.Email);
-
-            if (user != null && authDto.Password != null)
+            User? user;
+            if (authDto.Username != null)
             {
-                if (user.VerifyPassword(authDto.Password, user.Password))
-                {
-                    _authService.CreateAuthCookie(user, Response);
-                    return Ok(new { 
-                        id = user.Id,
-                        username = user.Username,
-                        email = user.Email
-                    });
-                }
-                else
-                {
-                    return Unauthorized(new { message = "Invalid username or password." });
-                }
+                user = await _usersRepository.GetUserByNameAsync(authDto.Username);
+            }
+            else if (authDto.Email != null)
+            {
+                user = await _usersRepository.GetUserByEmailAsync(authDto.Email);
             }
             else
             {
-                return Unauthorized(new { message = "Invalid username or password." });
+                return BadRequest(new { message = "Please enter a username or email." });
             }
+             
+            if (user == null || authDto.Password != null && !user.VerifyPassword(authDto.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid username or password." });
+                
+            }
+
+            _authService.CreateAuthCookie(user, Response);
+
+            return Ok(new
+            {
+                id = user.Id,
+                username = user.Username,
+                email = user.Email
+            });
         }
 
         // @desc Delete auth cookie
@@ -184,7 +189,7 @@ namespace GameplaysApi.Controllers
             if (userDto.Username != null && userDto.Username != user.Username)
             {
                 // Does the provided username match an existing user's
-                var existingUser = await _usersRepository.GetUserByUsernameAsync(userDto.Username);
+                var existingUser = await _usersRepository.GetUserByNameAsync(userDto.Username);
                 if (existingUser != null && userDto.Username == existingUser.Username)
                 {
                     return BadRequest(new { message = "The username already exists." });

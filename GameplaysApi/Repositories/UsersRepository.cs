@@ -1,4 +1,5 @@
 ﻿using GameplaysApi.Data;
+using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ namespace GameplaysApi.Repositories
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<User?> GetUserByNameAsync(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
