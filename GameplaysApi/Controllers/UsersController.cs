@@ -184,7 +184,7 @@ namespace GameplaysApi.Controllers
             if (userDto.Username != null && userDto.Username != user.Username)
             {
                 // Does the provided username match an existing user's
-                var existingUser = await _usersRepository.GetUserByNameAsync(userDto.Username);
+                var existingUser = await _usersRepository.GetUserByUsernameAsync(userDto.Username);
                 if (existingUser != null && userDto.Username == existingUser.Username)
                 {
                     return BadRequest(new { message = "The username already exists." });
