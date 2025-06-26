@@ -14,11 +14,6 @@ namespace GameplaysApi.Repositories
             _context = context;
         }
 
-        public async Task<User?> GetUserByIdAsync(int userId)
-        {
-            return await _context.Users.FindAsync(userId);
-        }
-
         public async Task DeleteUserAsync(User user)
         {
             if (_context.Entry(user).State == EntityState.Detached)
@@ -27,6 +22,21 @@ namespace GameplaysApi.Repositories
             }
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
+
+        public async Task<User?> GetUserByNameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task UpdateUserAsync(User user)
