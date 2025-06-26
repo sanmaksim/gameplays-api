@@ -1,5 +1,4 @@
 ﻿using GameplaysApi.Data;
-using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.EntityFrameworkCore;
