@@ -12,16 +12,13 @@ namespace GameplaysApi.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
         private readonly IUsersRepository _usersRepository;
 
         public UsersController(
-            ApplicationDbContext context,
             IAuthService authService,
             IUsersRepository usersRepository)
         {
-            _context = context;
             _authService = authService;
             _usersRepository = usersRepository;
         }
@@ -32,51 +29,41 @@ namespace GameplaysApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
+            var user = await _usersRepository.GetUserByNameAsync(registerDto.Username);
+            if (user != null)
+            {
+                return BadRequest(new { message = "Username already exists." });
+            }
+
+            var email = await _usersRepository.GetUserByEmailAsync(registerDto.Email);
+            if (email != null)
+            {
+                return BadRequest(new { message = "Email already exists." });
+            }
+
+            var newUser = new User
+            {
+                Username = registerDto.Username,
+                Password = registerDto.Password, // auto-hashed upon save in User model
+                Email = registerDto.Email
+            };
+
             try
             {
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
-                if (existingUser != null)
-                {
-                    return BadRequest(new { message = "Username already exists." });
-                }
-
-                var existingEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
-                if (existingEmail != null)
-                {
-                    return BadRequest(new { message = "Email already exists." });
-                }
-
-                var newUser = new User
-                {
-                    Username = registerDto.Username,
-                    Password = registerDto.Password, // auto-hashed upon save in User model
-                    Email = registerDto.Email
-                };
-
-                _context.Users.Add(newUser);
-
-                // Save the new user first to generate the UserId
-                await _context.SaveChangesAsync();
-
-                // Now that the UserId is set, create the cookie
+                await _usersRepository.AddUserAsync(newUser);
                 _authService.CreateAuthCookie(newUser, Response);
-
-                return CreatedAtAction(nameof(GetUser), 
-                                        new { id = newUser.Id }, 
-                                        new {
+                return CreatedAtAction(nameof(GetUser),
+                                        new { id = newUser.Id },
+                                        new
+                                        {
                                             id = newUser.Id,
                                             username = newUser.Username,
                                             email = newUser.Email
                                         });
-
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, new { message = "An error occurred while creating the user." });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { message = "An unexpected error occurred." });
+                return Conflict("There was an issue creating the record. Please reload and try again.");
             }
         }
 
