@@ -151,7 +151,7 @@ builder.Services.AddTransient<IJwtTokenService, JwtTokenService>(); // does NOT 
 builder.Services.AddScoped<ICookieService, CookieService>();        // relies on request-scoped object HttpResponse
 builder.Services.AddScoped<IAuthService, AuthService>();            // relies on request-scoped object HttpResponse
 
-// Add the data access repository for plays
+// Add data access repositories for controllers
 builder.Services.AddScoped<IGamesRepository, GamesRepository>();
 builder.Services.AddScoped<IPlaysRepository, PlaysRepository>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
