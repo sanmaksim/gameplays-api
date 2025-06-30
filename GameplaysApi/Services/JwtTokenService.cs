@@ -16,7 +16,7 @@ namespace GameplaysApi.Services
             _tokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public string CreateToken(List<Claim> claims, int expDays)
+        public string CreateToken(List<Claim> claims, int expMins)
         {
             string? hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
 
@@ -26,7 +26,7 @@ namespace GameplaysApi.Services
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddDays(expDays),
+                    Expires = DateTime.UtcNow.AddMinutes(expMins),
                     SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256)
                 };
 
