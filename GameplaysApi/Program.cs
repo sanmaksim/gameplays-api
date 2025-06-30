@@ -118,7 +118,10 @@ if (hmacSecretKey != null)
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.HttpContext.Request.Cookies["jwt"];
+                if (context.HttpContext.Request.Cookies.ContainsKey("jwt"))
+                {
+                    context.Token = context.HttpContext.Request.Cookies["jwt"];
+                }
                 return Task.CompletedTask;
             }
         };
