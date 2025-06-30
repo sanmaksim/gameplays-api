@@ -112,6 +112,7 @@ if (hmacSecretKey != null)
             ValidIssuer = validIssuer,
             ValidAudience = validAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey)),
+            ClockSkew = TimeSpan.FromSeconds(30)
         };
         // Read token from cookie
         options.Events = new JwtBearerEvents
