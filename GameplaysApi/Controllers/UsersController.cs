@@ -1,5 +1,4 @@
 using GameplaysApi.Models;
-using GameplaysApi.Data;
 using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using Microsoft.AspNetCore.Authorization;
