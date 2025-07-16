@@ -15,6 +15,7 @@ namespace GameplaysApi.Data
         public DbSet<Platform> Platforms { get; set; }
         public DbSet<Play> Plays { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -84,6 +85,10 @@ namespace GameplaysApi.Data
 
             modelBuilder.Entity<Publisher>()
                 .HasAlternateKey(p => p.PublisherId);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(r => r.Token)
+                .IsUnique();
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
