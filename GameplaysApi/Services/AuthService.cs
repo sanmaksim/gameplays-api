@@ -25,7 +25,7 @@ namespace GameplaysApi.Services
 
         public void CreateAuthCookie(User user, HttpResponse response)
         {
-            var expirationMinutes = 15;
+            var expirationMinutes = Environment.GetEnvironmentVariable("EXPIRATION_MINUTES");
             var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
             var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
             
@@ -40,11 +40,14 @@ namespace GameplaysApi.Services
                     new Claim(JwtRegisteredClaimNames.Aud, validAudience)
                 };
 
-                var token = _jwtTokenService.CreateToken(payload, expirationMinutes);
+                if (int.TryParse(expirationMinutes, out int expMins))
+                {
+                    var token = _jwtTokenService.CreateToken(payload, expMins);
 
-                // create cookie
-                var cookieValue = token;
-                _cookieService.CreateCookie(response, _cookieName, cookieValue, expirationMinutes);
+                    // create cookie
+                    var cookieValue = token;
+                    _cookieService.CreateCookie(response, _cookieName, cookieValue, expMins);
+                }
             }
             else
             {
