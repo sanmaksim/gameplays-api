@@ -48,5 +48,7 @@ namespace GameplaysApi.Models
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, storedPassword);
         }
+
+        public List<RefreshToken>? RefreshTokens { get; set; }
     }
 }
