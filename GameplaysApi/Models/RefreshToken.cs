@@ -10,11 +10,16 @@ namespace GameplaysApi.Models
         
         [MaxLength(255)]
         public required string Token { get; set; }
+        
         public int UserId { get; set; }
         
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
+
+        public string? DeviceInfo { get; set; }
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
         public DateTime ExpiresAt { get; set; }
     }
 }
