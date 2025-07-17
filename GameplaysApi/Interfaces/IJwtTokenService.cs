@@ -4,6 +4,6 @@ namespace GameplaysApi.Interfaces
 {
     public interface IJwtTokenService
     {
-        string CreateToken(List<Claim> claims, int expDays);
+        string CreateToken(List<Claim> claims, TimeSpan expiresIn);
     }
 }

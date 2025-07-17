@@ -16,9 +16,9 @@ namespace GameplaysApi.Services
             _tokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public string CreateToken(List<Claim> claims, int expMins)
+        public string CreateToken(List<Claim> claims, TimeSpan expiresIn)
         {
-            string? hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
+            string? hmacSecretKey = Environment.GetEnvironmentVariable("JWT_HMACSECRETKEY");
 
             if (hmacSecretKey != null)
             {
@@ -26,7 +26,7 @@ namespace GameplaysApi.Services
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddMinutes(expMins),
+                    Expires = DateTimeOffset.UtcNow.Add(expiresIn).UtcDateTime,
                     SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256)
                 };
 
