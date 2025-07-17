@@ -105,6 +105,7 @@ namespace GameplaysApi.Controllers
             }
 
             _authService.CreateAuthCookie(user, Response);
+            await _authService.CreateRefreshTokenCookie(user, Request, Response);
 
             return Ok(new
             {
