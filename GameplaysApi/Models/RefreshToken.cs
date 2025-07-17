@@ -16,7 +16,7 @@ namespace GameplaysApi.Models
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
 
-        public string? DeviceInfo { get; set; }
+        public string? UserAgent { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
