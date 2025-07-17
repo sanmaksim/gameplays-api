@@ -22,7 +22,7 @@ if (builder.Environment.IsDevelopment())
 var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
 
 // Define JWT config
-var hmacSecretKey = Environment.GetEnvironmentVariable("GAMEPLAYS_HMACSECRETKEY");
+var hmacSecretKey = Environment.GetEnvironmentVariable("JWT_HMACSECRETKEY");
 var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
 var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
 
@@ -151,11 +151,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>(); // does NOT rely on a request-scoped object
 builder.Services.AddScoped<ICookieService, CookieService>();        // relies on request-scoped object HttpResponse
 builder.Services.AddScoped<IAuthService, AuthService>();            // relies on request-scoped object HttpResponse
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>(); // relies on request-scoped object HttpRequest
 
-// Add data access repositories for controllers
+// Add data access repositories for controllers and services
 builder.Services.AddScoped<IGamesRepository, GamesRepository>();
 builder.Services.AddScoped<IPlaysRepository, PlaysRepository>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 // Add ApplicationDbContext helper services
 builder.Services.AddScoped<EntityTrackingService>();    // relies on request-scoped object ApplicationDbContext
