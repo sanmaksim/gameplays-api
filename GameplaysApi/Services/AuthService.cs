@@ -66,7 +66,7 @@ namespace GameplaysApi.Services
             var userId = _contextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             if (userId == null)
             {
-                throw new InvalidOperationException("User ID claim (sub) is missing.");
+                throw new InvalidOperationException("Invalid user.");
             }
             return userId;
         }
