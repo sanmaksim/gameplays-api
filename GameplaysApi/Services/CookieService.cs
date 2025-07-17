@@ -4,11 +4,11 @@ namespace GameplaysApi.Services
 {
     public class CookieService : ICookieService
     {
-        public void CreateCookie(HttpResponse response, string cookieName, string cookieValue, int expMins)
+        public void CreateCookie(HttpResponse response, string cookieName, string cookieValue, TimeSpan expiresIn)
         {
             var cookieOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.AddMinutes(expMins),
+                Expires = DateTimeOffset.UtcNow.Add(expiresIn),
                 HttpOnly = true,
                 Path = "/",
                 Secure = true,
