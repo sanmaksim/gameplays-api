@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GameplaysApi.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GameplaysApi.Models
 {
-    public class RefreshToken
+    public class RefreshToken : IHasCreatedAt, IHasUpdatedAt
     {
         [Key]
         public int Id { get; set; }
@@ -18,8 +19,10 @@ namespace GameplaysApi.Models
 
         public string? UserAgent { get; set; }
         
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
         public DateTime ExpiresAt { get; set; }
     }
 }
