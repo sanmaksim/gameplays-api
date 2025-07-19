@@ -1,6 +1,7 @@
 ﻿using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -44,7 +45,10 @@ namespace GameplaysApi.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
-            var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
+            // need to decode the URL-encoded refresh token string first since
+            // the browser automatically encodes all cookie values automatically
+            var decodedToken = WebUtility.UrlDecode(refreshToken);
+            var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(decodedToken)));
 
             var existingRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(userId, hashedRefreshToken);
             if (existingRefreshToken is null || existingRefreshToken.ExpiresAt < DateTime.UtcNow)
