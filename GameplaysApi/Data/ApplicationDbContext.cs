@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GameplaysApi.Models;
+using GameplaysApi.Interfaces;
 
 namespace GameplaysApi.Data
 {
@@ -93,6 +94,43 @@ namespace GameplaysApi.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+        }
+
+        public override int SaveChanges()
+        {
+            UpdateTimeStamps();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            UpdateTimeStamps();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void UpdateTimeStamps()
+        {
+            var addedEntities = ChangeTracker
+                                .Entries()
+                                .Where(e => e.State == EntityState.Added);
+
+            foreach (var entry in addedEntities)
+            {
+                var hasCreatedEntry = entry.Entity as IHasCreatedAt;
+                if (hasCreatedEntry != null) hasCreatedEntry.CreatedAt = DateTime.UtcNow;
+
+                var hasUpdatedEntry = entry.Entity as IHasUpdatedAt;
+                if (hasUpdatedEntry != null) hasUpdatedEntry.UpdatedAt = DateTime.UtcNow;
+            }
+
+            var modifiedEntities = ChangeTracker
+                                    .Entries<IHasUpdatedAt>()
+                                    .Where(e => e.State == EntityState.Modified);
+
+            foreach (var entry in modifiedEntities)
+            {
+                entry.Entity.UpdatedAt = DateTime.UtcNow;
+            }
         }
     }
 }
