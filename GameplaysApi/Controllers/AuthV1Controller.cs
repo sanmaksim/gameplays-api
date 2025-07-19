@@ -1,7 +1,5 @@
 ﻿using GameplaysApi.Interfaces;
-using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -26,7 +24,7 @@ namespace GameplaysApi.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+        public async Task<IActionResult> Refresh()
         {
             var jwtUserId = _authService.GetCurrentUserId();
             if (string.IsNullOrEmpty(jwtUserId))
@@ -45,10 +43,13 @@ namespace GameplaysApi.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
-            // need to decode the URL-encoded refresh token string first since
-            // the browser automatically encodes all cookie values automatically
-            var decodedToken = WebUtility.UrlDecode(refreshToken);
-            var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(decodedToken)));
+            Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+            if (refreshToken == null)
+            {
+                return Unauthorized();
+            }
+
+            var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
 
             var existingRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(userId, hashedRefreshToken);
             if (existingRefreshToken is null || existingRefreshToken.ExpiresAt < DateTime.UtcNow)
