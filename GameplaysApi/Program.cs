@@ -114,15 +114,24 @@ if (hmacSecretKey != null)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey)),
             ClockSkew = TimeSpan.FromSeconds(30)
         };
-        // Read token from cookie
+        // Assign custom event handlers
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
+                // Disable token lifetime validation only for the refresh endpoint in
+                // order to retrieve the sub claim for the purpose of issuing a new JWT
+                if (context.HttpContext.Request.Path.StartsWithSegments("/api/v1/auth/refresh"))
+                {
+                    context.Options.TokenValidationParameters.ValidateLifetime = false;
+                }
+
+                // Pull token from cookie if present
                 if (context.HttpContext.Request.Cookies.ContainsKey("jwt"))
                 {
                     context.Token = context.HttpContext.Request.Cookies["jwt"];
                 }
+                
                 return Task.CompletedTask;
             }
         };
