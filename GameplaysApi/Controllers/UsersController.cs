@@ -1,6 +1,6 @@
-using GameplaysApi.Models;
 using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
+using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
