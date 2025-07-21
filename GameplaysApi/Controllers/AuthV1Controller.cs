@@ -1,5 +1,7 @@
 ﻿using GameplaysApi.Interfaces;
+using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,44 +25,36 @@ namespace GameplaysApi.Controllers
             _usersRepository = usersRepository;
         }
 
+        // [Authorize] omitted to allow through expired jwt for refresh
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh()
         {
-            var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId))
-            {
-                return Forbid();
-            }
-
-            if (!int.TryParse(jwtUserId, out int userId))
-            {
-                return BadRequest(new { message = "The token string is not a valid integer." });
-            }
-
-            var user = await _usersRepository.GetUserByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found." });
-            }
-
             Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+            
             if (refreshToken == null)
             {
                 return Unauthorized();
             }
 
             var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
-
-            var existingRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(userId, hashedRefreshToken);
-            if (existingRefreshToken is null || existingRefreshToken.ExpiresAt < DateTime.UtcNow)
+            var existingRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(hashedRefreshToken);
+            
+            if (existingRefreshToken is null
+                || existingRefreshToken.User is null
+                || existingRefreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 return Unauthorized();
             }
 
-            _authService.CreateAuthCookie(user, Response);
-            await _authService.CreateRefreshTokenCookie(user, Request, Response);
+            _authService.CreateAuthCookie(existingRefreshToken.User, Response);
+            await _authService.CreateRefreshTokenCookie(existingRefreshToken.User, Request, Response);
 
-            return Ok();
+            return Ok(new
+            {
+                id = existingRefreshToken.User.Id,
+                username = existingRefreshToken.User.Username,
+                email = existingRefreshToken.User.Email
+            });
         }
     }
 }
