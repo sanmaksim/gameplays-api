@@ -119,13 +119,6 @@ if (hmacSecretKey != null)
         {
             OnMessageReceived = context =>
             {
-                // Disable token lifetime validation only for the refresh endpoint in
-                // order to retrieve the sub claim for the purpose of issuing a new JWT
-                if (context.HttpContext.Request.Path.StartsWithSegments("/api/v1/auth/refresh"))
-                {
-                    context.Options.TokenValidationParameters.ValidateLifetime = false;
-                }
-
                 // Pull token from cookie if present
                 if (context.HttpContext.Request.Cookies.ContainsKey("jwt"))
                 {
