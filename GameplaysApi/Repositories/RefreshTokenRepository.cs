@@ -24,10 +24,11 @@ namespace GameplaysApi.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<RefreshToken?> GetRefreshTokenAsync(int userId, string hashedToken)
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string hashedToken)
         {
             return await _context.RefreshTokens
-                .Where(r => r.UserId == userId && r.Token == hashedToken)
+                .Include(r => r.User)
+                .Where(r => r.Token == hashedToken)
                 .FirstOrDefaultAsync();
         }
     }

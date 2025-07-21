@@ -5,6 +5,6 @@ namespace GameplaysApi.Interfaces
     public interface IRefreshTokenRepository
     {
         Task AddRefreshTokenAsync(RefreshToken refreshToken);
-        Task<RefreshToken?> GetRefreshTokenAsync(int userId, string hashedToken);
+        Task<RefreshToken?> GetRefreshTokenAsync(string hashedToken);
     }
 }
