@@ -1,7 +1,5 @@
 ﻿using GameplaysApi.Interfaces;
-using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -25,7 +23,8 @@ namespace GameplaysApi.Controllers
             _usersRepository = usersRepository;
         }
 
-        // [Authorize] omitted to allow through expired jwt for refresh
+        // [Authorize] omitted since no auth middleware
+        // configured for refresh token cookie
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh()
         {
