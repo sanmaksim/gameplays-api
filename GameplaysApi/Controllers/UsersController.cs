@@ -65,56 +65,7 @@ namespace GameplaysApi.Controllers
                 return Conflict("There was an issue creating the record. Please reload and try again.");
             }
         }
-
         
-        // @desc Auth user/create auth cookie
-        // route GET /api/users/login
-        // @access Public
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] AuthDto authDto)
-        {
-            var validator = new AuthDtoValidator();
-            var result = validator.Validate(authDto);
-            if (!result.IsValid)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-                }
-                return BadRequest(ModelState);
-            }
-
-            User? user;
-            if (authDto.Username != null)
-            {
-                user = await _usersRepository.GetUserByNameAsync(authDto.Username);
-            }
-            else if (authDto.Email != null)
-            {
-                user = await _usersRepository.GetUserByEmailAsync(authDto.Email);
-            }
-            else
-            {
-                return BadRequest(new { message = "Please enter a username or email." });
-            }
-             
-            if (user == null || authDto.Password != null && !user.VerifyPassword(authDto.Password, user.Password))
-            {
-                return Unauthorized(new { message = "Invalid username or password." });
-                
-            }
-
-            _authService.CreateAuthCookie(user, Response);
-            await _authService.CreateRefreshTokenCookie(user, Request, Response);
-
-            return Ok(new
-            {
-                id = user.Id,
-                username = user.Username,
-                email = user.Email
-            });
-        }
-
         // @desc Delete auth cookie
         // route POST /api/users/logout
         // @access Private

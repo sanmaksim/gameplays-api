@@ -1,4 +1,6 @@
-﻿using GameplaysApi.Interfaces;
+﻿using GameplaysApi.DTOs;
+using GameplaysApi.Interfaces;
+using GameplaysApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,7 +24,55 @@ namespace GameplaysApi.Controllers
             _refreshTokenRepository = refreshTokenRepository;
             _usersRepository = usersRepository;
         }
+        
+        // @desc Auth user/create auth & refresh cookies
+        // route GET /api/v1/auth/login
+        // @access Public
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] AuthDto authDto)
+        {
+            var validator = new AuthDtoValidator();
+            var result = validator.Validate(authDto);
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
+            }
 
+            User? user;
+            if (authDto.Username != null)
+            {
+                user = await _usersRepository.GetUserByNameAsync(authDto.Username);
+            }
+            else if (authDto.Email != null)
+            {
+                user = await _usersRepository.GetUserByEmailAsync(authDto.Email);
+            }
+            else
+            {
+                return BadRequest(new { message = "Please enter a username or email." });
+            }
+
+            if (user == null || authDto.Password != null && !user.VerifyPassword(authDto.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid username or password." });
+
+            }
+
+            _authService.CreateAuthCookie(user, Response);
+            await _authService.CreateRefreshTokenCookie(user, Request, Response);
+
+            return Ok(new
+            {
+                id = user.Id,
+                username = user.Username,
+                email = user.Email
+            });
+        }
+        
         // [Authorize] omitted since no auth middleware
         // configured for refresh token cookie
         [HttpPost("refresh")]
