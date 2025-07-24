@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    [Route("api/v1/users")]
+    public class UsersV1Controller : ControllerBase
     {
         private readonly IAuthService _authService;
         private readonly IUsersRepository _usersRepository;
 
-        public UsersController(
+        public UsersV1Controller(
             IAuthService authService,
             IUsersRepository usersRepository)
         {
@@ -51,6 +51,7 @@ namespace GameplaysApi.Controllers
             {
                 await _usersRepository.AddUserAsync(newUser);
                 _authService.CreateAuthCookie(newUser, Response);
+                await _authService.CreateRefreshTokenCookie(newUser, Request, Response);
                 return CreatedAtAction(nameof(GetUser),
                                         new { id = newUser.Id },
                                         new
@@ -197,6 +198,7 @@ namespace GameplaysApi.Controllers
                 
             await _usersRepository.DeleteUserAsync(user);
             _authService.DeleteAuthCookie(Response);
+            _authService.DeleteRefreshTokenCookie(Response);
 
             return Ok(new { message = "User deleted." });
         }
