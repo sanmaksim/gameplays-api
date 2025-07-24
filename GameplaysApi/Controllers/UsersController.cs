@@ -66,17 +66,6 @@ namespace GameplaysApi.Controllers
             }
         }
         
-        // @desc Delete auth cookie
-        // route POST /api/users/logout
-        // @access Private
-        [Authorize]
-        [HttpPost("logout")]
-        public IActionResult Logout()
-        {
-            _authService.DeleteAuthCookie(Response);
-            return Ok( new { message = "Logged out successfully." });
-        }
-
         // @desc Get user
         // route GET /api/users/profile/{id}
         // @access Private

@@ -1,6 +1,7 @@
 ﻿using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
@@ -72,7 +73,18 @@ namespace GameplaysApi.Controllers
                 email = user.Email
             });
         }
-        
+
+        // @desc Delete auth cookie
+        // route POST /api/users/logout
+        // @access Private
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            _authService.DeleteAuthCookie(Response);
+            return Ok(new { message = "Logged out successfully." });
+        }
+
         // [Authorize] omitted since no auth middleware
         // configured for refresh token cookie
         [HttpPost("refresh")]
