@@ -22,11 +22,11 @@ namespace GameplaysApi.Controllers
             _usersRepository = usersRepository;
         }
 
-        // @desc Register user/set token
+        // @desc Create user/set jwt/refresh token
         // route POST /api/users/register
         // @access Public
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
         {
             var user = await _usersRepository.GetUserByNameAsync(registerDto.Username);
             if (user != null)
