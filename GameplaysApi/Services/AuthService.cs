@@ -95,6 +95,14 @@ namespace GameplaysApi.Services
             }
         }
 
+        public void DeleteRefreshTokenCookie(HttpResponse response)
+        {
+            if (_refreshTokenCookieName != null)
+                _cookieService.DeleteCookie(response, _refreshTokenCookieName);
+            else
+                throw new ArgumentNullException($"Required value for '{nameof(_refreshTokenCookieName)}' is missing or empty.");
+        }
+
         public string GetCurrentUserId()
         {
             // Retrieve the user ID string from the JWT 'sub' claim

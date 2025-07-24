@@ -82,6 +82,7 @@ namespace GameplaysApi.Controllers
         public IActionResult Logout()
         {
             _authService.DeleteAuthCookie(Response);
+            _authService.DeleteRefreshTokenCookie(Response);
             return Ok(new { message = "Logged out successfully." });
         }
 

@@ -7,6 +7,7 @@ namespace GameplaysApi.Interfaces
         void CreateAuthCookie(User user, HttpResponse response);
         Task CreateRefreshTokenCookie(User user, HttpRequest request, HttpResponse response);
         void DeleteAuthCookie(HttpResponse response);
+        void DeleteRefreshTokenCookie(HttpResponse response);
         string GetCurrentUserId();
     }
 }
