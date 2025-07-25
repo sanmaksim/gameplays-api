@@ -86,13 +86,9 @@ namespace GameplaysApi.Services
         public void DeleteAuthCookie(HttpResponse response)
         {
             if (_jwtCookieName != null)
-            {
                 _cookieService.DeleteCookie(response, _jwtCookieName);
-            }
             else
-            {
-                throw new Exception("Error reading configuration.");
-            }
+                throw new ArgumentNullException($"Required value for '{nameof(_jwtCookieName)}' is missing or empty.");
         }
 
         public void DeleteRefreshTokenCookie(HttpResponse response)
