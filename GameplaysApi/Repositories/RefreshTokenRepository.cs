@@ -31,5 +31,16 @@ namespace GameplaysApi.Repositories
                 .Where(r => r.Token == hashedToken)
                 .FirstOrDefaultAsync();
         }
+        
+        public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken, string hashedString, DateTime expiresAt)
+        {
+            if (_context.Entry(refreshToken).State == EntityState.Detached)
+            {
+                _context.Attach(refreshToken);
+            }
+            refreshToken.Token = hashedString;
+            refreshToken.ExpiresAt = expiresAt;
+            await _context.SaveChangesAsync();
+        }
     }
 }
