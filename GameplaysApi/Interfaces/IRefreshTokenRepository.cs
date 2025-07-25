@@ -6,5 +6,6 @@ namespace GameplaysApi.Interfaces
     {
         Task AddRefreshTokenAsync(RefreshToken refreshToken);
         Task<RefreshToken?> GetRefreshTokenAsync(string hashedToken);
+        Task UpdateRefreshTokenAsync(RefreshToken refreshToken, string hashedString, DateTime expiresAt);
     }
 }
