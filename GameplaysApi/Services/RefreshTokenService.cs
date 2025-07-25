@@ -17,21 +17,33 @@ namespace GameplaysApi.Services
         public async Task<string> CreateRefreshToken(User user, HttpRequest request, TimeSpan expiresIn)
         {
             var userAgent = request.Headers.UserAgent.ToString();
-            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            var tokenString = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             // create a SHA-256 hashed 64-character hexadecimal string to persist in the database
-            var hashedToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+            var hashedString = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tokenString)));
 
-            var refreshToken = new RefreshToken
+            var newToken = new RefreshToken
             {
-                Token = hashedToken,
+                Token = hashedString,
                 UserId = user.Id,
                 UserAgent = userAgent,
                 ExpiresAt = DateTimeOffset.UtcNow.Add(expiresIn).UtcDateTime
             };
 
-            await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+            await _refreshTokenRepository.AddRefreshTokenAsync(newToken);
 
-            return token;
+            return tokenString;
+        }
+
+        public async Task<string> UpdateRefreshToken(User user, HttpRequest request, TimeSpan expiresIn, RefreshToken refreshToken)
+        {
+            var tokenString = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            // create a SHA-256 hashed 64-character hexadecimal string to persist in the database
+            var hashedString = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tokenString)));
+            var expiresAt = DateTimeOffset.UtcNow.Add(expiresIn).UtcDateTime;
+            
+            await _refreshTokenRepository.UpdateRefreshTokenAsync(refreshToken, hashedString, expiresAt);
+
+            return tokenString;
         }
     }
 }
