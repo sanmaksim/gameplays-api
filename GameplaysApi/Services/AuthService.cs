@@ -70,16 +70,37 @@ namespace GameplaysApi.Services
                 var expDays = TimeSpan.FromDays(expirationDays);
 
                 // create refresh token
-                var refreshToken = await _refreshTokenService.CreateRefreshToken(user, request, expDays);
+                var tokenString = await _refreshTokenService.CreateRefreshToken(user, request, expDays);
 
                 // create cookie
-                var cookieValue = refreshToken;
+                var cookieValue = tokenString;
                 _cookieService.CreateCookie(response, _refreshTokenCookieName, cookieValue, expDays);
                 
             }
             else
             {
-                throw new Exception("Error reading configuration.");
+                throw new ArgumentNullException("Error reading configuration.");
+            }
+        }
+
+        public async Task UpdateRefreshTokenCookie(User user, HttpRequest request, HttpResponse response, RefreshToken refreshToken)
+        {
+            if (_validIssuer != null && _validAudience != null && _refreshTokenCookieName != null
+                && int.TryParse(_refreshTokenExpirationDays, out int expirationDays))
+            {
+                var expDays = TimeSpan.FromDays(expirationDays);
+
+                // create refresh token
+                var tokenString = await _refreshTokenService.UpdateRefreshToken(user, request, expDays, refreshToken);
+
+                // create cookie
+                var cookieValue = tokenString;
+                _cookieService.CreateCookie(response, _refreshTokenCookieName, cookieValue, expDays);
+
+            }
+            else
+            {
+                throw new ArgumentNullException("Error reading configuration.");
             }
         }
 
