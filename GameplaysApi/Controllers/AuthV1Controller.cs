@@ -91,31 +91,31 @@ namespace GameplaysApi.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh()
         {
-            Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+            Request.Cookies.TryGetValue("refreshToken", out string tokenString);
             
-            if (refreshToken == null)
+            if (tokenString == null)
             {
                 return Unauthorized();
             }
 
-            var hashedRefreshToken = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
-            var existingRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(hashedRefreshToken);
+            string hashedString = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tokenString)));
+            RefreshToken? refreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(hashedString);
             
-            if (existingRefreshToken is null
-                || existingRefreshToken.User is null
-                || existingRefreshToken.ExpiresAt < DateTime.UtcNow)
+            if (refreshToken is null
+                || refreshToken.User is null
+                || refreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 return Unauthorized();
             }
 
-            _authService.CreateAuthCookie(existingRefreshToken.User, Response);
-            await _authService.CreateRefreshTokenCookie(existingRefreshToken.User, Request, Response);
+            _authService.CreateAuthCookie(refreshToken.User, Response);
+            await _authService.UpdateRefreshTokenCookie(refreshToken.User, Request, Response, refreshToken);
 
             return Ok(new
             {
-                id = existingRefreshToken.User.Id,
-                username = existingRefreshToken.User.Username,
-                email = existingRefreshToken.User.Email
+                id = refreshToken.User.Id,
+                username = refreshToken.User.Username,
+                email = refreshToken.User.Email
             });
         }
     }
