@@ -42,5 +42,15 @@ namespace GameplaysApi.Repositories
             refreshToken.ExpiresAt = expiresAt;
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            if (_context.Entry(refreshToken).State == EntityState.Detached)
+            {
+                _context.Attach(refreshToken);
+            }
+            _context.RefreshTokens.Remove(refreshToken);
+            await _context.SaveChangesAsync();
+        }
     }
 }
