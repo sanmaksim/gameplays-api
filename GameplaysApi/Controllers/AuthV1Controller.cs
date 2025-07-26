@@ -3,8 +3,6 @@ using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace GameplaysApi.Controllers
 {
@@ -13,16 +11,16 @@ namespace GameplaysApi.Controllers
     public class AuthV1Controller : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IRefreshTokenService _refreshTokenService;
         private readonly IUsersRepository _usersRepository;
 
         public AuthV1Controller(
             IAuthService authService,
-            IRefreshTokenRepository refreshTokenRepository,
+            IRefreshTokenService refreshTokenService,
             IUsersRepository usersRepository)
         {
             _authService = authService;
-            _refreshTokenRepository = refreshTokenRepository;
+            _refreshTokenService = refreshTokenService;
             _usersRepository = usersRepository;
         }
         
@@ -79,10 +77,26 @@ namespace GameplaysApi.Controllers
         // @access Private
         [Authorize]
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            Request.Cookies.TryGetValue("refreshToken", out string? tokenString);
+            if (tokenString == null)
+            {
+                return Unauthorized();
+            }
+
+            RefreshToken? refreshToken = await _refreshTokenService.GetRefreshToken(tokenString);
+
+            if (refreshToken is null
+                || refreshToken.User is null
+                || refreshToken.ExpiresAt < DateTime.UtcNow)
+            {
+                return Unauthorized();
+            }
+
             _authService.DeleteAuthCookie(Response);
             _authService.DeleteRefreshTokenCookie(Response);
+            await _refreshTokenService.DeleteRefreshToken(refreshToken);
             return Ok(new { message = "Logged out successfully." });
         }
 
@@ -91,16 +105,15 @@ namespace GameplaysApi.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh()
         {
-            Request.Cookies.TryGetValue("refreshToken", out string tokenString);
+            Request.Cookies.TryGetValue("refreshToken", out string? tokenString);
             
             if (tokenString == null)
             {
                 return Unauthorized();
             }
 
-            string hashedString = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tokenString)));
-            RefreshToken? refreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(hashedString);
-            
+            RefreshToken? refreshToken = await _refreshTokenService.GetRefreshToken(tokenString);
+
             if (refreshToken is null
                 || refreshToken.User is null
                 || refreshToken.ExpiresAt < DateTime.UtcNow)
