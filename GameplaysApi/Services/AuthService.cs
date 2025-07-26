@@ -33,6 +33,13 @@ namespace GameplaysApi.Services
             _refreshTokenService = refreshTokenService;
         }
 
+        public string GetCurrentUserId()
+        {
+            // Retrieve the user ID string from the JWT 'sub' claim
+            var userId = _contextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            return userId == null ? throw new InvalidOperationException("Invalid user.") : userId;
+        }
+
         public void CreateAuthCookie(User user, HttpResponse response)
         {
             if (_validIssuer != null && _validAudience != null && _jwtCookieName != null)
@@ -58,8 +65,16 @@ namespace GameplaysApi.Services
             }
             else
             {
-                throw new Exception("Error reading configuration.");
+                throw new ArgumentNullException("Error reading access token config.");
             }
+        }
+
+        public void DeleteAuthCookie(HttpResponse response)
+        {
+            if (_jwtCookieName != null)
+                _cookieService.DeleteCookie(response, _jwtCookieName);
+            else
+                throw new ArgumentNullException("Error reading access token config.");
         }
 
         public async Task CreateRefreshTokenCookie(User user, HttpRequest request, HttpResponse response)
@@ -79,7 +94,7 @@ namespace GameplaysApi.Services
             }
             else
             {
-                throw new ArgumentNullException("Error reading configuration.");
+                throw new ArgumentNullException("Error reading refresh token config.");
             }
         }
 
@@ -100,31 +115,20 @@ namespace GameplaysApi.Services
             }
             else
             {
-                throw new ArgumentNullException("Error reading configuration.");
+                throw new ArgumentNullException("Error reading refresh token config.");
             }
-        }
-
-        public void DeleteAuthCookie(HttpResponse response)
-        {
-            if (_jwtCookieName != null)
-                _cookieService.DeleteCookie(response, _jwtCookieName);
-            else
-                throw new ArgumentNullException($"Required value for '{nameof(_jwtCookieName)}' is missing or empty.");
         }
 
         public void DeleteRefreshTokenCookie(HttpResponse response)
         {
             if (_refreshTokenCookieName != null)
+            {
                 _cookieService.DeleteCookie(response, _refreshTokenCookieName);
+            }
             else
-                throw new ArgumentNullException($"Required value for '{nameof(_refreshTokenCookieName)}' is missing or empty.");
-        }
-
-        public string GetCurrentUserId()
-        {
-            // Retrieve the user ID string from the JWT 'sub' claim
-            var userId = _contextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            return userId == null ? throw new InvalidOperationException("Invalid user.") : userId;
+            {
+                throw new ArgumentNullException("Error reading refresh token config.");
+            }
         }
     }
 }
