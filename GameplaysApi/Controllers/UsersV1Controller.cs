@@ -195,8 +195,9 @@ namespace GameplaysApi.Controllers
             {
                 return NotFound(new { message = "User not found." });
             }
-                
+
             await _usersRepository.DeleteUserAsync(user);
+
             _authService.DeleteAuthCookie(Response);
             _authService.DeleteRefreshTokenCookie(Response);
 
