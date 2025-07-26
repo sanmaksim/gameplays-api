@@ -34,6 +34,14 @@ namespace GameplaysApi.Services
             return tokenString;
         }
 
+        public async Task<RefreshToken?> GetRefreshToken(string tokenString)
+        {
+            string hashedString = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tokenString)));
+            RefreshToken? refreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(hashedString);
+
+            return refreshToken;
+        }
+
         public async Task<string> UpdateRefreshToken(User user, HttpRequest request, TimeSpan expiresIn, RefreshToken refreshToken)
         {
             var tokenString = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -44,6 +52,11 @@ namespace GameplaysApi.Services
             await _refreshTokenRepository.UpdateRefreshTokenAsync(refreshToken, hashedString, expiresAt);
 
             return tokenString;
+        }
+
+        public async Task DeleteRefreshToken(RefreshToken refreshToken)
+        {
+            await _refreshTokenRepository.DeleteRefreshTokenAsync(refreshToken);
         }
     }
 }
