@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GameplaysApi.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 
 namespace GameplaysApi.Models
 {
-    public class Game
+    public class Game : IHasCreatedAt, IHasUpdatedAt
     {
         [Key]
         public int Id { get; set; }
@@ -41,9 +42,9 @@ namespace GameplaysApi.Models
 
         public List<Publisher>? Publishers { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         public void UpdateTimestamp()
         {

@@ -1,3 +1,4 @@
+using GameplaysApi.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +12,7 @@ namespace GameplaysApi.Models
         Backlog
     }
 
-    public class Play
+    public class Play : IHasCreatedAt, IHasUpdatedAt
     {
         [Key]
         public int Id { get; set; }
@@ -40,9 +41,9 @@ namespace GameplaysApi.Models
 
         public DateOnly? LastPlayedAt { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         public void UpdateTimestamp()
         {

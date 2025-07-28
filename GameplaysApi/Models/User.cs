@@ -1,8 +1,9 @@
+using GameplaysApi.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace GameplaysApi.Models
 {
-    public class User
+    public class User : IHasCreatedAt, IHasUpdatedAt
     {
         private string _password = string.Empty;
 
@@ -35,9 +36,9 @@ namespace GameplaysApi.Models
             }
         }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         public void UpdateTimestamp()
         {
