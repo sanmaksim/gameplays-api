@@ -3,6 +3,7 @@ using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace GameplaysApi.Controllers
 {
@@ -24,10 +25,12 @@ namespace GameplaysApi.Controllers
             _usersRepository = usersRepository;
         }
         
-        // @desc Auth user/create auth & refresh cookies
-        // route GET /api/v1/auth/login
-        // @access Public
         [HttpPost("login")]
+        [SwaggerOperation(
+            Summary = "Authenticates user",
+            Description = "Creates access & refresh tokens",
+            OperationId = "Login"
+        )]
         public async Task<IActionResult> Login([FromBody] AuthDto authDto)
         {
             var validator = new AuthDtoValidator();
