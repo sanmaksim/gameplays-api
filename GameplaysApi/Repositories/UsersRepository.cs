@@ -55,7 +55,6 @@ namespace GameplaysApi.Repositories
             {
                 _context.Attach(user);
             }
-            user.UpdateTimestamp();
             await _context.SaveChangesAsync();
         }
     }

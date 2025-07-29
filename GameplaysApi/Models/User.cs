@@ -40,11 +40,6 @@ namespace GameplaysApi.Models
 
         public DateTime UpdatedAt { get; set; }
 
-        public void UpdateTimestamp()
-        {
-            UpdatedAt = DateTime.UtcNow;
-        }
-
         public bool VerifyPassword(string enteredPassword, string storedPassword)
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, storedPassword);
