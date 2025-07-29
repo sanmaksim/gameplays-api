@@ -6,6 +6,8 @@ using GameplaysApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -140,7 +142,11 @@ builder.Services.AddAuthorization();
 
 // Add services to the container
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations();
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Gameplays API", Version = "v1" });
+});
 builder.Services.AddControllersWithViews();
 
 // Required for communicating with the Giant Bomb API
@@ -176,12 +182,14 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseCors("AllowSpecificOriginWithCredentials");
 app.UseRateLimiter();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("v1/swagger.json", "Gameplays API v1");
+});
 app.Run();
