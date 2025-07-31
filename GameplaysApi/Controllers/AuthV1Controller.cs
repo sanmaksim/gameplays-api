@@ -75,11 +75,14 @@ namespace GameplaysApi.Controllers
             });
         }
 
-        // @desc Delete auth cookie
-        // route POST /api/users/logout
-        // @access Private
         [Authorize]
         [HttpPost("logout")]
+        [SwaggerOperation(
+            Summary = "Logs the user out",
+            Description = "Deletes user access & refresh tokens, " +
+            "removes associated user refresh token entry from the database.",
+            OperationId = "Logout"
+        )]
         public async Task<IActionResult> Logout()
         {
             Request.Cookies.TryGetValue("refreshToken", out string? tokenString);
