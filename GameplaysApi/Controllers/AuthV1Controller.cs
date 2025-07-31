@@ -106,9 +106,13 @@ namespace GameplaysApi.Controllers
             return Ok(new { message = "Logged out successfully." });
         }
 
-        // [Authorize] omitted since no auth middleware
-        // configured for refresh token cookie
         [HttpPost("refresh")]
+        [SwaggerOperation(
+            Summary = "Regenerates the user refresh token",
+            Description = "Overwrites the existing user refresh token" +
+            "and associated user refresh token entry in the database.",
+            OperationId = "Refresh"
+        )]
         public async Task<IActionResult> Refresh()
         {
             Request.Cookies.TryGetValue("refreshToken", out string? tokenString);
