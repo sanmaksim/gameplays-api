@@ -28,7 +28,7 @@ namespace GameplaysApi.Controllers
         [HttpPost("login")]
         [SwaggerOperation(
             Summary = "Authenticates user",
-            Description = "Creates access & refresh tokens",
+            Description = "Creates user access & refresh tokens.",
             OperationId = "Login"
         )]
         public async Task<IActionResult> Login([FromBody] AuthDto authDto)
