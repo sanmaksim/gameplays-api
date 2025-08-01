@@ -46,11 +46,6 @@ namespace GameplaysApi.Models
 
         public DateTime UpdatedAt { get; set; }
 
-        public void UpdateTimestamp()
-        {
-            UpdatedAt = DateTime.UtcNow;
-        }
-
         // This is the non-mapped property that holds the Image object
         [NotMapped]
         public Image? Image

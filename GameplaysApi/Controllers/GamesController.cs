@@ -194,7 +194,6 @@ namespace GameplaysApi.Controllers
                                 property.CurrentValue = typeof(Game).GetProperty(property.Metadata.Name)?.GetValue(game);
                             }
                         }
-                        trackedGame.Entity.UpdateTimestamp();
                     }
                     else
                     {
