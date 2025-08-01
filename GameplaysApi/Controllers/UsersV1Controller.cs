@@ -95,11 +95,13 @@ namespace GameplaysApi.Controllers
             return Ok();
         }
 
-        // @desc Update user
-        // route PUT /api/users/profile/{id}
-        // @access Private
         [Authorize]
         [HttpPut("profile/{id}")]
+        [SwaggerOperation(
+            Summary = "Update user",
+            Description = "Updates user data based on ID",
+            OperationId = "UpdateUser"
+        )]
         public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
         {
             // Does the user's JWT sub match the provided user ID
