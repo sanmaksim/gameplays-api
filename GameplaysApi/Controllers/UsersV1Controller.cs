@@ -71,11 +71,13 @@ namespace GameplaysApi.Controllers
             }
         }
         
-        // @desc Get user
-        // route GET /api/users/profile/{id}
-        // @access Private
         [Authorize]
         [HttpGet("profile/{id}")]
+        [SwaggerOperation(
+            Summary = "Get user",
+            Description = "Retrieves a user based on ID",
+            OperationId = "GetUser"
+        )]
         public async Task<IActionResult> GetUser(int id)
         {
             var jwtUserId = _authService.GetCurrentUserId();
