@@ -4,6 +4,7 @@ using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace GameplaysApi.Controllers
 {
@@ -22,10 +23,13 @@ namespace GameplaysApi.Controllers
             _usersRepository = usersRepository;
         }
 
-        // @desc Create user/set jwt/refresh token
-        // route POST /api/users/register
-        // @access Public
         [HttpPost("register")]
+        [SwaggerOperation(
+            Summary = "Creates a new user",
+            Description = "Adds a new user to the database, " +
+            "creates their access & refresh tokens",
+            OperationId = "Register"
+        )]
         public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
         {
             var user = await _usersRepository.GetUserByNameAsync(registerDto.Username);
