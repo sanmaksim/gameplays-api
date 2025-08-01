@@ -180,11 +180,13 @@ namespace GameplaysApi.Controllers
             return Ok(new { message = "No changes detected." });
         }
 
-        // @desc Delete user
-        // route DELETE /api/users/profile
-        // @access Private
         [Authorize]
         [HttpDelete("profile")]
+        [SwaggerOperation(
+            Summary = "Delete user",
+            Description = "Deletes a user based on their access token identifier",
+            OperationId = "DeleteUser"
+        )]
         public async Task<IActionResult> DeleteUser()
         {
             var jwtUserId = _authService.GetCurrentUserId();
