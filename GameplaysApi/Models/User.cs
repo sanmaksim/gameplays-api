@@ -5,8 +5,6 @@ namespace GameplaysApi.Models
 {
     public class User : IHasCreatedAt, IHasUpdatedAt
     {
-        private string _password = string.Empty;
-
         [Key]
         public int Id { get; set; }
 
@@ -20,30 +18,11 @@ namespace GameplaysApi.Models
 
         [MaxLength(255)]
         [Required]
-        public required string Password
-        { 
-            get { return _password; } 
-            set
-            {
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    _password = BCrypt.Net.BCrypt.HashPassword(value);
-                }
-                else
-                {
-                    throw new ArgumentException("Password cannot be null or whitespace.");
-                }
-            }
-        }
+        public required string Password { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
-
-        public bool VerifyPassword(string enteredPassword, string storedPassword)
-        {
-            return BCrypt.Net.BCrypt.Verify(enteredPassword, storedPassword);
-        }
 
         public List<RefreshToken>? RefreshTokens { get; set; }
     }
