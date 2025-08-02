@@ -13,15 +13,18 @@ namespace GameplaysApi.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly IUserService _userService;
         private readonly IUsersRepository _usersRepository;
 
         public AuthV1Controller(
             IAuthService authService,
             IRefreshTokenService refreshTokenService,
+            IUserService userService,
             IUsersRepository usersRepository)
         {
             _authService = authService;
             _refreshTokenService = refreshTokenService;
+            _userService = userService;
             _usersRepository = usersRepository;
         }
         
@@ -58,10 +61,10 @@ namespace GameplaysApi.Controllers
                 return BadRequest(new { message = "Please enter a username or email." });
             }
 
-            if (user == null || authDto.Password != null && !user.VerifyPassword(authDto.Password, user.Password))
+            if (user == null || authDto.Password != null 
+                && !_userService.VerifyPassword(authDto.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid username or password." });
-
             }
 
             _authService.CreateAuthCookie(user, Response);

@@ -13,13 +13,16 @@ namespace GameplaysApi.Controllers
     public class UsersV1Controller : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
         private readonly IUsersRepository _usersRepository;
 
         public UsersV1Controller(
             IAuthService authService,
+            IUserService userService,
             IUsersRepository usersRepository)
         {
             _authService = authService;
+            _userService = userService;
             _usersRepository = usersRepository;
         }
 
@@ -47,7 +50,7 @@ namespace GameplaysApi.Controllers
             var newUser = new User
             {
                 Username = registerDto.Username,
-                Password = registerDto.Password, // auto-hashed upon save in User model
+                Password = _userService.HashPassword(registerDto.Password),
                 Email = registerDto.Email
             };
 
@@ -155,7 +158,7 @@ namespace GameplaysApi.Controllers
             if (!string.IsNullOrEmpty(userDto.Password))
             {
                 // Update password to the new string
-                user.Password = userDto.Password;
+                user.Password = _userService.HashPassword(userDto.Password);
                 hasChanges = true;
             }
 
