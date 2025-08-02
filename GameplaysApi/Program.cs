@@ -159,6 +159,7 @@ builder.Services.AddTransient<IJwtTokenService, JwtTokenService>(); // does NOT 
 builder.Services.AddScoped<ICookieService, CookieService>();        // relies on request-scoped object HttpResponse
 builder.Services.AddScoped<IAuthService, AuthService>();            // relies on request-scoped object HttpResponse
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>(); // relies on request-scoped object HttpRequest
+builder.Services.AddSingleton<IUserService, UserService>();         // utility service that is stateless and thread-safe
 
 // Add data access repositories for controllers and services
 builder.Services.AddScoped<IGamesRepository, GamesRepository>();
