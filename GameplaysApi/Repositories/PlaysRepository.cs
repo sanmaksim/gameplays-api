@@ -34,7 +34,6 @@ namespace GameplaysApi.Repositories
                 _context.Attach(play);
             }
             play.Status = (PlayStatus)newStatus;
-            _context.Entry(play).Entity.UpdateTimestamp();
             await _context.SaveChangesAsync();
         }
 
