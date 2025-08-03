@@ -16,18 +16,18 @@ namespace GameplaysApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly EntityTrackingService _entityTrackingService;
-        private readonly GameHelperService _gameHelperService;
+        private readonly GameService _gameService;
         private readonly HttpClient _httpClient;
         
         public GamesController(
             ApplicationDbContext context, 
             EntityTrackingService entityTrackingService, 
-            GameHelperService gameHelperService,
+            GameService gameService,
             HttpClient httpClient)
         {
             _context = context;
             _entityTrackingService = entityTrackingService;
-            _gameHelperService = gameHelperService;
+            _gameService = gameService;
             _httpClient = httpClient;
         }
 
@@ -92,7 +92,7 @@ namespace GameplaysApi.Controllers
             // check whether the game can be retreived from the database
             if (int.TryParse(gameId, out int id))
             {
-                var existingGame = await _gameHelperService.GetExistingGame(id);
+                var existingGame = await _gameService.GetExistingGame(id);
 
                 var writeOptions = new JsonSerializerOptions
                 {

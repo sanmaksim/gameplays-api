@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameplaysApi.Services
 {
-    public class GameHelperService
+    public class GameService
     {
         private readonly ApplicationDbContext _context;
 
-        public GameHelperService(ApplicationDbContext context)
+        public GameService(ApplicationDbContext context)
         {
             _context = context;
         }

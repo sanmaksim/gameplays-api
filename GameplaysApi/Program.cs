@@ -169,7 +169,7 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 // Add ApplicationDbContext helper services
 builder.Services.AddScoped<EntityTrackingService>();    // relies on request-scoped object ApplicationDbContext
-builder.Services.AddScoped<GameHelperService>();        // relies on request-scoped object ApplicationDbContext
+builder.Services.AddScoped<GameService>();              // relies on request-scoped object ApplicationDbContext
 
 var app = builder.Build();
 
