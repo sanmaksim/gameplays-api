@@ -1,5 +1,4 @@
 ﻿using GameplaysApi.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 namespace GameplaysApi.DTOs
