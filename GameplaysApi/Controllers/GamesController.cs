@@ -1,3 +1,4 @@
+using GameplaysApi.Config;
 using GameplaysApi.Converters;
 using GameplaysApi.Data;
 using GameplaysApi.Models;
@@ -5,6 +6,7 @@ using GameplaysApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -16,42 +18,36 @@ namespace GameplaysApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly EntityTrackingService _entityTrackingService;
+        private readonly GameConfig _gameConfig;
         private readonly GameService _gameService;
         private readonly HttpClient _httpClient;
-        
+
         public GamesController(
-            ApplicationDbContext context, 
-            EntityTrackingService entityTrackingService, 
+            ApplicationDbContext context,
+            EntityTrackingService entityTrackingService,
+            IOptions<GameConfig> gameConfig,
             GameService gameService,
             HttpClient httpClient)
         {
             _context = context;
             _entityTrackingService = entityTrackingService;
+            _gameConfig = gameConfig.Value;
             _gameService = gameService;
             _httpClient = httpClient;
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery(Name = "q")] string query, [FromQuery(Name = "page")] string? page, [FromHeader(Name = "Result-Limit")] string? limit = "10")
+        public async Task<IActionResult> Search(
+            [FromQuery(Name = "q")] string query, 
+            [FromQuery(Name = "page")] string? page, 
+            [FromHeader(Name = "Result-Limit")] string? limit = "10")
         {
-            string? apiUrl = Environment.GetEnvironmentVariable("GIANT_BOMB_API_URL");
-            string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
-            string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
-            string? appVersion = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_VERSION");
-            string? authorEmail = Environment.GetEnvironmentVariable("GIANT_BOMB_USER_AGENT_EMAIL");
+            var apiSearchUrl = $"{_gameConfig.GiantBombApiUrl}/search";
 
-            // verify api config is present
-            if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey))
-            {
-                return StatusCode(500, "Giant Bomb API configuration is missing.");
-            }
-
-            apiUrl = $"{apiUrl}/search";
-
-            // assemble search parameters
+            // Assemble the search parameters
             var queryParams = new Dictionary<string, string?>
             {
-                { "api_key", apiKey },
+                { "api_key", _gameConfig.GiantBombApiKey },
                 { "format", "json" },
                 { "limit", limit },
                 { "page", page },
@@ -59,8 +55,8 @@ namespace GameplaysApi.Controllers
                 { "resources", "game" },
             };
 
-            // build the search url
-            var uriBuilder = new UriBuilder(apiUrl)
+            // Build the search url
+            var uriBuilder = new UriBuilder(apiSearchUrl)
             {
                 Query = QueryHelpers.AddQueryString("", queryParams).TrimStart('?')
             };
@@ -68,18 +64,18 @@ namespace GameplaysApi.Controllers
             // Create a new HttpRequestMessage
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
 
-            // The Giant Bomb API requires a custom User-Agent
-            var userAgent = $"{appName}/{appVersion} ({authorEmail})";
+            // Define a custom User-Agent as required by the Giant Bomb API
+            var userAgent = $"{_gameConfig.AppName}/{_gameConfig.AppVersion} ({_gameConfig.AuthorEmail})";
             request.Headers.Add("User-Agent", userAgent);
 
-            // send the request to the GB API
+            // Send the request to the Giant Bomb API
             var response = await _httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
-                StatusCode((int)response.StatusCode);
+                return StatusCode((int)response.StatusCode);
             }
 
-            // get the content from the request
+            // Return the content from the request
             var content = await response.Content.ReadAsStringAsync();
             return Ok(content);
         }
@@ -116,30 +112,17 @@ namespace GameplaysApi.Controllers
                 }
             }
 
-            string? apiUrl = Environment.GetEnvironmentVariable("GIANT_BOMB_API_URL");
-            string? apiKey = Environment.GetEnvironmentVariable("GIANT_BOMB_API_KEY");
-            string? appName = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_NAME");
-            string? appVersion = Environment.GetEnvironmentVariable("GAMEPLAYS_APP_VERSION");
-            string? authorEmail = Environment.GetEnvironmentVariable("GIANT_BOMB_USER_AGENT_EMAIL");
-            string? resourcePrefix = Environment.GetEnvironmentVariable("GAMEPLAYS_RESOURCE_PREFIX");
-
-            // verify api config is present
-            if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey))
-            {
-                return StatusCode(500, "Giant Bomb API configuration is missing.");
-            }
-
-            apiUrl = $"{apiUrl}/game/{resourcePrefix}-{gameId}";
+            var apiGameUrl = $"{_gameConfig.GiantBombApiUrl}/game/{_gameConfig.GiantBombResourcePrefix}-{gameId}";
 
             // assemble search parameters
             var queryParams = new Dictionary<string, string?>
             {
-                { "api_key", apiKey },
+                { "api_key", _gameConfig.GiantBombApiKey },
                 { "format", "json" }
             };
 
             // build the search url
-            var uriBuilder = new UriBuilder(apiUrl)
+            var uriBuilder = new UriBuilder(apiGameUrl)
             {
                 Query = QueryHelpers.AddQueryString("", queryParams).TrimStart('?')
             };
@@ -148,14 +131,14 @@ namespace GameplaysApi.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
 
             // The Giant Bomb API requires a custom User-Agent
-            var userAgent = $"{appName}/{appVersion} ({authorEmail})";
+            var userAgent = $"{_gameConfig.AppName}/{_gameConfig.AppVersion} ({_gameConfig.AuthorEmail})";
             request.Headers.Add("User-Agent", userAgent);
 
             // send the request to the GB API
             var response = await _httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
-                StatusCode((int)response.StatusCode);
+                return StatusCode((int)response.StatusCode);
             }
 
             // get the content from the request
