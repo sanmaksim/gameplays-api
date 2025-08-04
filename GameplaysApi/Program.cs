@@ -1,3 +1,4 @@
+using GameplaysApi.Config;
 using GameplaysApi.Controllers;
 using GameplaysApi.Data;
 using GameplaysApi.Interfaces;
@@ -11,13 +12,18 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
-var builder = WebApplication.CreateBuilder(args);
+var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") 
+            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+bool isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
 
 // Read from the .env file in dev
-if (builder.Environment.IsDevelopment())
+if (isDevelopment)
 {
     DotNetEnv.Env.Load();
 }
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Define ports
 var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
@@ -135,6 +141,13 @@ else
 {
     throw new Exception("HmacSecretKey must not be null.");
 }
+
+// Read environment variables into memory & validate
+builder.Services.Configure<GameConfig>(builder.Configuration.GetSection(nameof(GameConfig)));
+builder.Services.AddOptions<GameConfig>()
+    .BindConfiguration("GameConfig")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 // Add authorization policy services
 builder.Services.AddAuthorization();
