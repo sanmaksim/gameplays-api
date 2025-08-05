@@ -1,5 +1,7 @@
+using GameplaysApi.Config;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
+using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -7,26 +9,20 @@ namespace GameplaysApi.Services
 {
     public class AuthService : IAuthService
     {
+        private readonly AuthConfig _authConfig;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ICookieService _cookieService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokenService _refreshTokenService;
-
-        private readonly string? _jwtCookieName = Environment.GetEnvironmentVariable("JWT_COOKIE_NAME");
-        private readonly string? _jwtExpirationMinutes = Environment.GetEnvironmentVariable("JWT_EXPIRATION_MINUTES");
-
-        private readonly string? _refreshTokenCookieName = Environment.GetEnvironmentVariable("REFRESH_TOKEN_COOKIE_NAME");
-        private readonly string? _refreshTokenExpirationDays = Environment.GetEnvironmentVariable("REFRESH_TOKEN_EXPIRATION_DAYS");
-
-        private readonly string? _validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
-        private readonly string? _validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
-
+        
         public AuthService(
+            IOptions<AuthConfig> authConfig,
             IHttpContextAccessor contextAccessor,
             ICookieService cookieService,
             IJwtTokenService jwtTokenService,
             IRefreshTokenService refreshTokenService)
         {
+            _authConfig = authConfig.Value;
             _contextAccessor = contextAccessor;
             _cookieService = cookieService;
             _jwtTokenService = jwtTokenService;
@@ -42,93 +38,53 @@ namespace GameplaysApi.Services
 
         public void CreateAuthCookie(User user, HttpResponse response)
         {
-            if (_validIssuer != null && _validAudience != null && _jwtCookieName != null)
+            // Create JSON Web Token
+            var payload = new List<Claim>
             {
-                // create JWT
-                var payload = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Iss, _validIssuer),
-                    new Claim(JwtRegisteredClaimNames.Aud, _validAudience)
-                };
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iss, _authConfig.ValidIssuers),
+                new Claim(JwtRegisteredClaimNames.Aud, _authConfig.ValidAudiences)
+            };
 
-                if (int.TryParse(_jwtExpirationMinutes, out int expirationMinutes))
-                {
-                    var expirationMins = TimeSpan.FromMinutes(expirationMinutes);
-                    var jwt = _jwtTokenService.CreateToken(payload, expirationMins);
-
-                    // create cookie
-                    var cookieValue = jwt;
-                    _cookieService.CreateCookie(response, _jwtCookieName, cookieValue, expirationMins);
-                }
-            }
-            else
+            if (int.TryParse(_authConfig.JwtExpMins, out int expirationMinutes))
             {
-                throw new ArgumentNullException("Error reading access token config.");
+                var expirationMins = TimeSpan.FromMinutes(expirationMinutes);
+                var jwt = _jwtTokenService.CreateToken(payload, expirationMins);
+
+                var cookieValue = jwt;
+                _cookieService.CreateCookie(response, _authConfig.JwtCookieName, cookieValue, expirationMins);
             }
         }
 
         public void DeleteAuthCookie(HttpResponse response)
         {
-            if (_jwtCookieName != null)
-                _cookieService.DeleteCookie(response, _jwtCookieName);
-            else
-                throw new ArgumentNullException("Error reading access token config.");
+            _cookieService.DeleteCookie(response, _authConfig.JwtCookieName);
         }
 
         public async Task CreateRefreshTokenCookie(User user, HttpRequest request, HttpResponse response)
         {
-            if (_validIssuer != null && _validAudience != null && _refreshTokenCookieName != null
-                && int.TryParse(_refreshTokenExpirationDays, out int expirationDays))
-            {
-                var expDays = TimeSpan.FromDays(expirationDays);
+            var expDays = TimeSpan.FromDays(int.Parse(_authConfig.RefreshExpDays));
 
-                // create refresh token
-                var tokenString = await _refreshTokenService.CreateRefreshToken(user, request, expDays);
+            var tokenString = await _refreshTokenService.CreateRefreshToken(user, request, expDays);
 
-                // create cookie
-                var cookieValue = tokenString;
-                _cookieService.CreateCookie(response, _refreshTokenCookieName, cookieValue, expDays);
-                
-            }
-            else
-            {
-                throw new ArgumentNullException("Error reading refresh token config.");
-            }
+            var cookieValue = tokenString;
+            _cookieService.CreateCookie(response, _authConfig.RefreshCookieName, cookieValue, expDays);
         }
 
         public async Task UpdateRefreshTokenCookie(User user, HttpRequest request, HttpResponse response, RefreshToken refreshToken)
         {
-            if (_validIssuer != null && _validAudience != null && _refreshTokenCookieName != null
-                && int.TryParse(_refreshTokenExpirationDays, out int expirationDays))
-            {
-                var expDays = TimeSpan.FromDays(expirationDays);
+            var expDays = TimeSpan.FromDays(int.Parse(_authConfig.RefreshExpDays));
 
-                // create refresh token
-                var tokenString = await _refreshTokenService.UpdateRefreshToken(user, request, expDays, refreshToken);
+            var tokenString = await _refreshTokenService.UpdateRefreshToken(user, request, expDays, refreshToken);
 
-                // create cookie
-                var cookieValue = tokenString;
-                _cookieService.CreateCookie(response, _refreshTokenCookieName, cookieValue, expDays);
-
-            }
-            else
-            {
-                throw new ArgumentNullException("Error reading refresh token config.");
-            }
+            var cookieValue = tokenString;
+            _cookieService.CreateCookie(response, _authConfig.RefreshCookieName, cookieValue, expDays);
         }
 
         public void DeleteRefreshTokenCookie(HttpResponse response)
         {
-            if (_refreshTokenCookieName != null)
-            {
-                _cookieService.DeleteCookie(response, _refreshTokenCookieName);
-            }
-            else
-            {
-                throw new ArgumentNullException("Error reading refresh token config.");
-            }
+            _cookieService.DeleteCookie(response, _authConfig.RefreshCookieName);
         }
     }
 }
