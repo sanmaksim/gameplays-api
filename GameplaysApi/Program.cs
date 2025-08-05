@@ -12,43 +12,42 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
-var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") 
-            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-
+// Load environment variables for Development
+var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 bool isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
+if (isDevelopment) DotNetEnv.Env.Load();
 
-// Read from the .env file in dev
-if (isDevelopment)
-{
-    DotNetEnv.Env.Load();
-}
-
+// Build the app configuration
 var builder = WebApplication.CreateBuilder(args);
 
-// Define ports
-var httpsPort = int.Parse(Environment.GetEnvironmentVariable("GAMEPLAYS_HTTPS_PORT")!);
+// Bind & validate the provided AuthConfig environment variables
+var authConfig = new AuthConfig();
+builder.Configuration.Bind(nameof(AuthConfig), authConfig);
+if (authConfig.HmacSecretKey == null) throw new ArgumentNullException($"{nameof(authConfig.HmacSecretKey)} must not be null.");
+if (authConfig.JwtCookieName == null) throw new ArgumentNullException($"{nameof(authConfig.JwtCookieName)} must not be null.");
 
-// Define JWT config
-var hmacSecretKey = Environment.GetEnvironmentVariable("JWT_HMACSECRETKEY");
-var validIssuer = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDISSUERS");
-var validAudience = Environment.GetEnvironmentVariable("GAMEPLAYS_VALIDAUDIENCES");
+// Bind & validate the provided ConnectionConfig environment variables
+var connectionConfig = new ConnectionConfig();
+builder.Configuration.Bind(nameof(ConnectionConfig), connectionConfig);
+if (connectionConfig.ConnectionString == null) throw new ArgumentNullException($"{nameof(connectionConfig.ConnectionString)} must not be null.");
+if (connectionConfig.DevCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.DevCertPath)} must not be null.");
+if (!int.TryParse(connectionConfig.HttpsPort, out int httpsPort)) throw new ArgumentNullException($"{nameof(connectionConfig.HttpsPort)} must not be null.");
+if (connectionConfig.ProdCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdCertPath)} must not be null.");
+if (connectionConfig.ProdKeyPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdKeyPath)} must not be null.");
 
-// Define database connection string
-var connectionString = Environment.GetEnvironmentVariable("GAMEPLAYS_CONNECTION_STRING");
-
-// Add Kestrel HTTPS config
+// Configure Kestrel HTTPS
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(httpsPort, listenOptions =>
     {
-        if (builder.Environment.IsDevelopment())
+        if (isDevelopment)
         {
-            listenOptions.UseHttps(Environment.GetEnvironmentVariable("GAMEPLAYS_CERTIFICATE_PATH")!);
+            listenOptions.UseHttps(connectionConfig.DevCertPath);
         }
         else
         {
-            var certPath = "/etc/ssl/certs/gameplays.test+1.pem";
-            var keyPath = "/etc/ssl/certs/gameplays.test+1-key.pem";
+            var certPath = connectionConfig.ProdCertPath;
+            var keyPath = connectionConfig.ProdKeyPath;
 
             var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
             certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
@@ -71,16 +70,9 @@ builder.Services.AddCors(options =>
 });
 
 // Add the database context for MySQL
-if (connectionString != null)
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 41)))
-    );
-}
-else
-{
-    throw new Exception("DefaultConnection string must not be null.");
-}
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(connectionConfig.ConnectionString, new MySqlServerVersion(new Version(8, 0, 41)))
+);
 
 // Rate limit proxied API requests to 1 per second and provide a response upon rejection
 builder.Services.AddRateLimiter(options => {
@@ -102,50 +94,48 @@ builder.Services.AddRateLimiter(options => {
     };
 });
 
-// Add authentication middleware
-if (hmacSecretKey != null)
-{
-    builder.Services.AddAuthentication(options => {
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
-        // Do NOT map claim types that are extracted when validating a JWT
-        options.MapInboundClaims = false;
-        // Define JWT validation parameters
-        options.TokenValidationParameters = new TokenValidationParameters
+// Configure authentication middleware
+builder.Services.AddAuthentication(options => {
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
+    // Do NOT map claim types that are extracted when validating a JWT
+    options.MapInboundClaims = false;
+    // Define token validation parameters
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidIssuer = authConfig.ValidIssuers,
+        ValidAudience = authConfig.ValidAudiences,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authConfig.HmacSecretKey)),
+        ClockSkew = TimeSpan.FromSeconds(30)
+    };
+    // Assign custom event handlers
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidIssuer = validIssuer,
-            ValidAudience = validAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hmacSecretKey)),
-            ClockSkew = TimeSpan.FromSeconds(30)
-        };
-        // Assign custom event handlers
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
+            // Pull token from cookie if present
+            if (context.HttpContext.Request.Cookies.ContainsKey(authConfig.JwtCookieName))
             {
-                // Pull token from cookie if present
-                if (context.HttpContext.Request.Cookies.ContainsKey("jwt"))
-                {
-                    context.Token = context.HttpContext.Request.Cookies["jwt"];
-                }
-                
-                return Task.CompletedTask;
+                context.Token = context.HttpContext.Request.Cookies[authConfig.JwtCookieName];
             }
-        };
-    });
-}
-else
-{
-    throw new Exception("HmacSecretKey must not be null.");
-}
+                
+            return Task.CompletedTask;
+        }
+    };
+});
 
-// Read environment variables into memory & validate
+// Bind the necessary environment variables for Dependency Injection & validate
+builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection(nameof(AuthConfig)));
+builder.Services.AddOptions<AuthConfig>()
+    .BindConfiguration(nameof(AuthConfig))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.Configure<GameConfig>(builder.Configuration.GetSection(nameof(GameConfig)));
 builder.Services.AddOptions<GameConfig>()
-    .BindConfiguration("GameConfig")
+    .BindConfiguration(nameof(GameConfig))
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
@@ -168,11 +158,11 @@ builder.Services.AddHttpClient<GamesController>();
 builder.Services.AddHttpContextAccessor();
 
 // Add custom user auth related services
-builder.Services.AddTransient<IJwtTokenService, JwtTokenService>(); // does NOT rely on a request-scoped object
-builder.Services.AddScoped<ICookieService, CookieService>();        // relies on request-scoped object HttpResponse
-builder.Services.AddScoped<IAuthService, AuthService>();            // relies on request-scoped object HttpResponse
+builder.Services.AddScoped<IAuthService, AuthService>();                 // relies on request-scoped object HttpResponse
+builder.Services.AddScoped<ICookieService, CookieService>();             // relies on request-scoped object HttpResponse
+builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();      // does NOT rely on a request-scoped object
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>(); // relies on request-scoped object HttpRequest
-builder.Services.AddSingleton<IUserService, UserService>();         // utility service that is stateless and thread-safe
+builder.Services.AddSingleton<IUserService, UserService>();              // utility service that is stateless and thread-safe
 
 // Add data access repositories for controllers and services
 builder.Services.AddScoped<IGamesRepository, GamesRepository>();
@@ -184,6 +174,7 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<EntityTrackingService>();    // relies on request-scoped object ApplicationDbContext
 builder.Services.AddScoped<GameService>();              // relies on request-scoped object ApplicationDbContext
 
+// Build the application
 var app = builder.Build();
 
 // Apply migrations and ensure the database is created
