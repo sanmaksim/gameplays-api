@@ -20,9 +20,9 @@ namespace GameplaysApi.Config
         public string RefreshExpDays { get; set; } = default!;
 
         [Required]
-        public string ValidIssuers { get; set; } = default!;
+        public string ValidAudiences { get; set; } = default!;
 
         [Required]
-        public string ValidAudiences { get; set; } = default!;
+        public string ValidIssuers { get; set; } = default!;
     }
 }
