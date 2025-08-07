@@ -32,6 +32,8 @@ if (authConfig.ValidIssuers == null) throw new ArgumentNullException($"{nameof(a
 var connectionConfig = new ConnectionConfig();
 builder.Configuration.Bind(nameof(ConnectionConfig), connectionConfig);
 if (connectionConfig.ConnectionString == null) throw new ArgumentNullException($"{nameof(connectionConfig.ConnectionString)} must not be null.");
+if (connectionConfig.CorsOriginDev == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginDev)} must not be null.");
+if (connectionConfig.CorsOriginTest == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginTest)} must not be null.");
 if (connectionConfig.DevCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.DevCertPath)} must not be null.");
 if (!int.TryParse(connectionConfig.HttpsPort, out int httpsPort)) throw new ArgumentNullException($"{nameof(connectionConfig.HttpsPort)} must not be null.");
 if (connectionConfig.ProdCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdCertPath)} must not be null.");
@@ -64,10 +66,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOriginWithCredentials", builder =>
     {
-        builder.WithOrigins($"http://localhost:5000", "https://gameplays.test")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+        builder.WithOrigins
+        (
+            connectionConfig.CorsOriginDev, 
+            connectionConfig.CorsOriginTest
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
