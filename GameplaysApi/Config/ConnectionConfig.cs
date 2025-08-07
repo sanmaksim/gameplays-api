@@ -8,6 +8,12 @@ namespace GameplaysApi.Config
         public string ConnectionString { get; set; } = default!;
 
         [Required]
+        public string CorsOriginDev { get; set; } = default!;
+
+        [Required]
+        public string CorsOriginTest { get; set; } = default!;
+        
+        [Required]
         public string DevCertPath { get; set; } = default!;
 
         [Required]
