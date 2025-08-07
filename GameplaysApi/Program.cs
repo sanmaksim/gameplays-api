@@ -20,13 +20,15 @@ if (isDevelopment) DotNetEnv.Env.Load();
 // Build the app configuration
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind & validate the provided AuthConfig environment variables
+// Bind & validate the AuthConfig environment variables required by the startup config
 var authConfig = new AuthConfig();
 builder.Configuration.Bind(nameof(AuthConfig), authConfig);
 if (authConfig.HmacSecretKey == null) throw new ArgumentNullException($"{nameof(authConfig.HmacSecretKey)} must not be null.");
 if (authConfig.JwtCookieName == null) throw new ArgumentNullException($"{nameof(authConfig.JwtCookieName)} must not be null.");
+if (authConfig.ValidAudiences == null) throw new ArgumentNullException($"{nameof(authConfig.ValidAudiences)} must not be null.");
+if (authConfig.ValidIssuers == null) throw new ArgumentNullException($"{nameof(authConfig.ValidIssuers)} must not be null.");
 
-// Bind & validate the provided ConnectionConfig environment variables
+// Bind & validate the ConnectionConfig environment variables required by the startup config
 var connectionConfig = new ConnectionConfig();
 builder.Configuration.Bind(nameof(ConnectionConfig), connectionConfig);
 if (connectionConfig.ConnectionString == null) throw new ArgumentNullException($"{nameof(connectionConfig.ConnectionString)} must not be null.");
@@ -98,7 +100,8 @@ builder.Services.AddRateLimiter(options => {
 builder.Services.AddAuthentication(options => {
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
-    // Do NOT map claim types that are extracted when validating a JWT
+    // Do NOT map JWT claim types to .NET claim types
+    // when validating the extracted access token
     options.MapInboundClaims = false;
     // Define token validation parameters
     options.TokenValidationParameters = new TokenValidationParameters
@@ -116,7 +119,7 @@ builder.Services.AddAuthentication(options => {
     {
         OnMessageReceived = context =>
         {
-            // Pull token from cookie if present
+            // Pull access token from cookie if present
             if (context.HttpContext.Request.Cookies.ContainsKey(authConfig.JwtCookieName))
             {
                 context.Token = context.HttpContext.Request.Cookies[authConfig.JwtCookieName];
