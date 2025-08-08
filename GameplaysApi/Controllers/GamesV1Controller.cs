@@ -13,8 +13,8 @@ using System.Text.Json.Serialization;
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class GamesController : ControllerBase
+    [Route("api/v1/games")]
+    public class GamesV1Controller : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly EntityTrackingService _entityTrackingService;
@@ -22,7 +22,7 @@ namespace GameplaysApi.Controllers
         private readonly GameService _gameService;
         private readonly HttpClient _httpClient;
 
-        public GamesController(
+        public GamesV1Controller(
             ApplicationDbContext context,
             EntityTrackingService entityTrackingService,
             IOptions<GameConfig> gameConfig,
