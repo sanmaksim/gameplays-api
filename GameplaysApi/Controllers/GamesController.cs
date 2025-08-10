@@ -13,8 +13,8 @@ using System.Text.Json.Serialization;
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/v1/games")]
-    public class GamesV1Controller : ControllerBase
+    [Route("api/[controller]")]
+    public class GamesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly EntityTrackingService _entityTrackingService;
@@ -22,7 +22,7 @@ namespace GameplaysApi.Controllers
         private readonly GameService _gameService;
         private readonly HttpClient _httpClient;
 
-        public GamesV1Controller(
+        public GamesController(
             ApplicationDbContext context,
             EntityTrackingService entityTrackingService,
             IOptions<GameConfig> gameConfig,
@@ -35,7 +35,8 @@ namespace GameplaysApi.Controllers
             _gameService = gameService;
             _httpClient = httpClient;
         }
-
+        // TODO: add swagger annotations
+        // TODO: refactor service related logic
         [HttpGet("search")]
         public async Task<IActionResult> Search(
             [FromQuery(Name = "q")] string query, 

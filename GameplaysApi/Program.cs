@@ -161,7 +161,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddControllersWithViews();
 
 // Required for communicating with the Giant Bomb API
-builder.Services.AddHttpClient<GamesV1Controller>();
+builder.Services.AddHttpClient<GamesController>();
 
 // Required by AuthService for accessing HttpContext.User outside the scope of a Controller
 builder.Services.AddHttpContextAccessor();
