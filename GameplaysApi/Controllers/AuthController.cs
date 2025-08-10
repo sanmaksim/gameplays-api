@@ -8,15 +8,15 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/v1/auth")]
-    public class AuthV1Controller : ControllerBase
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IUserService _userService;
         private readonly IUsersRepository _usersRepository;
 
-        public AuthV1Controller(
+        public AuthController(
             IAuthService authService,
             IRefreshTokenService refreshTokenService,
             IUserService userService,
