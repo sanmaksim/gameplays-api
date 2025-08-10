@@ -9,14 +9,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace GameplaysApi.Controllers
 {
     [ApiController]
-    [Route("api/v1/users")]
-    public class UsersV1Controller : ControllerBase
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
     {
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IUsersRepository _usersRepository;
 
-        public UsersV1Controller(
+        public UsersController(
             IAuthService authService,
             IUserService userService,
             IUsersRepository usersRepository)
