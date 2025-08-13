@@ -3,6 +3,7 @@ using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace GameplaysApi.Controllers
 {
@@ -87,7 +88,7 @@ namespace GameplaysApi.Controllers
                 );
             }
         }
-
+        // TODO: refactor endpoint to filter based
         [Authorize]
         [HttpDelete("user/{userId}/play/{playId}")]
         public async Task<IActionResult> DeletePlay(string userId, string playId)
@@ -125,7 +126,7 @@ namespace GameplaysApi.Controllers
 
             return Ok(new { message = $"Removed from {Enum.GetName(typeof(PlayStatus), play.Status)}." });
         }
-
+        // TODO: refactor endpoint to filter based
         [Authorize]
         [HttpGet("user/{userId}/game/{apiGameId}")]
         public async Task<IActionResult> GetPlayByUserAndExternalGameId(string userId, string apiGameId)
@@ -162,27 +163,27 @@ namespace GameplaysApi.Controllers
         }
 
         [Authorize]
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetPlaysByUserId(string userId)
+        [HttpGet("user/{id}")]
+        [SwaggerOperation(
+            Summary = "Get all plays by user ID",
+            Description = "Retrieve all plays for a user based on their ID",
+            OperationId = "GetPlaysByUserId"
+        )]
+        public async Task<IActionResult> GetPlaysByUserId(int id)
         {
             var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
+            if (string.IsNullOrEmpty(jwtUserId) || id.ToString() != jwtUserId)
             {
                 return Forbid();
             }
 
-            if (!int.TryParse(userId, out int uId))
-            {
-                return BadRequest(new { message = "The user ID is invalid." });
-            }
-
-            var user = await _usersRepository.GetUserByIdAsync(uId);
+            var user = await _usersRepository.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
             
-            var plays = await _playsRepository.GetPlaysByUserIdAsync(uId);
+            var plays = await _playsRepository.GetPlaysByUserIdAsync(id);
             if (plays == null || !plays.Any())
             {
                 return Ok(new { message = "No games shelved." });
