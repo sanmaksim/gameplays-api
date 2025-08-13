@@ -184,33 +184,32 @@ namespace GameplaysApi.Controllers
         }
 
         [Authorize]
-        [HttpDelete("profile")]
+        [HttpDelete("profile/{id}")]
         [SwaggerOperation(
             Summary = "Delete user",
-            Description = "Deletes a user based on their access token identifier",
+            Description = "Deletes a user based on ID",
             OperationId = "DeleteUser"
         )]
-        public async Task<IActionResult> DeleteUser()
+        public async Task<IActionResult> DeleteUser(int id)
         {
+            // Does the user's JWT sub match the provided user ID
             var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId))
+            if (string.IsNullOrEmpty(jwtUserId) || id.ToString() != jwtUserId)
             {
                 return Forbid();
             }
 
-            if (!int.TryParse(jwtUserId, out int userId))
-            {
-                return BadRequest(new { message = "The token string is not a valid integer." });
-            }
-
-            var user = await _usersRepository.GetUserByIdAsync(userId);
+            // Does the user exist in the database
+            var user = await _usersRepository.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound(new { message = "User not found." });
             }
 
+            // Delete the user and associated records
             await _usersRepository.DeleteUserAsync(user);
 
+            // Delete the user access and refresh tokens
             _authService.DeleteAuthCookie(Response);
             _authService.DeleteRefreshTokenCookie(Response);
 
