@@ -80,7 +80,8 @@ namespace GameplaysApi.Controllers
                 await _playsRepository.AddPlayAsync(newPlay);
                 return CreatedAtAction(
                     nameof(GetPlayByUserAndExternalGameId),
-                    new {
+                    new
+                    {
                         userId = newPlay.UserId,
                         apiGameId = newPlay.ApiGameId
                     },
@@ -152,13 +153,13 @@ namespace GameplaysApi.Controllers
             {
                 return BadRequest(new { message = "The game ID is invalid." });
             }
-            
+
             var play = await _playsRepository.GetPlayByUserIdAndExternalGameIdAsync(uId, extGameId);
             if (play == null)
             {
                 return Ok(new { message = "Game not shelved." });
             }
-            
+
             return Ok(play);
         }
 
@@ -182,7 +183,7 @@ namespace GameplaysApi.Controllers
             {
                 return NotFound();
             }
-            
+
             var plays = await _playsRepository.GetPlaysByUserIdAsync(id);
             if (plays == null || !plays.Any())
             {
