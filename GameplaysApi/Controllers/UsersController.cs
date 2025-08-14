@@ -75,7 +75,7 @@ namespace GameplaysApi.Controllers
         }
         
         [Authorize]
-        [HttpGet("profile/{id}")]
+        [HttpGet("{id}")]
         [SwaggerOperation(
             Summary = "Get user",
             Description = "Retrieves a user based on ID",
@@ -99,7 +99,7 @@ namespace GameplaysApi.Controllers
         }
 
         [Authorize]
-        [HttpPut("profile/{id}")]
+        [HttpPut("{id}")]
         [SwaggerOperation(
             Summary = "Update user",
             Description = "Updates user data based on ID",
@@ -184,7 +184,7 @@ namespace GameplaysApi.Controllers
         }
 
         [Authorize]
-        [HttpDelete("profile/{id}")]
+        [HttpDelete("{id}")]
         [SwaggerOperation(
             Summary = "Delete user",
             Description = "Deletes a user based on ID",
