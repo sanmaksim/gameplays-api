@@ -10,7 +10,7 @@ namespace GameplaysApi.Interfaces
         Task UpdatePlayStatusAsync(Play play, int newStatus);
         Task<Play?> GetPlayByIdAsync(int playId);
         Task<PlayStatusDto?> GetPlayByUserIdAndExternalGameIdAsync(int userId, int externalGameId);
-        Task<List<UserPlaysDto>> GetPlaysByUserIdAsync(int userId);
+        Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int statusId);
         Task<Play?> GetPlayByUserIdAndInternalGameIdAsync(int userId, int internalGameId);
     }
 }

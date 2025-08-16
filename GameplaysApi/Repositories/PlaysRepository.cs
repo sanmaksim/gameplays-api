@@ -54,11 +54,12 @@ namespace GameplaysApi.Repositories
                     .FirstOrDefaultAsync();
         }
 
-        public async Task<List<UserPlaysDto>> GetPlaysByUserIdAsync(int userId)
+        public async Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int statusId)
         {
             return await _context.Plays
                     .Include(p => p.Game)
                     .Where(p => p.UserId == userId)
+                    .Where(p => p.Status == (PlayStatus)statusId)
                     .Select(p => new UserPlaysDto
                     {
                         Id = p.Id,
