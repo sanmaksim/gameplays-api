@@ -1,6 +1,7 @@
 using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
+using GameplaysApi.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -164,27 +165,41 @@ namespace GameplaysApi.Controllers
         }
 
         [Authorize]
-        [HttpGet("user/{id}")]
+        [HttpGet]
         [SwaggerOperation(
-            Summary = "Get all plays by user ID",
-            Description = "Retrieve all plays for a user based on their ID",
-            OperationId = "GetPlaysByUserId"
+            Summary = "Get filtered plays",
+            Description = "Retrieve plays for a user filtered by status",
+            OperationId = "GetPlays"
         )]
-        public async Task<IActionResult> GetPlaysByUserId(int id)
+        public async Task<IActionResult> GetPlays([FromQuery] PlayDto playDto)
         {
+            var validator = new PlayDtoValidator();
+            var result = validator.Validate(playDto);
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
+            }
+
             var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId) || id.ToString() != jwtUserId)
+            if (string.IsNullOrEmpty(jwtUserId))
             {
                 return Forbid();
             }
-
-            var user = await _usersRepository.GetUserByIdAsync(id);
-            if (user == null)
+            else if (playDto.UserId.ToString() != jwtUserId)
             {
-                return NotFound();
+                return Unauthorized();
             }
 
-            var plays = await _playsRepository.GetPlaysByUserIdAsync(id);
+            if (playDto.UserId == null || playDto.StatusId == null)
+            {
+                return BadRequest(new { message = $"{nameof(playDto.UserId)} and {nameof(playDto.StatusId)} required." });
+            }
+
+            var plays = await _playsRepository.GetPlaysAsync((int)playDto.UserId, (int)playDto.StatusId);
             if (plays == null || !plays.Any())
             {
                 return Ok(new { message = "No games shelved." });
