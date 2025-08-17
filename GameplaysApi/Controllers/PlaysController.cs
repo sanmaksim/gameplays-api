@@ -80,7 +80,7 @@ namespace GameplaysApi.Controllers
 
                 await _playsRepository.AddPlayAsync(newPlay);
                 return CreatedAtAction(
-                    nameof(GetPlayByUserAndExternalGameId),
+                    nameof(GetPlays),
                     new
                     {
                         userId = newPlay.UserId,
@@ -90,6 +90,7 @@ namespace GameplaysApi.Controllers
                 );
             }
         }
+
         // TODO: refactor endpoint to filter based
         [Authorize]
         [HttpDelete("user/{userId}/play/{playId}")]
@@ -128,42 +129,7 @@ namespace GameplaysApi.Controllers
 
             return Ok(new { message = $"Removed from {Enum.GetName(typeof(PlayStatus), play.Status)}." });
         }
-        // TODO: refactor endpoint to filter based
-        [Authorize]
-        [HttpGet("user/{userId}/game/{apiGameId}")]
-        public async Task<IActionResult> GetPlayByUserAndExternalGameId(string userId, string apiGameId)
-        {
-            var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId) || userId != jwtUserId)
-            {
-                return Forbid();
-            }
-
-            if (!int.TryParse(userId, out int uId))
-            {
-                return BadRequest(new { message = "The user ID is invalid." });
-            }
-
-            var user = await _usersRepository.GetUserByIdAsync(uId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            if (!int.TryParse(apiGameId, out int extGameId))
-            {
-                return BadRequest(new { message = "The game ID is invalid." });
-            }
-
-            var play = await _playsRepository.GetPlayByUserIdAndExternalGameIdAsync(uId, extGameId);
-            if (play == null)
-            {
-                return Ok(new { message = "Game not shelved." });
-            }
-
-            return Ok(play);
-        }
-
+        
         [Authorize]
         [HttpGet]
         [SwaggerOperation(
@@ -173,6 +139,7 @@ namespace GameplaysApi.Controllers
         )]
         public async Task<IActionResult> GetPlays([FromQuery] PlayDto playDto)
         {
+            // Validate incoming query parameters
             var validator = new PlayDtoValidator();
             var result = validator.Validate(playDto);
             if (!result.IsValid)
@@ -184,6 +151,7 @@ namespace GameplaysApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            // Verify user access
             var jwtUserId = _authService.GetCurrentUserId();
             if (string.IsNullOrEmpty(jwtUserId))
             {
@@ -194,18 +162,37 @@ namespace GameplaysApi.Controllers
                 return Unauthorized();
             }
 
-            if (playDto.UserId == null || playDto.StatusId == null)
+            // Return all plays for a user filtered by status
+            if (playDto.UserId != null && playDto.StatusId != null)
             {
-                return BadRequest(new { message = $"{nameof(playDto.UserId)} and {nameof(playDto.StatusId)} required." });
+                var plays = await _playsRepository.GetPlaysAsync((int)playDto.UserId, null, (int)playDto.StatusId);
+                if (plays == null || plays.Count == 0)
+                {
+                    return Ok(new { message = "No games shelved." });
+                }
+
+                return Ok(plays);
             }
 
-            var plays = await _playsRepository.GetPlaysAsync((int)playDto.UserId, (int)playDto.StatusId);
-            if (plays == null || !plays.Any())
+            // Return only the user single play ID and status for a certain Giant Bomb game ID
+            if (playDto.UserId != null && playDto.ApiGameId != null)
             {
-                return Ok(new { message = "No games shelved." });
+                var plays = await _playsRepository.GetPlaysAsync((int)playDto.UserId, (int)playDto.ApiGameId, null);
+                if (plays == null || plays.Count == 0)
+                {
+                    return Ok(new { message = "Game not shelved." });
+                }
+
+                var play = plays.Select(p => new {
+                        PlayId = p.Id,
+                        Status = p.Status!
+                    })
+                    .Single();
+                
+                return Ok(play);
             }
 
-            return Ok(plays);
+            return BadRequest(new { message = "One or more missing query parameters." });
         }
     }
 }
