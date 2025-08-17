@@ -42,43 +42,42 @@ namespace GameplaysApi.Repositories
             return await _context.Plays.FindAsync(playId);
         }
 
-        public async Task<PlayStatusDto?> GetPlayByUserIdAndExternalGameIdAsync(int userId, int externalGameId)
+        public async Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int? apiGameId, int? statusId)
         {
-            return await _context.Plays
-                    .Where(p => p.UserId == userId && p.ApiGameId == externalGameId)
-                    .Select(p => new PlayStatusDto
-                    {
-                        PlayId = p.Id,
-                        Status = (int)p.Status
-                    })
-                    .FirstOrDefaultAsync();
-        }
+            var query = _context.Plays
+                .Include(p => p.Game)
+                .Where(p => p.UserId == userId);
 
-        public async Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int statusId)
-        {
-            return await _context.Plays
-                    .Include(p => p.Game)
-                    .Where(p => p.UserId == userId)
-                    .Where(p => p.Status == (PlayStatus)statusId)
-                    .Select(p => new UserPlaysDto
+            if (apiGameId.HasValue)
+            {
+                query = query.Where(p => p.ApiGameId == apiGameId.Value);
+            }
+            else if (statusId.HasValue)
+            {
+                query = query.Where(p => p.Status == (PlayStatus)statusId.Value);
+            }
+
+            var plays = await query
+                .Select(p => new UserPlaysDto
+                {
+                    Id = p.Id,
+                    Name = p.Game!.Name,
+                    Developers = p.Game.Developers!.Select(dev => new DevDto
                     {
-                        Id = p.Id,
-                        Name = p.Game!.Name,
-                        Developers = p.Game.Developers!.Select(
-                            dev => new DevDto
-                            {
-                                DevId = dev.Id,
-                                Name = dev.Name
-                            }).ToList(),
-                        OriginalReleaseDate = p.Game.OriginalReleaseDate,
-                        CreatedAt = DateOnly.FromDateTime(p.CreatedAt),
-                        HoursPlayed = p.HoursPlayed,
-                        PercentageCompleted = p.PercentageCompleted,
-                        LastPlayedAt = p.LastPlayedAt,
-                        Status = (int)p.Status,
-                        ApiGameId = p.ApiGameId
-                    })
-                    .ToListAsync();
+                        DevId = dev.Id,
+                        Name = dev.Name
+                    }).ToList(),
+                    OriginalReleaseDate = p.Game.OriginalReleaseDate,
+                    CreatedAt = DateOnly.FromDateTime(p.CreatedAt),
+                    HoursPlayed = p.HoursPlayed,
+                    PercentageCompleted = p.PercentageCompleted,
+                    LastPlayedAt = p.LastPlayedAt,
+                    Status = (int)p.Status,
+                    ApiGameId = p.ApiGameId
+                })
+                .ToListAsync();
+
+            return plays;
         }
 
         public async Task<Play?> GetPlayByUserIdAndInternalGameIdAsync(int userId, int internalGameId)
