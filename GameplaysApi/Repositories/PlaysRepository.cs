@@ -27,22 +27,27 @@ namespace GameplaysApi.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdatePlayStatusAsync(Play play, int newStatus)
+        public async Task UpdatePlayStatusAsync(Play play, int statusId)
         {
             if (_context.Entry(play).State == EntityState.Detached)
             {
                 _context.Attach(play);
             }
-            play.Status = (PlayStatus)newStatus;
+            play.Status = (PlayStatus)statusId;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Play?> GetPlayByIdAsync(int playId)
+        public async Task<Play?> GetPlayAsync(int playId)
         {
             return await _context.Plays.FindAsync(playId);
         }
 
-        public async Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int? apiGameId, int? statusId)
+        public async Task<Play?> GetPlayByUserAndApiGameIdAsync(int userId, int apiGameId)
+        {
+            return await _context.Plays.FirstOrDefaultAsync(p => p.UserId == userId && p.ApiGameId == apiGameId);
+        }
+
+        public async Task<List<PlayResponseDto>> GetPlaysByUserAndOptionalIdAsync(int userId, int? apiGameId, int? statusId)
         {
             var query = _context.Plays
                 .Include(p => p.Game)
@@ -58,7 +63,7 @@ namespace GameplaysApi.Repositories
             }
 
             var plays = await query
-                .Select(p => new UserPlaysDto
+                .Select(p => new PlayResponseDto
                 {
                     Id = p.Id,
                     Name = p.Game!.Name,
@@ -78,12 +83,6 @@ namespace GameplaysApi.Repositories
                 .ToListAsync();
 
             return plays;
-        }
-
-        public async Task<Play?> GetPlayByUserIdAndInternalGameIdAsync(int userId, int internalGameId)
-        {
-            return await _context.Plays
-                    .FirstOrDefaultAsync(p => p.UserId == userId && p.GameId == internalGameId);
         }
     }
 }

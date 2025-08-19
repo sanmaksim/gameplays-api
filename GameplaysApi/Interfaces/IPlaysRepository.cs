@@ -7,9 +7,9 @@ namespace GameplaysApi.Interfaces
     {
         Task AddPlayAsync(Play play);
         Task RemovePlayAsync(Play play);
-        Task UpdatePlayStatusAsync(Play play, int newStatus);
-        Task<Play?> GetPlayByIdAsync(int playId);
-        Task<List<UserPlaysDto>> GetPlaysAsync(int userId, int? apiGameId, int? statusId);
-        Task<Play?> GetPlayByUserIdAndInternalGameIdAsync(int userId, int internalGameId);
+        Task UpdatePlayStatusAsync(Play play, int statusId);
+        Task<Play?> GetPlayAsync(int playId);
+        Task<Play?> GetPlayByUserAndApiGameIdAsync(int userId, int apiGameId);
+        Task<List<PlayResponseDto>> GetPlaysByUserAndOptionalIdAsync(int userId, int? apiGameId, int? statusId);
     }
 }
