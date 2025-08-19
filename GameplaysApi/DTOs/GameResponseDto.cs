@@ -6,10 +6,10 @@ namespace GameplaysApi.DTOs
     public class ResultsWrapperDto
     {
         [JsonPropertyName("results")]
-        public GameResultDto? Results { get; set; }
+        public GameResponseDto? Results { get; set; }
     }
 
-    public class GameResultDto
+    public class GameResponseDto
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
