@@ -31,7 +31,7 @@ namespace GameplaysApi.Models
 
         public int RunId { get; set; } = 1;
 
-        public PlayStatus Status { get; set; } = PlayStatus.Backlog;
+        public PlayStatus Status { get; set; }
 
         [Column(TypeName = "decimal(5,2)")]
         public decimal PercentageCompleted { get; set; } = 0.00m;
