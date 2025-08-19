@@ -3,9 +3,9 @@ using GameplaysApi.DTOs;
 
 namespace GameplaysApi.Validators
 {
-    public class PlayDtoValidator : AbstractValidator<PlayRequestDto>
+    public class PlayRequestDtoValidator : AbstractValidator<PlayRequestDto>
     {
-        public PlayDtoValidator()
+        public PlayRequestDtoValidator()
         {
             RuleFor(playDto => playDto)
                 .Must(
