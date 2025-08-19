@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -35,9 +36,13 @@ namespace GameplaysApi.Controllers
             _gameService = gameService;
             _httpClient = httpClient;
         }
-        // TODO: add swagger annotations
-        // TODO: refactor service related logic
+        
         [HttpGet("search")]
+        [SwaggerOperation(
+            Summary = "Search for game info",
+            Description = "Searches the external Giant Bomb API for game info",
+            OperationId = "Search"
+        )]
         public async Task<IActionResult> Search(
             [FromQuery(Name = "q")] string query, 
             [FromQuery(Name = "page")] string? page, 
@@ -81,39 +86,41 @@ namespace GameplaysApi.Controllers
             return Ok(content);
         }
 
-        [HttpGet("{gameId}")]
-        public async Task<IActionResult> GetGame(string gameId)
+        [HttpGet("{id}")]
+        [SwaggerOperation(
+            Summary = "Get info for a game",
+            Description = "Retrieves game info from the external Giant Bomb API",
+            OperationId = "GetGame"
+        )]
+        public async Task<IActionResult> GetGame(int id)
         {
             bool updateEntity = false;
 
             // check whether the game can be retreived from the database
-            if (int.TryParse(gameId, out int id))
+            var existingGame = await _gameService.GetExistingGame(id);
+
+            var writeOptions = new JsonSerializerOptions
             {
-                var existingGame = await _gameService.GetExistingGame(id);
+                // avoid infinite loops from models with many-to-many relationships by tracking object references
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                // increase max depth since object graph is deeper than the default 32
+                MaxDepth = 64
+            };
 
-                var writeOptions = new JsonSerializerOptions
-                {
-                    // avoid infinite loops from models with many-to-many relationships by tracking object references
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    // increase max depth since object graph is deeper than the default 32
-                    MaxDepth = 64
-                };
-
-                // refresh existing game entity after 30 days
-                if (existingGame != null 
-                    && existingGame.Results != null 
-                    && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 30)
-                {
-                    var json = JsonSerializer.Serialize(existingGame, writeOptions);
-                    return Ok(json);
-                }
-                else
-                {
-                    updateEntity = true;
-                }
+            // refresh existing game entity after 30 days
+            if (existingGame != null 
+                && existingGame.Results != null 
+                && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 30)
+            {
+                var json = JsonSerializer.Serialize(existingGame, writeOptions);
+                return Ok(json);
+            }
+            else
+            {
+                updateEntity = true;
             }
 
-            var apiGameUrl = $"{_gameConfig.GiantBombApiUrl}/game/{_gameConfig.GiantBombResourcePrefix}-{gameId}";
+            var apiGameUrl = $"{_gameConfig.GiantBombApiUrl}/game/{_gameConfig.GiantBombResourcePrefix}-{id}";
 
             // assemble search parameters
             var queryParams = new Dictionary<string, string?>
