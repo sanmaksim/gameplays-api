@@ -4,7 +4,6 @@ using GameplaysApi.Models;
 using GameplaysApi.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mysqlx;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace GameplaysApi.Controllers
