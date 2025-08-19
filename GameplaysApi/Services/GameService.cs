@@ -24,7 +24,7 @@ namespace GameplaysApi.Services
                 .Where(game => game.GameId == gameId)
                 .Select(game => new ResultsWrapperDto
                 {
-                    Results = new GameResultDto
+                    Results = new GameResponseDto
                     {
                         Name = game.Name,
                         Deck = game.Deck,
