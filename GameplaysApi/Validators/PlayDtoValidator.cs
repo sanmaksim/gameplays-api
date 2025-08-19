@@ -3,7 +3,7 @@ using GameplaysApi.DTOs;
 
 namespace GameplaysApi.Validators
 {
-    public class PlayDtoValidator : AbstractValidator<PlayDto>
+    public class PlayDtoValidator : AbstractValidator<PlayRequestDto>
     {
         public PlayDtoValidator()
         {
@@ -11,8 +11,9 @@ namespace GameplaysApi.Validators
                 .Must(
                     playDto => playDto.UserId != null 
                     || playDto.ApiGameId != null
+                    || playDto.PlayId != null
                     || playDto.StatusId != null)
-                .WithMessage($"At least one property of {nameof(PlayDto)} must not be null.");
+                .WithMessage($"At least one property of {nameof(PlayRequestDto)} must not be null.");
         }
     }
 }
