@@ -2,7 +2,7 @@
 
 namespace GameplaysApi.DTOs
 {
-    public class UserPlaysDto
+    public class PlayResponseDto
     {
         public int Id { get; set; }
 
