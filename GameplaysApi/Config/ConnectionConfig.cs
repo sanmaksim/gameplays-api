@@ -17,7 +17,7 @@ namespace GameplaysApi.Config
         public string DevCertPath { get; set; } = default!;
 
         [Required]
-        public string HttpsPort { get; set; } = default!;
+        public string KestrelHttpsPort { get; set; } = default!;
 
         [Required]
         public string ProdCertPath { get; set; } = default!;

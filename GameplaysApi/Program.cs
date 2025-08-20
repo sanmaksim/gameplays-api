@@ -35,14 +35,15 @@ if (connectionConfig.ConnectionString == null) throw new ArgumentNullException($
 if (connectionConfig.CorsOriginDev == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginDev)} must not be null.");
 if (connectionConfig.CorsOriginTest == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginTest)} must not be null.");
 if (connectionConfig.DevCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.DevCertPath)} must not be null.");
-if (!int.TryParse(connectionConfig.HttpsPort, out int httpsPort)) throw new ArgumentNullException($"{nameof(connectionConfig.HttpsPort)} must not be null.");
+if (!int.TryParse(connectionConfig.KestrelHttpsPort, out int kestrelhttpsPort))
+    throw new ArgumentNullException($"{nameof(connectionConfig.KestrelHttpsPort)} must not be null.");
 if (connectionConfig.ProdCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdCertPath)} must not be null.");
 if (connectionConfig.ProdKeyPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdKeyPath)} must not be null.");
 
 // Configure Kestrel HTTPS
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(httpsPort, listenOptions =>
+    options.ListenAnyIP(kestrelhttpsPort, listenOptions =>
     {
         if (isDevelopment)
         {
