@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using GameplaysApi.DTOs;
-using MySql.Data.MySqlClient;
 
 namespace GameplaysApi.Validators
 {
