@@ -35,7 +35,8 @@ namespace GameplaysApi.Controllers
         )]
         public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
         {
-            var user = await _usersRepository.GetUserByNameAsync(registerDto.Username);
+            var normalizedUsername = registerDto.Username.ToLower();
+            var user = await _usersRepository.GetUserByNameAsync(normalizedUsername);
             if (user != null)
             {
                 return BadRequest(new { message = "Username already exists." });
@@ -128,7 +129,8 @@ namespace GameplaysApi.Controllers
             if (userDto.Username != null && userDto.Username != user.Username)
             {
                 // Does the provided username match an existing user's
-                var existingUser = await _usersRepository.GetUserByNameAsync(userDto.Username);
+                var normalizedUsername = userDto.Username.ToLower();
+                var existingUser = await _usersRepository.GetUserByNameAsync(normalizedUsername);
                 if (existingUser != null && userDto.Username == existingUser.Username)
                 {
                     return BadRequest(new { message = "The username already exists." });
