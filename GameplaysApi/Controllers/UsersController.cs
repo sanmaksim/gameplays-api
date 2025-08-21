@@ -1,6 +1,7 @@
 using GameplaysApi.DTOs;
 using GameplaysApi.Interfaces;
 using GameplaysApi.Models;
+using GameplaysApi.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,16 +34,27 @@ namespace GameplaysApi.Controllers
             "creates their access & refresh tokens",
             OperationId = "Register"
         )]
-        public async Task<IActionResult> CreateUser([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> CreateUser([FromBody] RegisterRequestDto registerRequestDto)
         {
-            var normalizedUsername = registerDto.Username.ToLower();
+            var validator = new RegisterRequestDtoValidator();
+            var result = validator.Validate(registerRequestDto);
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
+            }
+
+            var normalizedUsername = registerRequestDto.Username.ToLower();
             var user = await _usersRepository.GetUserByNameAsync(normalizedUsername);
             if (user != null)
             {
                 return BadRequest(new { message = "Username already exists." });
             }
 
-            var email = await _usersRepository.GetUserByEmailAsync(registerDto.Email);
+            var email = await _usersRepository.GetUserByEmailAsync(registerRequestDto.Email);
             if (email != null)
             {
                 return BadRequest(new { message = "Email already exists." });
@@ -50,9 +62,9 @@ namespace GameplaysApi.Controllers
 
             var newUser = new User
             {
-                Username = registerDto.Username,
-                Password = _userService.HashPassword(registerDto.Password),
-                Email = registerDto.Email
+                Username = registerRequestDto.Username,
+                Password = _userService.HashPassword(registerRequestDto.Password),
+                Email = registerRequestDto.Email
             };
 
             try
