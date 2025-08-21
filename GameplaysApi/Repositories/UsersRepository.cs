@@ -44,9 +44,10 @@ namespace GameplaysApi.Repositories
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<User?> GetUserByNameAsync(string username)
+        public async Task<User?> GetUserByNameAsync(string normalizedUsername)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == normalizedUsername);
         }
 
         public async Task UpdateUserAsync(User user)
