@@ -35,10 +35,10 @@ namespace GameplaysApi.Controllers
             Description = "Creates user access & refresh tokens.",
             OperationId = "Login"
         )]
-        public async Task<IActionResult> Login([FromBody] AuthDto authDto)
+        public async Task<IActionResult> Login([FromBody] AuthRequestDto authRequestDto)
         {
-            var validator = new AuthDtoValidator();
-            var result = validator.Validate(authDto);
+            var validator = new AuthRequestDtoValidator();
+            var result = validator.Validate(authRequestDto);
             if (!result.IsValid)
             {
                 foreach (var error in result.Errors)
@@ -49,21 +49,22 @@ namespace GameplaysApi.Controllers
             }
 
             User? user;
-            if (authDto.Username != null)
+            if (authRequestDto.Username != null)
             {
-                user = await _usersRepository.GetUserByNameAsync(authDto.Username);
+                var normalizedUsername = authRequestDto.Username.ToLower();
+                user = await _usersRepository.GetUserByNameAsync(normalizedUsername);
             }
-            else if (authDto.Email != null)
+            else if (authRequestDto.Email != null)
             {
-                user = await _usersRepository.GetUserByEmailAsync(authDto.Email);
+                user = await _usersRepository.GetUserByEmailAsync(authRequestDto.Email);
             }
             else
             {
                 return BadRequest(new { message = "Please enter a username or email." });
             }
 
-            if (user == null || authDto.Password != null 
-                && !_userService.VerifyPassword(authDto.Password, user.Password))
+            if (user == null || authRequestDto.Password != null 
+                && !_userService.VerifyPassword(authRequestDto.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid username or password." });
             }
