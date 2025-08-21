@@ -3,9 +3,9 @@ using GameplaysApi.DTOs;
 
 namespace GameplaysApi.Validators
 {
-    public class AuthDtoValidator : AbstractValidator<AuthDto>
+    public class AuthRequestDtoValidator : AbstractValidator<AuthRequestDto>
     {
-        public AuthDtoValidator()
+        public AuthRequestDtoValidator()
         {
             RuleFor(authDto => authDto)
                 .Must(authDto => string.IsNullOrEmpty(authDto.Username) ^ string.IsNullOrEmpty(authDto.Email))
