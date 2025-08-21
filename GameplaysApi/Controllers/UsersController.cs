@@ -118,17 +118,28 @@ namespace GameplaysApi.Controllers
             Description = "Updates user data based on ID",
             OperationId = "UpdateUser"
         )]
-        public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
+        public async Task<IActionResult> UpdateUser([FromBody] UserRequestDto userRequestDto)
         {
+            var validator = new UserRequestDtoValidator();
+            var result = validator.Validate(userRequestDto);
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
+            }
+
             // Does the user's JWT sub match the provided user ID
             var jwtUserId = _authService.GetCurrentUserId();
-            if (string.IsNullOrEmpty(jwtUserId) || userDto.UserId.ToString() != jwtUserId)
+            if (string.IsNullOrEmpty(jwtUserId) || userRequestDto.UserId.ToString() != jwtUserId)
             {
                 return Forbid();
             }
 
             // Does the user exist in the database
-            var user = await _usersRepository.GetUserByIdAsync(userDto.UserId);
+            var user = await _usersRepository.GetUserByIdAsync(userRequestDto.UserId);
             if (user == null)
             {
                 return NotFound();
@@ -138,41 +149,41 @@ namespace GameplaysApi.Controllers
             bool hasChanges = false;
 
             // Is the provided username different to the original
-            if (userDto.Username != null && userDto.Username != user.Username)
+            if (userRequestDto.Username != null && userRequestDto.Username != user.Username)
             {
                 // Does the provided username match an existing user's
-                var normalizedUsername = userDto.Username.ToLower();
+                var normalizedUsername = userRequestDto.Username.ToLower();
                 var existingUser = await _usersRepository.GetUserByNameAsync(normalizedUsername);
-                if (existingUser != null && userDto.Username == existingUser.Username)
+                if (existingUser != null && userRequestDto.Username == existingUser.Username)
                 {
                     return BadRequest(new { message = "The username already exists." });
                 }
 
                 // Update username to the new string
-                user.Username = userDto.Username;
+                user.Username = userRequestDto.Username;
                 hasChanges = true;
             }
 
             // Is the provided email address different to the original
-            if (userDto.Email != null && userDto.Email != user.Email)
+            if (userRequestDto.Email != null && userRequestDto.Email != user.Email)
             {
                 // Does the provided email address match an existing user's
-                var existingUser = await _usersRepository.GetUserByEmailAsync(userDto.Email);
-                if (existingUser != null && userDto.Email == existingUser.Email)
+                var existingUser = await _usersRepository.GetUserByEmailAsync(userRequestDto.Email);
+                if (existingUser != null && userRequestDto.Email == existingUser.Email)
                 {
                     return BadRequest(new { message = "The email is already in use." });
                 }
 
                 // Update email to the new address
-                user.Email = userDto.Email;
+                user.Email = userRequestDto.Email;
                 hasChanges = true;
             }
 
             // Has the user provided a password string
-            if (!string.IsNullOrEmpty(userDto.Password))
+            if (!string.IsNullOrEmpty(userRequestDto.Password))
             {
                 // Update password to the new string
-                user.Password = _userService.HashPassword(userDto.Password);
+                user.Password = _userService.HashPassword(userRequestDto.Password);
                 hasChanges = true;
             }
 

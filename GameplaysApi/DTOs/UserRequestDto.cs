@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameplaysApi.DTOs
 {
-    public class UserDto
+    public class UserRequestDto
     {
         public int UserId { get; set; }
 
