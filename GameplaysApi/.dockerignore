@@ -1,0 +1,108 @@
+﻿# Ignore user-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build results and intermediate files
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.log
+logs/
+
+# Visual Studio specific files and folders
+.vs/
+.vscode/
+*.code-workspace
+.vshistory/
+.history/
+*.ncb
+*.aps
+*.sdf
+*.cachefile
+*.VC.db
+*.vsp
+*.vspx
+*.psess
+*.plg
+*.psess
+*.tmp
+*.tmp_proj
+*.pidb
+*.svclog
+*.vspscc
+*.vssscc
+*.builds
+
+# Backup, history, and package files
+*.bak
+*.backup
+_Backup*/
+Backup*/
+_UpgradeReport_Files/
+*.pubxml
+*.publishproj
+*.publishsettings
+*.vsix
+*.tmproj
+
+# DotCover, Coverlet, and test results
+*.coverage
+*.coveragexml
+*.coveragejson
+coverage*.xml
+coverage*.json
+TestResult.xml
+nunit-*.xml
+*.VisualState.xml
+*.trx
+
+# Azure and Package Manager
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+.paket/
+.npm/
+node_modules/
+packages/
+
+# Dependency directories
+node_modules/
+dist/
+dist-ssr/
+
+# Configuration files often unsafe or unnecessary in images
+appsettings.json
+*.env
+
+# Publish output (comment this out if you want to copy publish folder explicitly)
+publish/
+
+# Logs from npm, yarn, lerna etc.
+npm-debug.log*
+yarn-debug.log*
+
+# IDE and editor files
+.idea/
+*.sln.iml
+*.sw?
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+*.cache
+*.tgz
+*.7z
+*.zip
+*.rar
