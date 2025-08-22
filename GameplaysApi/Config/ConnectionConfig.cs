@@ -8,21 +8,9 @@ namespace GameplaysApi.Config
         public string ConnectionString { get; set; } = default!;
 
         [Required]
-        public string CorsOriginDev { get; set; } = default!;
+        public string CorsOrigin { get; set; } = default!;
 
         [Required]
-        public string CorsOriginTest { get; set; } = default!;
-        
-        [Required]
-        public string DevCertPath { get; set; } = default!;
-
-        [Required]
-        public string KestrelHttpsPort { get; set; } = default!;
-
-        [Required]
-        public string ProdCertPath { get; set; } = default!;
-
-        [Required]
-        public string ProdKeyPath { get; set; } = default!;
+        public string KestrelPort { get; set; } = default!;
     }
 }

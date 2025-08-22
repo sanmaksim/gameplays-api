@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -32,34 +31,14 @@ if (authConfig.ValidIssuers == null) throw new ArgumentNullException($"{nameof(a
 var connectionConfig = new ConnectionConfig();
 builder.Configuration.Bind(nameof(ConnectionConfig), connectionConfig);
 if (connectionConfig.ConnectionString == null) throw new ArgumentNullException($"{nameof(connectionConfig.ConnectionString)} must not be null.");
-if (connectionConfig.CorsOriginDev == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginDev)} must not be null.");
-if (connectionConfig.CorsOriginTest == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOriginTest)} must not be null.");
-if (connectionConfig.DevCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.DevCertPath)} must not be null.");
-if (!int.TryParse(connectionConfig.KestrelHttpsPort, out int kestrelhttpsPort))
-    throw new ArgumentNullException($"{nameof(connectionConfig.KestrelHttpsPort)} must not be null.");
-if (connectionConfig.ProdCertPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdCertPath)} must not be null.");
-if (connectionConfig.ProdKeyPath == null) throw new ArgumentNullException($"{nameof(connectionConfig.ProdKeyPath)} must not be null.");
+if (connectionConfig.CorsOrigin == null) throw new ArgumentNullException($"{nameof(connectionConfig.CorsOrigin)} must not be null.");
+if (!int.TryParse(connectionConfig.KestrelPort, out int kestrelPort))
+    throw new ArgumentNullException($"{nameof(connectionConfig.KestrelPort)} must not be null.");
 
-// Configure Kestrel HTTPS
+// Configure Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(kestrelhttpsPort, listenOptions =>
-    {
-        if (isDevelopment)
-        {
-            listenOptions.UseHttps(connectionConfig.DevCertPath);
-        }
-        else
-        {
-            var certPath = connectionConfig.ProdCertPath;
-            var keyPath = connectionConfig.ProdKeyPath;
-
-            var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
-            certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
-
-            listenOptions.UseHttps(certificate);
-        }
-    });
+    options.ListenAnyIP(kestrelPort);
 });
 
 // Add CORS policies
@@ -69,8 +48,7 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins
         (
-            connectionConfig.CorsOriginDev, 
-            connectionConfig.CorsOriginTest
+            connectionConfig.CorsOrigin
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
