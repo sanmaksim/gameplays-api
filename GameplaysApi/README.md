@@ -1,6 +1,6 @@
 ﻿# Gameplays
 
-ASP.NET backend powering the Gameplays video game tracker web app.
+This is the ASP.NET backend powering the Gameplays video game tracker web app.
 
 It handles business logic, data management, and serves the frontend through a REST API. Integrates with a MySQL database.
 
