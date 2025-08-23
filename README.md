@@ -1,4 +1,4 @@
-﻿# Gameplays
+﻿# gameplays-api
 
 This is the ASP.NET backend powering the Gameplays video game tracker web app.
 
