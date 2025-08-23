@@ -40,7 +40,7 @@ if (!int.TryParse(connectionConfig.KestrelPort, out int kestrelPort))
 // Configure Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
-        if (isDevelopment || isTest)
+        if (isTest)
         {
             var certPath = "/etc/ssl/certs/gameplays.test.pem";
             var keyPath = "/etc/ssl/certs/gameplays.test-key.pem";
