@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.RateLimiting;
 
 // Load environment variables for Development
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 bool isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
+bool isTest = string.Equals(env, "Test", StringComparison.OrdinalIgnoreCase);
 if (isDevelopment) DotNetEnv.Env.Load();
 
 // Build the app configuration
@@ -38,7 +40,23 @@ if (!int.TryParse(connectionConfig.KestrelPort, out int kestrelPort))
 // Configure Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(kestrelPort);
+        if (isDevelopment || isTest)
+        {
+            var certPath = "/etc/ssl/certs/gameplays.test.pem";
+            var keyPath = "/etc/ssl/certs/gameplays.test-key.pem";
+
+            var certificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+            certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
+
+            options.ListenAnyIP(kestrelPort, options =>
+            {
+                options.UseHttps(certificate);
+            });
+    }
+        else
+        {
+            options.ListenAnyIP(kestrelPort);
+        }
 });
 
 // Add CORS policies
