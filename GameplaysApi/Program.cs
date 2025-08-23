@@ -58,7 +58,15 @@ builder.Services.AddCors(options =>
 
 // Add the database context for MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionConfig.ConnectionString, new MySqlServerVersion(new Version(8, 0, 43)))
+    options.UseMySql(
+        connectionConfig.ConnectionString,
+        new MySqlServerVersion(new Version(8, 0, 43)),
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null
+        )
+    )
 );
 
 // Rate limit proxied API requests to 1 per second and provide a response upon rejection
