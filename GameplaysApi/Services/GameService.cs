@@ -1,5 +1,6 @@
 ﻿using GameplaysApi.Data;
 using GameplaysApi.DTOs;
+using GameplaysApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameplaysApi.Services
@@ -29,6 +30,7 @@ namespace GameplaysApi.Services
                         Name = game.Name,
                         Deck = game.Deck,
                         DateLastUpdated = game.DateLastUpdated,
+                        Description = game.Description,
                         Developers = game.Developers!.Select(
                             developer => new DeveloperDto
                             {
@@ -65,6 +67,53 @@ namespace GameplaysApi.Services
                     }
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public ResultsWrapperDto MapToDto(Game game)
+        {
+            return new ResultsWrapperDto
+            {
+                Results = new GameResponseDto
+                {
+                    Name = game.Name,
+                    Deck = game.Deck,
+                    DateLastUpdated = game.DateLastUpdated,
+                    Description = game.Description,
+                    Developers = game.Developers!.Select(
+                            developer => new DeveloperDto
+                            {
+                                DeveloperId = developer.DeveloperId,
+                                Name = developer.Name
+                            }).ToList(),
+                    Franchises = game.Franchises!.Select(
+                            franchise => new FranchiseDto
+                            {
+                                FranchiseId = franchise.FranchiseId,
+                                Name = franchise.Name
+                            }).ToList(),
+                    Genres = game.Genres!.Select(
+                            genre => new GenreDto
+                            {
+                                GenreId = genre.GenreId,
+                                Name = genre.Name
+                            }).ToList(),
+                    Image = game.Image,
+                    OriginalReleaseDate = game.OriginalReleaseDate,
+                    Platforms = game.Platforms!.Select(
+                            platform => new PlatformDto
+                            {
+                                PlatformId = platform.PlatformId,
+                                Name = platform.Name
+                            }).ToList(),
+                    Publishers = game.Publishers!.Select(
+                            publisher => new PublisherDto
+                            {
+                                PublisherId = publisher.PublisherId,
+                                Name = publisher.Name
+                            }).ToList(),
+                    UpdatedAt = game.UpdatedAt
+                }
+            };
         }
     }
 }
