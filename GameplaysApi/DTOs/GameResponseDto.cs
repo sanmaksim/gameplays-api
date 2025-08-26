@@ -20,8 +20,8 @@ namespace GameplaysApi.DTOs
         [JsonPropertyName("deck")]
         public string? Deck { get; set; }
 
-        //[JsonPropertyName("description")]
-        //public string? Description { get; set; }
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
 
         [JsonPropertyName("developers")]
         public List<DeveloperDto>? Developers { get; set; }

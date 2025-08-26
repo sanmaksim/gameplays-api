@@ -36,6 +36,9 @@ namespace GameplaysApi.Data
                 entity.Property(g => g.ImageJson)
                     .HasColumnType("json");
 
+                entity.Property(g => g.Description)
+                    .HasColumnType("text");
+
                 // junction table customizations
                 entity.HasMany(g => g.Developers)
                     .WithMany(f => f.Games)

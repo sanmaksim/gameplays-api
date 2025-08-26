@@ -24,8 +24,7 @@ namespace GameplaysApi.Models
         [MaxLength(255)]
         public string? Deck { get; set; }
 
-        //[MaxLength(255)]
-        //public string? Description { get; set; }
+        public string? Description { get; set; }
 
         public List<Developer>? Developers { get; set; }
 
