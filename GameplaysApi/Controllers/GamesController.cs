@@ -197,9 +197,23 @@ namespace GameplaysApi.Controllers
                 }
                 
                 await _context.SaveChangesAsync();
+
+                var gameDto = _gameService.MapToDto(game);
+                if (gameDto != null)
+                {
+                    var serializedGame = JsonSerializer.Serialize(gameDto, writeOptions);
+                    return Ok(serializedGame);
+                }
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "Unable to process game data."
+                });
             }
 
-            return Ok(content);
+            return BadRequest(new { message = "Unable to retrieve game info." });
         }
     }
 }
