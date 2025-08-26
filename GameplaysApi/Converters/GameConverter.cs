@@ -21,6 +21,15 @@ namespace GameplaysApi.Converters
                     throw new JsonException("Required property 'id' is missing or null in the JSON payload.");
                 }
 
+                // Extract the cleaned overview text returned from the GB API
+                var htmlSection = new HtmlSectionExtractor();
+                var overview = htmlSection.ExtractOverviewText(
+                    root.GetProperty("results").TryGetProperty("description", out var descProp)
+                            && descProp.ValueKind != JsonValueKind.Null
+                            ? descProp.GetString() ?? ""
+                            : ""
+                );
+
                 var game = new Game
                 {
                     
@@ -41,6 +50,8 @@ namespace GameplaysApi.Converters
                                                 )
                                             : null
                                         : null,
+
+                    Description = overview,
 
                     Deck = root.GetProperty("results").TryGetProperty("deck", out var deckProp)
                             && deckProp.ValueKind != JsonValueKind.Null
