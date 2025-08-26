@@ -198,7 +198,7 @@ namespace GameplaysApi.Controllers
                 
                 await _context.SaveChangesAsync();
 
-                var gameDto = _gameService.MapToDto(game);
+                var gameDto = _gameService.MapGameToDto(game);
                 if (gameDto != null)
                 {
                     var serializedGame = JsonSerializer.Serialize(gameDto, writeOptions);

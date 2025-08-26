@@ -69,7 +69,7 @@ namespace GameplaysApi.Services
                 .FirstOrDefaultAsync();
         }
 
-        public ResultsWrapperDto MapToDto(Game game)
+        public ResultsWrapperDto MapGameToDto(Game game)
         {
             return new ResultsWrapperDto
             {
