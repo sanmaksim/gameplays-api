@@ -21,10 +21,9 @@ namespace GameplaysApi.Models
         [Precision(0)]
         public DateTime? DateLastUpdated { get; set; }
 
-        [MaxLength(255)]
-        public string? Deck { get; set; }
+        public string? Deck { get; set; } // Column Type = "text"
 
-        public string? Description { get; set; }
+        public string? Description { get; set; } // Column Type = "text"
 
         public List<Developer>? Developers { get; set; }
 
