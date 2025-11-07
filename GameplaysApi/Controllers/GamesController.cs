@@ -81,9 +81,10 @@ namespace GameplaysApi.Controllers
                 return StatusCode((int)response.StatusCode);
             }
 
-            // Return the content from the request
+            // Return the content as text from the request
+            // since it is already JSON encoded
             var content = await response.Content.ReadAsStringAsync();
-            return Ok(content);
+            return Content(content, "text/plain");
         }
 
         [HttpGet("{id}")]
