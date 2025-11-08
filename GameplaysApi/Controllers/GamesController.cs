@@ -114,7 +114,8 @@ namespace GameplaysApi.Controllers
                 && (DateTime.Now - existingGame.Results.UpdatedAt).TotalDays < 30)
             {
                 var json = JsonSerializer.Serialize(existingGame, writeOptions);
-                return Ok(json);
+                // Return as plain text since the result is already JSON
+                return Content(json, "text/plain");
             }
             else
             {
@@ -203,7 +204,7 @@ namespace GameplaysApi.Controllers
                 if (gameDto != null)
                 {
                     var serializedGame = JsonSerializer.Serialize(gameDto, writeOptions);
-                    return Ok(serializedGame);
+                    return Content(serializedGame, "text/plain");
                 }
             }
             else
